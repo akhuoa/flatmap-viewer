@@ -203,10 +203,16 @@ export class FlatMap
 
         this._userInteractions = null;
         this._initialState = null;
+        this._termGraphLoading = false;
 
         this._map.on('idle', () => {
             if (this._userInteractions === null) {
                 this.setupUserInteractions_();
+
+                if (!this._termGraphLoading) {
+                    this._termGraphLoading = true;
+                    this.loadTermGraph_();
+                }
             } else if (this._initialState === null) {
                 this._map.setMinZoom(3.0);
                 this._map.setMaxBounds(null);
@@ -229,6 +235,14 @@ export class FlatMap
         });
     }
 
+    async loadTermGraph_()
+    //=====================
+    {
+        // Load anatomical term hierarchy for the flatmap
+        const termGraph = await this.#mapServer.loadJSON(`flatmap/${this.__uuid}/termgraph`)
+        this.#mapTermGraph.load(termGraph)
+    }
+
     async setupUserInteractions_()
     //============================
     {
@@ -247,8 +261,9 @@ export class FlatMap
         await loadClusterIcons(this._map)
 
         // Load anatomical term hierarchy for the flatmap
-        const termGraph = await this.#mapServer.loadJSON(`flatmap/${this.__uuid}/termgraph`)
-        this.#mapTermGraph.load(termGraph)
+        // moved to loadTermGraph_()
+        // const termGraph = await this.#mapServer.loadJSON(`flatmap/${this.__uuid}/termgraph`)
+        // this.#mapTermGraph.load(termGraph)
 
         // Layers have now loaded so finish setting up
         this._userInteractions = new UserInteractions(this);
@@ -1345,7 +1360,7 @@ export class FlatMap
             this._userInteractions.rollbackAnnotationEvent(event)
         }
     }
-  
+
     /**
      * Clear all drawn annotations from current annotation layer.
      */
@@ -1407,7 +1422,7 @@ export class FlatMap
      * `draw_polygon` or `draw_point`. Options is accepted in first three modes.
      * More details in mapbox-gl-draw github repository.
      *
-     * @param type      {Object}     The object 
+     * @param type      {Object}     The object
      * @param type.mode {string}     Either ``simple_select``, ``direct_select``, etc
      * @param type.options {Object}  Feature id(s) object.
      */
