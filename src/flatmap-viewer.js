@@ -208,11 +208,6 @@ export class FlatMap
         this._map.on('idle', () => {
             if (this._userInteractions === null) {
                 this.setupUserInteractions_();
-
-                if (!this._termGraphLoading) {
-                    this._termGraphLoading = true;
-                    this.loadTermGraph_();
-                }
             } else if (this._initialState === null) {
                 this._map.setMinZoom(3.0);
                 this._map.setMaxBounds(null);
@@ -260,10 +255,10 @@ export class FlatMap
         // Load icons used for clustered markers
         await loadClusterIcons(this._map)
 
-        // Load anatomical term hierarchy for the flatmap
-        // moved to loadTermGraph_()
-        // const termGraph = await this.#mapServer.loadJSON(`flatmap/${this.__uuid}/termgraph`)
-        // this.#mapTermGraph.load(termGraph)
+        if (!this._termGraphLoading) {
+            this._termGraphLoading = true;
+            this.loadTermGraph_();
+        }
 
         // Layers have now loaded so finish setting up
         this._userInteractions = new UserInteractions(this);
