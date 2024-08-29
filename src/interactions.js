@@ -1271,10 +1271,14 @@ export class UserInteractions
                 this.selectionEvent_(event.originalEvent, clickedFeature)
                 this.__featureEvent('click', clickedFeature)
             } else {
+                const highlightedFeatureClick = clickedFeatures.some(feature => this.featureSelected_(feature.id))
                 const seenFeatures = new Set()
                 for (const clickedFeature of clickedFeatures) {
                     if (!seenFeatures.has(clickedFeature.properties.id)) {
                         seenFeatures.add(clickedFeature.properties.id)
+                        if (!highlightedFeatureClick) {
+                            this.unselectFeatures();
+                        }
                         this.selectionEvent_(event.originalEvent, clickedFeature)
                         let locationValue = {}
                         if (clickedFeature.properties.centreline) {
