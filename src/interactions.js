@@ -1309,6 +1309,7 @@ export class UserInteractions
                         seenFeatures.add(clickedFeature.properties.id)
                         this.__featureEvent('click', clickedFeature,
                                             this.#locationOnLine(clickedFeature.id, event.lngLat))
+                        break;
                     }
                 }
             }
