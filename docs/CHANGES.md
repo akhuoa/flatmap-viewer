@@ -1,3 +1,9 @@
+## 4.0.2
+
+* Add `hyperlinks.flatmap` to a specify a flatmap associated with the clicked-on feature.
+* Only load a map into a pane if `loadMap()` hasn't specified a container.
+* General code improvements.
+
 ## 4.0.1
 
 * Allow `container` as an option for `loadMap()`, as the container in which to load the map instead of using a pane.
