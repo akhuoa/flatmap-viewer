@@ -253,8 +253,9 @@ class StandaloneViewer
             const serverSelector = document.getElementById('server-selector') as HTMLSelectElement
             serverSelector!.innerHTML = mapServerList.join('')
             serverSelector!.onchange = async (e) => {
-                if (e.target.value !== '') {
-                    this.changeMapServer(e.target.value)
+                const value = (<HTMLSelectElement>e.target).value
+                if (value !== '') {
+                    this.changeMapServer(value)
                     await this.loadMapList()
                 }
             }
@@ -366,14 +367,16 @@ class StandaloneViewer
 
         this.#mapSelector!.innerHTML = mapList.join('')
         this.#mapSelector!.onchange = async (e) => {
-            if (e.target.value !== '') {
-                this.setGenerationSelector(e.target.value)
-                await this.loadMap(this.#currentViewer!, e.target.value)
+            const value = (<HTMLSelectElement>e.target).value
+            if (value !== '') {
+                this.setGenerationSelector(value)
+                await this.loadMap(this.#currentViewer!, value)
             }
         }
         this.#mapGeneration!.onchange = async (e: Event) => {
-            if (e.target.value !== '') {
-                await this.loadMap(this.#currentViewer!, e.target.value)
+            const value = (<HTMLSelectElement>e.target).value
+            if (value !== '') {
+                await this.loadMap(this.#currentViewer!, value)
             }
         }
 
@@ -435,14 +438,14 @@ class StandaloneViewer
         })
     }
 
-    async mapCallback(eventType, ...args)
-    //===================================
+    async mapCallback(eventType: string, ...args: any[])
+    //==================================================
     {
         if (args[0].type === 'control' && args[0].control === 'background') {
             this.#mapOptions.background = args[0].value
         } else if (eventType === 'annotation') {
             if (this.#drawControl) {
-                this.#drawControl.handleEvent(...args)
+                this.#drawControl.handleEvent(args[0])
             }
         } else if (eventType === 'click') {
             console.log(eventType, ...args)
