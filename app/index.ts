@@ -154,7 +154,7 @@ class DrawControl
     }
 
     handleEvent(event: DrawEvent)
-    //=======================
+    //===========================
     {
         console.log(event)
         if (this.#idField && event.type !== 'modeChanged' && event.type !== 'selectionChanged') {
