@@ -25,7 +25,7 @@ import {Dataset} from './acluster'
 
 //==============================================================================
 
-type DatasetMarker = {
+export type DatasetMarker = {
     term: string
     datasetId: string
     minZoom: number

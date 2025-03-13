@@ -28,12 +28,12 @@ import {pairwise} from '../utils'
 
 //==============================================================================
 
-interface NodeData
+export interface NodeData
 {
     id: string
 }
 
-interface LinkData
+export interface LinkData
 {
     source: string
     target: string

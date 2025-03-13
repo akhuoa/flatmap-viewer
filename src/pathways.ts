@@ -89,14 +89,14 @@ const NO_NERVES = ['NO-NERVES', 'No associated nerves']
 
 /* To go into systems.ts */
 
-interface SystemComponent
+export interface SystemComponent
 {
     label: string
     models: string
     ftus?: SystemComponent[]
 }
 
-interface SystemsType
+export interface SystemsType
 {
     name: string
     colour: string

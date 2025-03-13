@@ -35,7 +35,7 @@ import * as utils from '../utils'
 import {ANATOMICAL_MARKERS_LAYER, ClusteredAnatomicalMarkerLayer, Dataset} from './acluster'
 
 import * as style from './styling'
-import {BackgroundStyleLayer, BodyStyleLayer, RasterStyleLayer, StyleLayerOptions, StylingOptions} from './styling'
+import {BackgroundStyleLayer, BodyStyleLayer, RasterStyleLayer, StylingOptions} from './styling'
 import {VectorStyleLayer, VECTOR_TILES_SOURCE} from './styling'
 
 import {DeckGlOverlay} from './deckgl'

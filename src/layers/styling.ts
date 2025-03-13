@@ -100,7 +100,7 @@ const DETAIL_ZOOM_OFFSET = 3
 
 // MapLibre implied types
 
-type FillPaintSpecification = {
+export type FillPaintSpecification = {
     "fill-antialias"?: PropertyValueSpecification<boolean>
     "fill-opacity"?: DataDrivenPropertyValueSpecification<number>
     "fill-color"?: DataDrivenPropertyValueSpecification<ColorSpecification>
@@ -113,7 +113,7 @@ type FillPaintSpecification = {
     "fill-pattern"?: DataDrivenPropertyValueSpecification<ResolvedImageSpecification>
 }
 
-type LinePaintSpecification = {
+export type LinePaintSpecification = {
     "line-opacity"?: DataDrivenPropertyValueSpecification<number>
     "line-color"?: DataDrivenPropertyValueSpecification<ColorSpecification>
     "line-translate"?: PropertyValueSpecification<[
@@ -130,20 +130,20 @@ type LinePaintSpecification = {
     "line-gradient"?: ExpressionSpecification
 }
 
-type CaseSpecification = (string|number|(boolean|string|string[])[])[]
+export type CaseSpecification = (string|number|(boolean|string|string[])[])[]
 
-type PaintSpecification = FillPaintSpecification | LinePaintSpecification
+export type PaintSpecification = FillPaintSpecification | LinePaintSpecification
 
 //==============================================================================
 
-interface BaseLayerStyle
+export interface BaseLayerStyle
 {
     id: string
     maxzoom?: number
     minzoom?: number
 }
 
-interface VectorLayerStyle extends BaseLayerStyle
+export interface VectorLayerStyle extends BaseLayerStyle
 {
     source: string
     'source-layer'?: string

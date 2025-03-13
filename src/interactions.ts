@@ -36,8 +36,11 @@ import {PropertiesFilter} from './filters'
 import {NerveCentreFacet} from './filters/facets/nerve'
 import {PathTypeFacet} from './filters/facets/pathtype'
 import {TaxonFacet} from './filters/facets/taxon'
-import {FlatMapFeature, FlatMapFeatureAnnotation, FlatMapMarkerOptions, FlatMapPopUpOptions} from './flatmap-types'
-import type {MapFeature, MapFeatureIdentifier, MapRenderedFeature} from './flatmap-types'
+import {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent,
+        FlatMapFeature, FlatMapFeatureAnnotation,
+        FlatMapMarkerOptions, FlatMapPopUpOptions, MapFeature,
+        MapFeatureIdentifier, MapRenderedFeature} from './flatmap-types'
+import type {FeatureZoomOptions} from './flatmap-types'
 import type {Point2D} from './flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
 import {inAnatomicalClusterLayer, LayerManager} from './layers'
@@ -149,7 +152,7 @@ export class UserInteractions
     #activeFeatures: Map<number, MapFeature> = new Map()
     #activeMarker = null
     #annotationByMarkerId = new Map()
-    #annotationDrawControl = null
+    #annotationDrawControl: AnnotationDrawControl|null = null
     #closeControl: ClosePaneControl|null = null
     #colourOptions
     #currentPopup = null
@@ -166,7 +169,7 @@ export class UserInteractions
     #layerManager: LayerManager
     #map: maplibregl.Map
     #markerIdByFeatureId = new Map()
-    #markerIdByMarker = new Map()
+    #markerIdByMarker: Map<maplibregl.Marker, number> = new Map()
     #markerPositions: Map<number, [number, number]> = new Map() // Where to put labels and popups on a feature
     #minimap: MinimapControl|null = null
     #modal: boolean = false
@@ -407,24 +410,24 @@ export class UserInteractions
         }
     }
 
-    commitAnnotationEvent(event)
-    //==========================
+    commitAnnotationEvent(event: AnnotationEvent)
+    //===========================================
     {
         if (this.#annotationDrawControl) {
             this.#annotationDrawControl.commitEvent(event)
         }
     }
 
-    abortAnnotationEvent(event)
-    //=========================
+    abortAnnotationEvent(event: AnnotationEvent)
+    //==========================================
     {
         if (this.#annotationDrawControl) {
             this.#annotationDrawControl.abortEvent(event)
         }
     }
 
-    rollbackAnnotationEvent(event)
-    //============================
+    rollbackAnnotationEvent(event: AnnotationEvent)
+    //=============================================
     {
         if (this.#annotationDrawControl) {
             this.#annotationDrawControl.rollbackEvent(event)
@@ -447,27 +450,27 @@ export class UserInteractions
         }
     }
 
-    addAnnotationFeature(feature: FlatMapFeature)
-    //===========================================
+    addAnnotationFeature(feature: AnnotatedFeature)
+    //=============================================
     {
         if (this.#annotationDrawControl) {
             this.#annotationDrawControl.addFeature(feature)
         }
     }
 
-    refreshAnnotationFeatureGeometry(feature: FlatMapFeature)
-    //=======================================================
+    refreshAnnotationFeatureGeometry(feature: AnnotatedFeature)
+    //=========================================================
     {
         if (this.#annotationDrawControl) {
             return this.#annotationDrawControl.refreshGeometry(feature)
         }
     }
 
-    changeAnnotationDrawMode(type)
-    //=============================
+    changeAnnotationDrawMode(mode: AnnotationDrawMode)
+    //================================================
     {
         if (this.#annotationDrawControl) {
-            this.#annotationDrawControl.changeMode(type)
+            this.#annotationDrawControl.changeMode(mode)
         }
     }
 
@@ -1604,8 +1607,8 @@ export class UserInteractions
         this.#annotationByMarkerId.clear()
     }
 
-    removeMarker(markerId)
-    //====================
+    removeMarker(markerId: number)
+    //============================
     {
         for (const [marker, id] of this.#markerIdByMarker.entries()) {
             if (markerId === id) {
@@ -1683,8 +1686,8 @@ export class UserInteractions
         }
     }
 
-    markerEvent(event, markerId, markerPosition, annotation)
-    //======================================================
+    markerEvent(event, markerId: number, markerPosition, annotation)
+    //==============================================================
     {
         if (['mousemove', 'click'].includes(event.type)) {
 
@@ -1766,14 +1769,14 @@ export class UserInteractions
         return true
     }
 
-    enablePanZoomEvents(enabled=true)
-    //===============================
+    enablePanZoomEvents(enabled: boolean=true)
+    //========================================
     {
         this.#pan_zoom_enabled = enabled
     }
 
-    #panZoomEvent(type, event)
-    //========================
+    #panZoomEvent(type: string, event)
+    //================================
     {
         if (this.#pan_zoom_enabled) {
             this.#flatmap.panZoomEvent(type)

@@ -47,7 +47,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 
 //==============================================================================
 
-import type {MapRenderedFeature} from '../flatmap-types'
+import type {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent} from '../flatmap-types'
 
 import {FlatMap} from '../flatmap'
 
@@ -67,7 +67,7 @@ export const DRAW_ANNOTATION_LAYERS = [...drawStyleIds.map(id => `${id}.cold`),
 
 export class AnnotationDrawControl
 {
-    #committedFeatures: Map<number, MapRenderedFeature> = new Map()
+    #committedFeatures: Map<number, AnnotatedFeature> = new Map()
     #container: HTMLElement|null = null
     #draw: MapboxDraw
     #flatmap: FlatMap
@@ -149,8 +149,8 @@ export class AnnotationDrawControl
         this.#visible = visible
     }
 
-    #cleanFeature(event)
-    //==================
+    #cleanFeature(event): AnnotatedFeature|null
+    //=========================================
     {
         const features = event.features.filter(f => f.type === 'Feature')
                                        .map(f => {
@@ -163,8 +163,8 @@ export class AnnotationDrawControl
         return features.length ? features[0] : null
     }
 
-    #sendEvent(type: string, feature: MapRenderedFeature)
-    //===================================================
+    #sendEvent(type: string, feature: AnnotatedFeature)
+    //=================================================
     {
         if (feature.id) {
             // Add when the event is 'created', 'updated' or 'deleted'
@@ -232,8 +232,8 @@ export class AnnotationDrawControl
         this.#sendEvent('selectionChanged', event)
     }
 
-    commitEvent(event)
-    //================
+    commitEvent(event: AnnotationEvent)
+    //=================================
     {
         const feature = event.feature
         if (event.type === 'deleted') {
@@ -244,16 +244,16 @@ export class AnnotationDrawControl
         this.#uncommittedFeatureIds.delete(feature.id)
     }
 
-    abortEvent(event)
-    //===============
+    abortEvent(event: AnnotationEvent)
+    //================================
     {
         // Used as a flag to indicate the popup is closed
         // Rollback should be performed when triggered 'aborted' event
-        this.#sendEvent('aborted', event)
+        this.#sendEvent('aborted', event.feature)
     }
 
-    rollbackEvent(event)
-    //==================
+    rollbackEvent(event: AnnotationEvent)
+    //===================================
     {
         const feature = event.feature
         if (event.type === 'created') {
@@ -286,8 +286,8 @@ export class AnnotationDrawControl
         this.#draw.trash()
     }
 
-    addFeature(feature: MapRenderedFeature)
-    //=====================================
+    addFeature(feature: AnnotatedFeature)
+    //===================================
     {
         feature = Object.assign({}, feature, {type: 'Feature'})
         const ids = this.#draw.add(feature)
@@ -295,17 +295,17 @@ export class AnnotationDrawControl
         this.#uncommittedFeatureIds.delete(ids[0])
     }
 
-    refreshGeometry(feature: MapRenderedFeature)
-    //==========================================
+    refreshGeometry(feature: AnnotatedFeature)
+    //========================================
     {
         return this.#draw.get(feature.id) || null
     }
 
-    changeMode(type)
-    //==============
+    changeMode(mode: AnnotationDrawMode)
+    //==================================
     {
         // Change the mode directly without listening to modes callback
-        this.#draw.changeMode(type.mode, type.options)
+        this.#draw.changeMode(mode.mode, mode.options)
     }
 }
 

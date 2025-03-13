@@ -85,7 +85,7 @@ export interface SckanConnectivity
 
 //==============================================================================
 
-type HistoricalMapLayer = string | {id: string, description: string}
+export type HistoricalMapLayer = string | {id: string, description: string}
 
 export interface FlatMapIndex
 {
@@ -108,7 +108,7 @@ export interface FlatMapIndex
 
 //==============================================================================
 
-interface PathModelsType
+export interface PathModelsType
 {
     id: string
     paths: string[]
@@ -250,6 +250,37 @@ export type Point2D = [number, number]
 
 export type FlatMapFeatureGeometry = GeoJSON.LineString | GeoJSON.Point | GeoJSON.Polygon
 
+//==============================================================================
+//==============================================================================
+
+/**
+ * Modes for drawing annotations on the map.
+ *
+ * See https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md
+ * for details.
+ */
+export interface AnnotationDrawMode
+{
+    mode: string
+    options?: object
+}
+
+export interface AnnotationEvent
+{
+    type: string
+    feature: AnnotatedFeature
+}
+
+export interface AnnotatedFeature
+{
+    id: number
+    action?: string
+    geometry: FlatMapFeatureGeometry
+    properties?: object
+    type?: string
+}
+
+//==============================================================================
 //==============================================================================
 
 export interface FlatMapFeature

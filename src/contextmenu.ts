@@ -26,7 +26,7 @@ import {FlatMap} from './flatmap'
 
 //==============================================================================
 
-type MenuItem = {
+export type MenuItem = {
     action: () => void
     id: string
     prompt: string

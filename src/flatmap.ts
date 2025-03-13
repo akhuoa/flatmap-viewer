@@ -34,12 +34,15 @@ import '../static/css/flatmap-viewer.css'
 //==============================================================================
 
 import {
+    AnnotatedFeature,
+    AnnotationDrawMode,
+    AnnotationEvent,
+    FeatureZoomOptions,
     FlatMapAnnotations,
     FlatMapCallback,
     FlatMapFeatureAnnotation,
     FlatMapIndex,
     FlatMapLayer,
-    FlatMapLayerOptions,
     FlatMapMetadata,
     FlatMapOptions,
     FlatMapPathways,
@@ -131,7 +134,7 @@ export class FLATMAP_STYLE
 
 //==============================================================================
 
-interface CentrelineDetails
+export interface CentrelineDetails
 {
     models: string
     label: string
@@ -139,8 +142,8 @@ interface CentrelineDetails
 
 //==============================================================================
 
-type FlatMapSourceSpecification = maplibregl.VectorSourceSpecification
-                                | maplibregl.RasterSourceSpecification
+export type FlatMapSourceSpecification = maplibregl.VectorSourceSpecification
+                                       | maplibregl.RasterSourceSpecification
 
 export type FlatMapStyleSpecification = maplibregl.StyleSpecification & {
     "sources": {
@@ -163,7 +166,7 @@ export type MapDescriptionOptions = FlatMapOptions & {
     style: string
 }
 
-type MapDescription = {
+export type MapDescription = {
     id: string
     uuid: string
     details: FlatMapIndex
@@ -177,7 +180,7 @@ type MapDescription = {
     annotations: FlatMapAnnotations
     callback: FlatMapCallback
     pathways: FlatMapPathways
-    provenance: FlatMapMetadata
+    mapMetadata: FlatMapMetadata
 }
 
 //==============================================================================
@@ -207,6 +210,7 @@ export class FlatMap
     #knowledgeSource = ''
     #viewer: MapViewer
     #map: maplibregl.Map|null = null
+    #mapMetadata: FlatMapMetadata
     #mapNumber: number
     #mapServer: FlatMapServer
     #mapSourceToFeatureIds: FeatureIdMap = new Map()
@@ -216,7 +220,6 @@ export class FlatMap
     #normalised_size: [number, number]
     #options: MapDescriptionOptions
     #pathways: FlatMapPathways
-    #provenance: FlatMapMetadata
     #searchIndex: SearchIndex = new SearchIndex()
     #startupState = -1
     #taxon: string
@@ -233,8 +236,8 @@ export class FlatMap
         this.#id = mapDescription.id
         this.#uuid = mapDescription.uuid
         this.#details = mapDescription.details
-        this.#provenance = mapDescription.provenance
-        this.#created = mapDescription.provenance.created
+        this.#mapMetadata = mapDescription.mapMetadata
+        this.#created = mapDescription.mapMetadata.created
         this.#taxon = mapDescription.taxon
         this.#biologicalSex = mapDescription.biologicalSex
         this.#mapNumber = mapDescription.number
@@ -369,7 +372,6 @@ export class FlatMap
             }
         })
     }
-
 
     async mapLoaded()
     //===============
@@ -554,10 +556,9 @@ export class FlatMap
     /**
      * Show or hide connectivity features observed in particular species.
      *
-     * @param {string | Array.<string>}   taxonId(s)  A single taxon identifier
-     *                                                or an array of identifiers.
-     * @param {boolean}  enable  Show or hide connectivity paths and features.
-     *                           Defaults to ``true`` (show)
+     * @param taxonIds  A single taxon identifier or an array of identifiers.
+     * @param enable  Show or hide connectivity paths and features.
+     *                Defaults to ``true`` (show)
      */
     enableConnectivityByTaxonIds(taxonIds: string|string[], enable=true)
     //==================================================================
@@ -883,7 +884,7 @@ export class FlatMap
     /**
      * Get model terms of all paths connected to a node.
      *
-     * @param      {number}  pathId  The local (GeoJSON) identifier of a node
+     * @param      {number}  nodeId  The local (GeoJSON) identifier of a node
      * @return     {set<string>}  Model terms of all paths connected to the node
      */
     nodePathModels(nodeId: number): Set<string>
@@ -1264,19 +1265,12 @@ export class FlatMap
      *
      * @param {string}  anatomicalId  The anatomical identifier of the feature on which
      *                                to place the marker.
-     * @arg {Object} options          Configurable options for the marker.
-     * @arg {string} options.className Space-separated CSS class names to add to marker element.
-     * @arg {string} options.colour   Colour of the marker. Defaults to ``'#005974'``
-     *                                (dark cyan).
-     * @arg {string} options.element  The DOM element to use as a marker. The default is
-     *                                a dark blue droplet-shaped SVG marker.
-     * @arg {string} options.location The relative location (0.0 to 1.0) of the marker along a centreline
-     *                                in a centreline map.
+     * @param {FlatMapMarkerOptions} options          Configurable options for the marker.
      * @return     {integer}          The identifier for the resulting marker. -1 is returned if the
      *                                map doesn't contain a feature with the given anatomical identifier
      */
-    addMarker(anatomicalId,  options: FlatMapMarkerOptions={})
-    //========================================================
+    addMarker(anatomicalId: string,  options: FlatMapMarkerOptions={}): number
+    //========================================================================
     {
         if (this.#userInteractions !== null) {
             return this.#userInteractions.addMarker(anatomicalId, options)
@@ -1287,21 +1281,14 @@ export class FlatMap
     /**
      * Add a list of markers to the map.
      *
-     * @param {Array.<string>}  anatomicalId  Anatomical identifiers of features on which
+     * @param {Array.<string>}  anatomicalIds  Anatomical identifiers of features on which
      *                                to place markers.
-     * @arg {Object} options          Configurable options for the markers.
-     * @arg {string} options.className Space-separated CSS class names to add to marker elemens.
-     * @arg {boolean} options.cluster  The markers will be clustered together with other geographically
-     *                                close markers. Defaults to ``true``.
-     * @arg {string} options.colour   Colour of the markers. Defaults to ``'#005974'``
-     *                                (dark cyan).
-     * @arg {string} options.element  The DOM element to use as a marker. The default is
-     *                                a dark blue droplet-shaped SVG marker.
+     * @param {FlatMapMarkerOptions} options          Configurable options for the markers.
      * @return     {array.<integer>}  The identifiers of the resulting markers. -1 is returned if the
      *                                map doesn't contain a feature with the given anatomical identifier
      */
-    addMarkers(anatomicalIds,  options={})
-    //====================================
+    addMarkers(anatomicalIds: string[],  options: FlatMapMarkerOptions={}): number[]
+    //==============================================================================
     {
         options = Object.assign({cluster: true}, options)
         const markerIds = []
@@ -1321,8 +1308,8 @@ export class FlatMap
      * @param      {integer}  markerId  The identifier of the marker, as returned
      *                                  by ``addMarker()``
      */
-    removeMarker(markerId)
-    //====================
+    removeMarker(markerId: number)
+    //============================
     {
         if (markerId > -1 && this.#userInteractions !== null) {
             this.#userInteractions.removeMarker(markerId)
@@ -1447,8 +1434,8 @@ export class FlatMap
      *
      * @param  {boolean}  [visible=true]
      */
-    showAnnotator(visible=true)
-    //=========================
+    showAnnotator(visible: boolean=true)
+    //==================================
     {
         if (this.#userInteractions !== null) {
             this.#userInteractions.showAnnotator(visible)
@@ -1460,12 +1447,12 @@ export class FlatMap
      * a modified.
      *
      * @param eventType {string}   Either ``created``, ``updated`` or ``deleted``
-     * @param feature   {Object}   A feature object with ``id``, ``type``, and ``geometry``
+     * @param feature   {AnnotatedFeature}   A feature object with ``id``, ``type``, and ``geometry``
      *                             fields of a feature that has been created, updated or
      *                             deleted.
      */
-    annotationEvent(eventType, feature)
-    //=================================
+    annotationEvent(eventType: string, feature: AnnotatedFeature)
+    //===========================================================
     {
         this.callback('annotation', {
             type: eventType,
@@ -1476,12 +1463,10 @@ export class FlatMap
     /**
      * Mark a drawn/changed annotation as having been accepted by the user.
      *
-     * @param event      {Object}     The object as received in an annotation callback
-     * @param event.type {string}     Either ``created``, ``updated`` or ``deleted``
-     * @param event.feature {Object}  A feature object.
+     * @param event      {AnnotationEvent}     The object as received in an annotation callback
      */
-    commitAnnotationEvent(event)
-    //==========================
+    commitAnnotationEvent(event: AnnotationEvent)
+    //===========================================
     {
         if (this.#userInteractions) {
             this.#userInteractions.commitAnnotationEvent(event)
@@ -1491,12 +1476,10 @@ export class FlatMap
     /**
      * Mark a drawn/changed annotation as having been rejected by the user.
      *
-     * @param event      {Object}     The object as received in an annotation callback
-     * @param event.type {string}     Either ``created``, ``updated`` or ``deleted``
-     * @param event.feature {Object}  A feature object.
+     * @param event      {AnnotationEvent}     The object as received in an annotation callback
      */
-    rollbackAnnotationEvent(event)
-    //============================
+    rollbackAnnotationEvent(event: AnnotationEvent)
+    //=============================================
     {
         if (this.#userInteractions) {
             this.#userInteractions.rollbackAnnotationEvent(event)
@@ -1528,12 +1511,10 @@ export class FlatMap
     /**
      * Add a drawn feature to the annotation drawing tool.
      *
-     * @param feature    {Object}        The feature to add
-     * @param feature.id {string}        The feature's id
-     * @param feature.geometry {Object}  The feature's geometry as GeoJSON
+     * @param feature    {AnnotatedFeature}        The feature to add
      */
-    addAnnotationFeature(feature)
-    //===========================
+    addAnnotationFeature(feature: AnnotatedFeature)
+    //=============================================
     {
         if (this.#userInteractions) {
             this.#userInteractions.addAnnotationFeature(feature)
@@ -1550,8 +1531,8 @@ export class FlatMap
      * @returns {Object|null}  The feature with currently geometry or ``null``
      *                         if the feature has been deleted.
      */
-    refreshAnnotationFeatureGeometry(feature)
-    //=======================================
+    refreshAnnotationFeatureGeometry(feature: AnnotatedFeature): AnnotatedFeature|null
+    //================================================================================
     {
         if (this.#userInteractions) {
             return this.#userInteractions.refreshAnnotationFeatureGeometry(feature)
@@ -1559,20 +1540,13 @@ export class FlatMap
     }
 
     /**
-     * Changes draw to another mode. The mode argument must be one of the following:
-     * `simple_select`, `direct_select`, `draw_line_string`,
-     * `draw_polygon` or `draw_point`. Options is accepted in first three modes.
-     * More details in mapbox-gl-draw github repository.
-     *
-     * @param type      {Object}     The object
-     * @param type.mode {string}     Either ``simple_select``, ``direct_select``, etc
-     * @param type.options {Object}  Feature id(s) object.
+     * Changes the mode for drawing annotations.
      */
-    changeAnnotationDrawMode(type)
-    //============================
+    changeAnnotationDrawMode(mode: AnnotationDrawMode)
+    //================================================
     {
         if (this.#userInteractions) {
-            this.#userInteractions.changeAnnotationDrawMode(type)
+            this.#userInteractions.changeAnnotationDrawMode(mode)
         }
     }
 
@@ -1582,8 +1556,8 @@ export class FlatMap
      * @param      {string}  eventType     The event type
      * @param      {Object}  properties    Properties associated with the feature
      */
-    featureEvent(eventType, properties)
-    //=================================
+    featureEvent(eventType: string, properties: object)
+    //=================================================
     {
         const data = this.#exportedProperties(properties)
 
@@ -1611,11 +1585,11 @@ export class FlatMap
      * Generate a callback as a result of some event with a marker.
      *
      * @param      {string}  eventType   The event type
-     * @param      {integer}  markerId   The marker identifier
+     * @param      {integer}  markerId   The marker's GeoJSON identifier
      * @param      {Object}  properties  Properties associated with the marker
      */
-    markerEvent(eventType, markerId, properties)
-    //==========================================
+    markerEvent(eventType: string, markerId: number, properties: object)
+    //==================================================================
     {
 
         const data = Object.assign({}, this.#exportedProperties(properties), {
@@ -1632,8 +1606,8 @@ export class FlatMap
      * @param      {string}  control       The name of the control
      * @param      {string}  value         The value of the control
      */
-    controlEvent(eventType, control, value)
-    //=====================================
+    controlEvent(eventType: string, control: string, value: string)
+    //=============================================================
     {
         this.callback(eventType, {
             type: 'control',
@@ -1648,8 +1622,8 @@ export class FlatMap
      * @param {boolean}   enabled  Generate callbacks when ``true``,
      *                             otherwise disable them.
      */
-    enablePanZoomEvents(enabled=true)
-    //===============================
+    enablePanZoomEvents(enabled: boolean=true)
+    //========================================
     {
         if (this.#userInteractions !== null) {
             this.#userInteractions.enablePanZoomEvents(enabled)
@@ -1660,11 +1634,9 @@ export class FlatMap
      * Generate a callback as a result of panning/zooming the map.
      *
      * @param {string}         type    The event type, ``pan`` or ``zoom``.
-     * @param {Array.<float>}  origin  The map's normalised top-left corner
-     * @param {Array.<float>}  size    The map's normalised size
      */
-    panZoomEvent(type)
-    //================
+    panZoomEvent(type: string)
+    //========================
     {
         const bounds = this.#map.getBounds()
         if (this.#normalisedOrigin) {
@@ -1685,11 +1657,11 @@ export class FlatMap
     /**
      * Pan/zoom the map to a new view
      *
-     * @param {Array.<float>}  origin  The map's normalised top-left corner
-     * @param {Array.<float>}  size    The map's normalised size
+     * @param {[number, number]}  origin  The map's normalised top-left corner
+     * @param {[number, number]}  size    The map's normalised size
      */
-    panZoomTo(origin, size)
-    //=====================
+    panZoomTo(origin: [number, number], size: [number, number])
+    //=========================================================
     {
         if (this.#normalisedOrigin) {
             const sw_x = origin[0]*this.#normalised_size[0] + this.#normalisedOrigin[0]
@@ -1711,11 +1683,11 @@ export class FlatMap
      * @param      {boolean}  [auto=false]  If ``true`` return suggestions of text to search for.
      * @return     Either a ``Searchresults`` object with fields of ``featureIds`` and ``results``,
      *             where ``results`` has ``featureId``, ``score``, ``terms`` and ``text`` fields,
-     *             or a ``Suggestion`` object containing suggested matches
-     *             (see https://lucaong.github.io/minisearch/modules/_minisearch_.html#suggestion).
+     *             or a `Suggestion` object containing suggested matches
+     *             (see https://lucaong.github.io/minisearch/types/MiniSearch.Suggestion.html).
      */
-    search(text, auto=false)
-    //======================
+    search(text: string, auto: boolean=false)
+    //=======================================
     {
         if (auto) {
             return this.#searchIndex.auto_suggest(text)
@@ -1762,9 +1734,10 @@ export class FlatMap
      * @param      {Array.<string>}  featureIds   An array of feature identifiers
      * @param      {Object}  [options]
      * @param      {boolean} [options.zoomIn=false]  Zoom in the map (always zoom out as necessary)
+     * @param      {string} [options.selection='clear']  `clear`, `expand`, or `contract` the current selection
      */
-    zoomToFeatures(externalIds: string[], options=null)
-    //=================================================
+    zoomToFeatures(externalIds: string[], options: FeatureZoomOptions={})
+    //===================================================================
     {
         options = utils.setDefaults(options, {
             select: true,

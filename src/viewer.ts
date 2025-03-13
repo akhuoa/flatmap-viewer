@@ -35,7 +35,7 @@ const MAP_MAKER_SEPARATE_LAYERS_VERSION = 1.4
 
 //==============================================================================
 
-type MapIdentifier = {
+export type MapIdentifier = {
     biologicalSex?: string
     taxon?: string
     uuid?: string
@@ -208,45 +208,15 @@ export class MapViewer
    /**
     * Load and display a FlatMap.
     *
-    * @arg identifier {string|Object} A string or object identifying the map to load. If a string its
-    *                                 value can be either the map's ``uuid``, assigned at generation time,
-    *                                 or taxon and biological sex identifiers of the species that the map
-    *                                 represents. The latest version of a map is loaded unless it has been
-    *                                 identified using a ``uuid`` (see below).
-    * @arg identifier.taxon {string} The taxon identifier of the species represented by the map. This is
-    *                                specified as metadata in the map's source file.)
-    * @arg identifier.biologicalSex {string} The biological sex of the species represented by the map.
-    *                                 This is specified as metadata in the map's source file.)
-    * @arg identifier.uuid {string} The unique uuid the flatmap. If given then this exact map will
-    *                                be loaded, overriding ``taxon`` and ``biologicalSex``.
-    * @arg container {string} The id of the HTML container in which to display the map.
-    * @arg callback {function(string, Object)} A callback function, invoked when events occur with the map. The
-    *                                          first parameter gives the type of event, the second provides
-    *                                          details about the event.
-    * @arg options {Object} Configurable options for the map.
-    * @arg options.background {string} Background colour of flatmap. Defaults to ``white``.
-    * @arg options.debug {boolean} Enable debugging mode.
-    * @arg options.flightPaths {boolean} Enable flight path (3D) view of neuron paths
-    * @arg options.fullscreenControl {boolean} Add a ``Show full screen`` button to the map.
-    * @arg options.layerOptions {Object} Options to control colour and outlines of features
-    * @arg options.layerOptions.coloured {boolean} Use colour fill (if available) for features. Defaults to ``true``.
-    * @arg options.layerOptions.outlined {boolean} Show the border of features. Defaults to ``true``.
-    * @arg options.layerOptions.sckan {string} Show neuron paths known to SCKAN: values are ``valid`` (default),
-    *                                        ``invalid``, ``all`` or ``none``.
-    * @arg options.minimap {boolean|Object} Display a MiniMap of the flatmap. Defaults to ``false``.
-    * @arg options.minimap.position {string} The minimap's position: ``bottom-left`` (default), ``bottom-right``,
-    *                                        ``top-left`` or ``top-right``.
-    * @arg options.minimap.width {number|string} The width of the minimap. Defaults to ``320px``. Can also
-    *                                            be given as a percentage of the flatmap's width, e.g. ``10%``.
-    *                                            The minimap's ``height`` is determined from its width using
-    *                                            the flatmap's aspect ratio.
-    * @arg options.maxZoom {number} The maximum zoom level of the map.
-    * @arg options.minZoom {number} The minimum zoom level of the map.
-    * @arg options.navigationControl {boolean} Add navigation controls (zoom buttons) to the map.
-    * @arg options.showPosition {boolean} Show ``position`` of tooltip.
-    * @arg options.standalone {boolean} Viewer is running ``standalone``, as opposed to integrated into
-    *                                   another application so show a number of controls. Defaults to ``false``.
-    * @arg options.tooltipDelay {number} The number of milliseconds to delay the tooltip showing.
+    * @param identifier A string or object identifying the map to load. If a string its
+    *                   value can be either the map's ``uuid``, assigned at generation time,
+    *                   or taxon and biological sex identifiers of the species that the map
+    *                   represents. The latest version of a map is loaded unless it has been
+    *                   identified using a ``uuid`` (see below).
+    * @param callback   A callback function, invoked when events occur with the map. The
+    *                   first parameter gives the type of event, the second provides
+    *                   details about the event.
+    * @param options Configurable options for the map.
     * @example
     * const humanMap1 = mapManager.loadMap('humanV1', 'div-1')
     *
@@ -258,8 +228,8 @@ export class MapViewer
     *                     {uuid: 'a563be90-9225-51c1-a84d-00ed2d03b7dc'},
     *                     'div-4')
     */
-    async loadMap(identifier: string, callback: FlatMapCallback, options: FlatMapOptions={}): Promise<FlatMap>
-    //=========================================================================================================
+    async loadMap(identifier: MapIdentifier, callback: FlatMapCallback, options: FlatMapOptions={}): Promise<FlatMap>
+    //===============================================================================================================
     {
         const map = await this.#findMap(identifier)
         if (map === null) {
@@ -350,9 +320,9 @@ export class MapViewer
 
         const annotations = await this.#mapServer.mapAnnotations(mapId)
 
-        // Get the map's provenance
+        // Get metadata about the map
 
-        const provenance = await this.#mapServer.mapMetadata(mapId)
+        const mapMetadata = await this.#mapServer.mapMetadata(mapId)
 
         // Set zoom range if not specified as an option
 
@@ -439,7 +409,7 @@ export class MapViewer
                 annotations,
                 callback,
                 pathways,
-                provenance
+                mapMetadata
             })
         await flatmap.mapLoaded()
 

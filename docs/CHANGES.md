@@ -1,3 +1,9 @@
+* `FlatMap.mapMetadata` has been added as an alias for `FlatMap.provenance`.
+
+### FUTURE DEPRECATION
+
+* `FlatMap.provenance` will be removed as it has been replaced by `FlatMap.mapMetadata`.
+
 ## 4.0.2
 
 * Add `hyperlinks.flatmap` to a specify a flatmap associated with the clicked-on feature.
