@@ -708,14 +708,23 @@ export class FlatMap
     }
 
     /**
-     * The map's provenance as returned from the map server.
-     *
-     * @type Object
+     * @deprecated Replaced by ``FlatMap.mapMetadata`` since version 4.1.0
      */
     get provenance()
     //==============
     {
-        return this.#provenance
+        return this.mapMetadata
+    }
+
+    /**
+     * The map's mapMetadata as returned from the map server.
+     *
+     * @type Object
+     */
+    get mapMetadata()
+    //===============
+    {
+        return this.#mapMetadata
     }
 
     /**
