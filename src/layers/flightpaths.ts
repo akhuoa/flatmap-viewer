@@ -25,7 +25,7 @@ import {Model, Geometry} from '@luma.gl/engine'
 //==============================================================================
 
 import {PropertiesFilter} from '../filters'
-import type {MapFeature, MapFeatureIdentifier} from '../flatmap-types'
+import type {GeoJSONId, MapFeature, MapFeatureIdentifier} from '../flatmap-types'
 import {FlatMap} from '../flatmap'
 import {pathColourArray, PathStyle} from '../pathways'
 import {UserInteractions} from '../interactions'
@@ -120,9 +120,9 @@ export class FlightPathLayer
     #dimmed: boolean = false
     #enabled: boolean = false
     #featureFilter: PropertiesFilter = new PropertiesFilter()
-    #featureToLayerProperties: Map<number, ArcLayerProps> = new Map()
+    #featureToLayerProperties: Map<GeoJSONId, ArcLayerProps> = new Map()
     #layerProperties: Map<string, ArcLayerProps> = new Map()
-    #pathFeatures: Map<number, PathProperties>
+    #pathFeatures: Map<GeoJSONId, PathProperties>
     #pathFilters: Map<string, PropertiesFilter>
     #pathStyles: Map<string, PathStyle>
     #pathTypes: string[]
@@ -206,8 +206,8 @@ export class FlightPathLayer
         }
     }
 
-    removeFeatureState(featureId: number, key: string)
-    //================================================
+    removeFeatureState(featureId: GeoJSONId, key: string)
+    //===================================================
     {
         const properties = this.#featureToLayerProperties.get(featureId)
         if (properties) {
@@ -216,8 +216,8 @@ export class FlightPathLayer
         }
     }
 
-    setFeatureState(featureId: number, state: PropertiesType)
-    //=======================================================
+    setFeatureState(featureId: GeoJSONId, state: PropertiesType)
+    //==========================================================
     {
         const properties = this.#featureToLayerProperties.get(featureId)
         if (properties) {

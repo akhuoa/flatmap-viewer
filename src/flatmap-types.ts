@@ -46,6 +46,9 @@ export type MapRenderedFeature = maplibregl.MapGeoJSONFeature & {
 
 //==============================================================================
 
+// The type of the ``id`` field in a GeoJSONFeature
+export type GeoJSONId = number|string
+
 // Lng, Lat coordinates
 export type MapExtent = [number, number, number, number]
 
@@ -225,7 +228,7 @@ export interface FlatMapFeatureAnnotation
     children?: number[]
     colour?: string
     coordinates?: Point2D[]
-    featureId?: number
+    featureId?: GeoJSONId
     geometry?: string
     id?: string
     kind?: string

@@ -49,6 +49,7 @@ import {
     FlatMapMarkerOptions,
     FlatMapPopUpOptions
 } from './flatmap-types'
+import type {GeoJSONId} from './flatmap-types'
 
 import {UserInteractions} from './interactions'
 import {MapTermGraph, SparcTermGraph} from './knowledge'
@@ -185,7 +186,7 @@ export type MapDescription = {
 
 //==============================================================================
 
-type FeatureIdMap = Map<string, number[]>
+type FeatureIdMap = Map<string, GeoJSONId[]>
 
 
 /**
@@ -194,7 +195,7 @@ type FeatureIdMap = Map<string, number[]>
 */
 export class FlatMap
 {
-    #annIdToFeatureId: Map<string, number> = new Map()
+    #annIdToFeatureId: Map<string, GeoJSONId> = new Map()
     #baseUrl: string
     #biologicalSex: string
     #bounds: maplibregl.LngLatBounds
@@ -206,7 +207,7 @@ export class FlatMap
     #id: string
     #initialState = null
     #layers: FlatMapLayer[]
-    #idToAnnotation: Map<number, FlatMapFeatureAnnotation> = new Map()
+    #idToAnnotation: Map<GeoJSONId, FlatMapFeatureAnnotation> = new Map()
     #knowledgeSource = ''
     #viewer: MapViewer
     #map: maplibregl.Map|null = null
@@ -721,8 +722,8 @@ export class FlatMap
         return `${this.#uuid}-${this.#mapNumber}`
     }
 
-    get annotations(): Map<number, FlatMapFeatureAnnotation>
-    //======================================================
+    get annotations(): Map<GeoJSONId, FlatMapFeatureAnnotation>
+    //=========================================================
     {
         return this.#idToAnnotation
     }
@@ -733,10 +734,10 @@ export class FlatMap
      * @param      {string}  geojsonId  The features's GeoJSON identifier
      * @return     {FlatMapFeatureAnnotation}                    The feature's annotations
      */
-    annotation(geojsonId: number): FlatMapFeatureAnnotation
-    //=====================================================
+    annotation(geojsonId: GeoJSONId): FlatMapFeatureAnnotation
+    //========================================================
     {
-        return this.#idToAnnotation.get(+geojsonId)
+        return this.#idToAnnotation.get(geojsonId)
     }
 
     /**
@@ -767,8 +768,8 @@ export class FlatMap
         }
     }
 
-    #updateFeatureIdMapEntry(propertyId: string, featureIdMap: FeatureIdMap, featureId: number)
-    //=========================================================================================
+    #updateFeatureIdMapEntry(propertyId: string, featureIdMap: FeatureIdMap, featureId: GeoJSONId)
+    //============================================================================================
     {
         const id = utils.normaliseId(propertyId)
         const featureIds = featureIdMap.get(id)
@@ -802,8 +803,8 @@ export class FlatMap
         }
     }
 
-    #saveAnnotation(featureId: number, ann: FlatMapFeatureAnnotation)
-    //===============================================================
+    #saveAnnotation(featureId: GeoJSONId, ann: FlatMapFeatureAnnotation)
+    //==================================================================
     {
         ann.featureId = featureId
         this.#idToAnnotation.set(featureId, ann)
@@ -837,17 +838,17 @@ export class FlatMap
         }
     }
 
-    modelFeatureIds(anatomicalId: string): number[]
-    //=============================================
+    modelFeatureIds(anatomicalId: string): GeoJSONId[]
+    //================================================
     {
         const normalisedId = utils.normaliseId(anatomicalId)
         return this.#modelToFeatureIds.get(normalisedId) || []
     }
 
-    modelFeatureIdList(anatomicalIds: string[]): number[]
-    //===================================================
+    modelFeatureIdList(anatomicalIds: string[]): GeoJSONId[]
+    //======================================================
     {
-        const featureIds = new utils.List<number>()
+        const featureIds = new utils.List<GeoJSONId>()
         if (Array.isArray(anatomicalIds)) {
             for (const id of anatomicalIds) {
                 featureIds.extend(this.modelFeatureIds(id))
@@ -874,8 +875,8 @@ export class FlatMap
         return featureIds
     }
 
-    modelForFeature(featureId: number): string|null
-    //=============================================
+    modelForFeature(featureId: GeoJSONId): string|null
+    //================================================
     {
         const ann = this.#idToAnnotation.get(featureId)
         return (ann && 'models' in ann) ? utils.normaliseId(ann.models) : null
@@ -884,11 +885,11 @@ export class FlatMap
     /**
      * Get model terms of all paths connected to a node.
      *
-     * @param      {number}  nodeId  The local (GeoJSON) identifier of a node
-     * @return     {set<string>}  Model terms of all paths connected to the node
+     * @param      nodeId  The local (GeoJSON) identifier of a node
+     * @return             Model terms of all paths connected to the node
      */
-    nodePathModels(nodeId: number): Set<string>
-    //=========================================
+    nodePathModels(nodeId: GeoJSONId): Set<string>
+    //============================================
     {
         if (this.#userInteractions !== null) {
             return this.#userInteractions.nodePathModels(nodeId)
@@ -898,11 +899,11 @@ export class FlatMap
     /**
      * Get GeoJSON feature ids of all nodes of a path model.
      *
-     * @param      {string}  modelId  The path's model identifier
-     * @return     {Array<number>}   GeoJSON identifiers of features on the path
+     * @param  modelId  The path's model identifier
+     * @return GeoJSON identifiers of features on the path
      */
-    pathModelNodes(modelId: string): number[]
-    //=======================================
+    pathModelNodes(modelId: string): GeoJSONId[]
+    //==========================================
     {
         if (this.#userInteractions !== null) {
             return [...this.#userInteractions.pathModelNodes(modelId)]
@@ -912,11 +913,11 @@ export class FlatMap
     /**
      * Get GeoJSON feature ids of all features identified with a taxon.
      *
-     * @param      {string}  taxonId  The taxon identifier
-     * @return     {Array<number>}    GeoJSON identifiers of features on the path
+     * @param  taxonId  The taxon identifier
+     * @return          GeoJSON identifiers of features on the path
      */
-    taxonFeatureIds(taxonId: string): number[]
-    //========================================
+    taxonFeatureIds(taxonId: string): GeoJSONId[]
+    //===========================================
     {
         const featureIds = this.#taxonToFeatureIds.get(utils.normaliseId(taxonId))
         return [...new Set(featureIds ? featureIds : [])]
@@ -1571,11 +1572,11 @@ export class FlatMap
     /**
      * Return properties associated with a feature.
      *
-     * @param      {number}  featureId  The feature's internal (GeoJSON) id
-     * @returns    {Object}             Properties associated with the feature
+     * @param      featureId  The feature's internal (GeoJSON) id
+     * @returns               Properties associated with the feature
      */
-    featureProperties(featureId: number): object
-    //==========================================
+    featureProperties(featureId: GeoJSONId): object
+    //=============================================
     {
         const properties = this.annotation(featureId)
         return properties ? this.#exportedProperties(properties) : {}
@@ -1753,14 +1754,14 @@ export class FlatMap
     /**
      * Select features on the map.
      *
-     * @param {string | Array.<string>}  geojsonIds  A single GeoJSON feature identifiers
-     *                                               or an array of identifiers.
+     * @param  geojsonIds  A single GeoJSON feature identifiers
+     *                     or an array of identifiers.
      */
-    selectGeoJSONFeatures(geojsonIds)
-    //===============================
+    selectGeoJSONFeatures(geojsonIds: GeoJSONId|GeoJSONId[])
+    //======================================================
     {
         if (this.#userInteractions !== null) {
-            this.#userInteractions.selectFeatures(geojsonIds)
+            this.#userInteractions.selectFeatures(Array.isArray(geojsonIds) ? geojsonIds : [geojsonIds])
         }
     }
 
@@ -1781,8 +1782,8 @@ export class FlatMap
      * @param  geojsonIds  An array of  GeoJSON feature identifiers
      * @param {boolean} [options.zoomIn=false]  Zoom in the map (always zoom out as necessary)
      */
-    zoomToGeoJSONFeatures(geojsonIds: number[], options: { zoomIn?: boolean }=null)
-    //=============================================================================
+    zoomToGeoJSONFeatures(geojsonIds: GeoJSONId[], options: { zoomIn?: boolean }=null)
+    //================================================================================
     {
         options = utils.setDefaults(options, {
             select: true,
@@ -1965,11 +1966,11 @@ export class FlatMap
     /**
      * Get all paths associated with a set of features.
      *
-     * @param      {number|number[]}    geojsonIds  GeoJSON ids of features
-     * @return     {Promise<string[]>}  A Promise resolving to an array of path identifiers
+     * @param  geojsonIds  GeoJSON ids of features
+     * @return A Promise resolving to an array of path identifiers
      */
-    async queryPathsForGeoJsonFeatures(geojsonIds)
-    //============================================
+    async getPathsForGeoJsonFeatures(geojsonIds: GeoJSONId|GeoJSONId[]): Promise<string[]>
+    //====================================================================================
     {
         if (this.#mapServer.knowledgeSchema < KNOWLEDGE_SOURCE_SCHEMA) {
             return []

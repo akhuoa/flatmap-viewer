@@ -24,7 +24,7 @@ import {colord} from 'colord'
 
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
 import {MapRenderedFeature} from './flatmap-types'
-import type {PathDetailsType} from './flatmap-types'
+import type {GeoJSONId, PathDetailsType} from './flatmap-types'
 import {UserInteractions} from './interactions'
 import {Callback, PropertiesType} from './types'
 import {reverseMap} from './utils'
@@ -118,19 +118,19 @@ export interface NerveCentrelineDetails
 
 export class PathManager
 {
-    #allFeatureIds: Set<number>
+    #allFeatureIds: Set<GeoJSONId>
     #nerveCentrelineDetails: Map<string, string> = new Map() // models --> label
     #connectivityModelPaths: Record<string, string[]>   // modelId: [pathIds]
     #enabledCentrelines: boolean = false
     #flatmap: FlatMap
     #haveCentrelines: boolean = true
-    #nodePaths: Record<number, string[]>
+    #nodePaths: Record<GeoJSONId, string[]>
     #pathsByCentreline: Map<string, Set<string>> = new Map()
     #pathsByType: Record<string, string[]>
-    #pathLines: Map<string, Array<number>> = new Map()  // pathId: [lineIds]
+    #pathLines: Map<string, Array<GeoJSONId>> = new Map()  // pathId: [lineIds]
     #pathModelPaths: Record<string, string[]>
     #paths: Record<string, PathDetailsType>
-    #pathsByLine: Map<number, Set<string>>
+    #pathsByLine: Map<GeoJSONId, Set<string>>
     #pathsByNerve: Map<string, Set<string>>
     #pathToConnectivityModel: Record<string, string>
     #pathToPathModel: Record<string, string>
@@ -181,7 +181,7 @@ export class PathManager
 
         const nodePaths = flatmap.pathways['node-paths']
         this.#nodePaths = nodePaths                             // nodeId: [pathIds]
-        const featureIds: Set<number> = new Set()
+        const featureIds: Set<GeoJSONId> = new Set()
         for (const paths of Object.values(this.#nodePaths)) {
             this.#addPathsToFeatureSet(paths, featureIds)
         }
@@ -302,8 +302,8 @@ export class PathManager
         return pathTypes
     }
 
-    #addPathsToFeatureSet(pathIds: Iterable<string>, featureSet: Set<number>)
-    //=======================================================================
+    #addPathsToFeatureSet(pathIds: Iterable<string>, featureSet: Set<GeoJSONId>)
+    //==========================================================================
     {
         for (const pathId of pathIds) {
             const path = this.#paths[pathId]
@@ -313,16 +313,16 @@ export class PathManager
         }
     }
 
-    allFeatureIds(): Set<number>
-    //==========================
+    allFeatureIds(): Set<GeoJSONId>
+    //=============================
     {
         return this.#allFeatureIds
     }
 
-    lineFeatureIds(lineIds: Iterable<number>): Set<number>
-    //====================================================
+    lineFeatureIds(lineIds: Iterable<GeoJSONId>): Set<GeoJSONId>
+    //==========================================================
     {
-        const featureIds: Set<number> = new Set()
+        const featureIds: Set<GeoJSONId> = new Set()
         for (const lineId of lineIds) {
             if (this.#pathsByLine.has(lineId)) {
                 this.#addPathsToFeatureSet(this.#pathsByLine.get(lineId), featureIds)
@@ -331,10 +331,10 @@ export class PathManager
         return featureIds
     }
 
-    nerveFeatureIds(nerveId: string): Set<number>
-    //===========================================
+    nerveFeatureIds(nerveId: string): Set<GeoJSONId>
+    //==============================================
     {
-        const featureIds: Set<number> = new Set()
+        const featureIds: Set<GeoJSONId> = new Set()
         if (this.#pathsByNerve.has(nerveId)) {
             this.#addPathsToFeatureSet(this.#pathsByNerve.get(nerveId), featureIds)
         }
@@ -369,36 +369,36 @@ export class PathManager
         return properties
     }
 
-    connectivityModelFeatureIds(modelId: string): Set<number>
-    //=======================================================
+    connectivityModelFeatureIds(modelId: string): Set<GeoJSONId>
+    //==========================================================
     {
-        const featureIds: Set<number> = new Set()
+        const featureIds: Set<GeoJSONId> = new Set()
         if (modelId in this.#connectivityModelPaths) {
             this.#addPathsToFeatureSet(this.#connectivityModelPaths[modelId], featureIds)
             }
         return featureIds
     }
 
-    pathModelFeatureIds(modelId: string): Set<number>
-    //===============================================
+    pathModelFeatureIds(modelId: string): Set<GeoJSONId>
+    //==================================================
     {
-        const featureIds: Set<number> = new Set()
+        const featureIds: Set<GeoJSONId> = new Set()
         if (modelId in this.#pathModelPaths) {
             this.#addPathsToFeatureSet(this.#pathModelPaths[modelId], featureIds)
             }
         return featureIds
     }
 
-    isNode(id: number): boolean
-    //=========================
+    isNode(id: GeoJSONId): boolean
+    //============================
     {
         return id in this.#nodePaths
     }
 
-    pathFeatureIds(nodeId: number): Set<number>
-    //=========================================
+    pathFeatureIds(nodeId: GeoJSONId): Set<GeoJSONId>
+    //===============================================
     {
-        const featureIds: Set<number> = new Set()
+        const featureIds: Set<GeoJSONId> = new Set()
         if (nodeId in this.#nodePaths) {
             this.#addPathsToFeatureSet(this.#nodePaths[nodeId], featureIds)
         }
@@ -406,10 +406,10 @@ export class PathManager
     }
 
     /* FUTURE
-    #typeFeatureIds(pathType: string): Set<number>
-    //============================================
+    #typeFeatureIds(pathType: string): Set<GeoJSONId>
+    //===============================================
     {
-        const featureIds: Set<number> = new Set()
+        const featureIds: Set<GeoJSONId> = new Set()
         if (pathType in this.#pathsByType) {
             this.#addPathsToFeatureSet(this.#pathsByType[pathType], featureIds)
         }
@@ -436,7 +436,7 @@ export class PathManager
                 }
             }
             // Enable the paths that are associated with a centreline
-            const featureIds: Set<number> = new Set()
+            const featureIds: Set<GeoJSONId> = new Set()
             this.#addPathsToFeatureSet(this.#pathsByCentreline.get(centrelineId), featureIds)
             for (const featureId of featureIds) {
                 this.#ui.enableFeature(featureId, enable, force)
@@ -456,7 +456,7 @@ export class PathManager
                || enable && path.systemCount === 0
                || !enable && path.systemCount == 1)) {
                 // and type(pathId) is enabled...
-                const featureIds: Set<number> = new Set()
+                const featureIds: Set<GeoJSONId> = new Set()
                 this.#addPathsToFeatureSet([pathId], featureIds)
                 for (const featureId of featureIds) {
                     this.#ui.enableFeature(featureId, enable, force)
@@ -480,8 +480,8 @@ export class PathManager
         return this.#pathtypeEnabled[pathType] || false
     }
 
-    nodePathModels(nodeId: number): Set<string>
-    //=========================================
+    nodePathModels(nodeId: GeoJSONId): Set<string>
+    //============================================
     {
         const modelIds: Set<string> = new Set()
         if (nodeId in this.#nodePaths) {
@@ -494,10 +494,10 @@ export class PathManager
         return modelIds
     }
 
-    pathModelNodes(modelId: string): Set<number>
-    //==========================================
+    pathModelNodes(modelId: string): Set<GeoJSONId>
+    //=============================================
     {
-        const nodeIds: Set<number> = new Set()
+        const nodeIds: Set<GeoJSONId> = new Set()
         if (modelId in this.#pathModelPaths) {
             for (const pathId of this.#pathModelPaths[modelId]) {
                 for (const nodeId of this.#paths[pathId].nodes) {

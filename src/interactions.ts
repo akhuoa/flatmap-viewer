@@ -40,7 +40,7 @@ import {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent,
         FlatMapFeature, FlatMapFeatureAnnotation,
         FlatMapMarkerOptions, FlatMapPopUpOptions, MapFeature,
         MapFeatureIdentifier, MapRenderedFeature} from './flatmap-types'
-import type {FeatureZoomOptions} from './flatmap-types'
+import type {FeatureZoomOptions, GeoJSONId} from './flatmap-types'
 import type {Point2D} from './flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
 import {inAnatomicalClusterLayer, LayerManager} from './layers'
@@ -150,15 +150,15 @@ function getRenderedLabel(properties)
 
 export class UserInteractions
 {
-    #activeFeatures: Map<number, MapFeature> = new Map()
+    #activeFeatures: Map<GeoJSONId, MapFeature> = new Map()
     #activeMarker = null
     #annotationByMarkerId = new Map()
     #annotationDrawControl: AnnotationDrawControl|null = null
     #closeControl: ClosePaneControl|null = null
     #colourOptions
     #currentPopup = null
-    #featureEnabledCount: Map<number, number>
-    #featureIdToMapId: Map<string, number>
+    #featureEnabledCount: Map<GeoJSONId, number>
+    #featureIdToMapId: Map<string, GeoJSONId>
     #flatmap: FlatMap
     #imageLayerIds = new Map()
     #infoControl = null
@@ -193,7 +193,7 @@ export class UserInteractions
 
         // Track enabled features
 
-        this.#featureEnabledCount = new Map(Array.from(this.#flatmap.annotations.keys()).map(k => [+k, 0]))
+        this.#featureEnabledCount = new Map(Array.from(this.#flatmap.annotations.keys()).map(k => [k, 0]))
 
         const featuresEnabled = flatmap.options.style !== FLATMAP_STYLE.FUNCTIONAL
 
@@ -562,8 +562,8 @@ export class UserInteractions
         return null
     }
 
-    mapFeature(geojsonId: number): MapFeature
-    //=======================================
+    mapFeature(geojsonId: GeoJSONId): MapFeature
+    //===========================================
     {
         return this.mapFeatureFromAnnotation(this.#flatmap.annotation(geojsonId))
     }
@@ -585,8 +585,8 @@ export class UserInteractions
     }
 
 
-    getFeatureState(featureId: number)
-    //================================
+    getFeatureState(featureId: GeoJSONId)
+    //===================================
     {
         const feature = this.mapFeature(featureId)
         if (feature) {
@@ -632,17 +632,17 @@ export class UserInteractions
         }
     }
 
-    enableFeature(featureId: number, enable=true, force=false)
-    //========================================================
+    enableFeature(featureId: GeoJSONId, enable=true, force=false)
+    //===========================================================
     {
         const enabledCount = this.#featureEnabledCount.get(+featureId)
         if (force || enable && enabledCount === 0 || !enable && enabledCount == 1) {
             this.enableMapFeature(this.mapFeature(+featureId), enable)
         }
         if (force) {
-            this.#featureEnabledCount.set(+featureId, enable ? 1 : 0)
+            this.#featureEnabledCount.set(featureId, enable ? 1 : 0)
         } else {
-            this.#featureEnabledCount.set(+featureId, enabledCount + (enable ? 1 : -1))
+            this.#featureEnabledCount.set(featureId, enabledCount + (enable ? 1 : -1))
         }
     }
 
@@ -682,14 +682,14 @@ export class UserInteractions
         return DRAW_ANNOTATION_LAYERS.includes(feature.layer.id)
     }
 
-    #featureSelected(featureId: number|string): boolean
-    //=================================================
+    #featureSelected(featureId: GeoJSONId): boolean
+    //=============================================
     {
         return this.#selectedFeatureRefCount.has(+featureId)
     }
 
-    selectFeature(featureId: number, dim=true)
-    //========================================
+    selectFeature(featureId: GeoJSONId, dim=true)
+    //===========================================
     {
         const ann = this.#flatmap.annotation(featureId)
         if (ann && 'sckan' in ann) {
@@ -723,8 +723,8 @@ export class UserInteractions
         return result
     }
 
-    unselectFeature(featureId: number|string)
-    //=======================================
+    unselectFeature(featureId: GeoJSONId)
+    //===================================
     {
         featureId = +featureId;   // Ensure numeric
         if (this.#selectedFeatureRefCount.has(+featureId)) {
@@ -762,8 +762,8 @@ export class UserInteractions
     {
         if (feature) {
             this.#setFeatureState(feature, { active: true })
-            if (!this.#activeFeatures.has(+feature.id)) {
-                this.#activeFeatures.set(+feature.id, feature)
+            if (!this.#activeFeatures.has(feature.id)) {
+                this.#activeFeatures.set(feature.id, feature)
             }
         }
     }
@@ -773,7 +773,7 @@ export class UserInteractions
     {
         for (const lineFeature of lineFeatures) {
             this.activateFeature(lineFeature)
-            const lineIds: Set<number> = new Set(lineFeatures.map(f => f.properties.featureId))
+            const lineIds: Set<GeoJSONId> = new Set(lineFeatures.map(f => f.properties.featureId))
             for (const featureId of this.#pathManager.lineFeatureIds(lineIds)) {
                 this.activateFeature(this.mapFeature(featureId))
             }
@@ -841,10 +841,10 @@ export class UserInteractions
     /**
      * Select features on the map.
      *
-     * @param {Array.<string>}  featureIds  An array of feature identifiers to highlight
+     * @param  featureIds  An array of feature identifiers to highlight
      */
-    selectFeatures(featureIds: number[])
-    //==================================
+    selectFeatures(featureIds: GeoJSONId[])
+    //=====================================
     {
         if (featureIds.length) {
             this.unselectFeatures()
@@ -863,22 +863,15 @@ export class UserInteractions
         }
     }
 
-    showSearchResults(featureIds: number[])
-    //=====================================
+    showSearchResults(featureIds: GeoJSONId[])
+    //========================================
     {
         this.unselectFeatures()
         this.zoomToFeatures(featureIds, {zoomIn: false})
     }
 
-    /**
-     * Select features and zoom the map to them.
-     *
-     * @param      {Array.<string>}  featureIds   An array of feature identifiers
-     * @param      {Object}  [options]
-     * @param      {boolean} [options.zoomIn=false]  Zoom in the map (always zoom out as necessary)
-     */
-    zoomToFeatures(featureIds: number[], options=null)
-    //================================================
+    zoomToFeatures(featureIds: GeoJSONId[], options: FeatureZoomOptions)
+    //==================================================================
     {
         options = utils.setDefaults(options, {
             zoomIn: false
@@ -915,8 +908,8 @@ export class UserInteractions
         }
     }
 
-    showPopup(featureId: number, content, options: FlatMapPopUpOptions={})
-    //====================================================================
+    showPopup(featureId: GeoJSONId, content: string, options: FlatMapPopUpOptions={})
+    //===============================================================================
     {
         const ann = this.#flatmap.annotation(featureId)
         const drawn = !!options.annotationFeatureGeometry
@@ -1380,8 +1373,8 @@ export class UserInteractions
         }
     }
 
-    #locationOnLine(featureId, lngLat: maplibregl.LngLat|null)
-    //========================================================
+    #locationOnLine(featureId: GeoJSONId, lngLat: maplibregl.LngLat|null)
+    //===================================================================
     {
         if (lngLat && this.#flatmap.options.style === FLATMAP_STYLE.CENTRELINE) {
             const annotation = this.#flatmap.annotation(featureId)
@@ -1441,10 +1434,10 @@ export class UserInteractions
         this.#layerManager.refresh()
     }
 
-    pathFeatureIds(externalIds: string[]): Set<number>
-    //================================================
+    pathFeatureIds(externalIds: string[]): Set<GeoJSONId>
+    //===================================================
     {
-        let featureIds = new Set<number>()
+        let featureIds = new Set<GeoJSONId>()
         for (const id of externalIds) {
             featureIds = featureIds.union(this.#pathManager.connectivityModelFeatureIds(id))
             featureIds = featureIds.union(this.#pathManager.pathModelFeatureIds(id))
@@ -1458,8 +1451,8 @@ export class UserInteractions
         return this.#pathManager.pathModelNodes(modelId)
     }
 
-    nodePathModels(nodeId: number): Set<string>
-    //=========================================
+    nodePathModels(nodeId: GeoJSONId): Set<string>
+    //============================================
     {
         return this.#pathManager.nodePathModels(nodeId)
     }

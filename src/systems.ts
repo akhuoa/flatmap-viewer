@@ -19,6 +19,7 @@ limitations under the License.
 ==============================================================================*/
 
 import {FlatMap} from './flatmap'
+import type {GeoJSONId} from './flatmap-types'
 import {UserInteractions} from './interactions'
 
 //==============================================================================
@@ -42,7 +43,7 @@ type SystemFeature = {
 type SystemDetail = {
     colour: string
     enabled: boolean
-    featureIds: number[]
+    featureIds: GeoJSONId[]
     name: string
     organs: SystemFeature[]
     pathIds: string[]
@@ -103,8 +104,8 @@ export class SystemsManager
         }
     }
 
-    #children(childFeatureIds: number[], childClass: FC_CLASS_LIST): SystemFeature[]
-    //==============================================================================
+    #children(childFeatureIds: GeoJSONId[], childClass: FC_CLASS_LIST): SystemFeature[]
+    //=================================================================================
     {
         const children = []
         for (const childFeatureId of childFeatureIds || []) {
