@@ -61,18 +61,6 @@ const UNCLUSTERED_MARKER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox=
     <circle cx="12.5" cy="12.5" r="5" fill="{secondaryColor}"/>
 </svg>`
 
-const ZOOM_MARKER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"
-                              width="calc(28 * {scale})" height="calc(39 * {scale})">
-    <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License
-       - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-    <path d="M416 208H272V64c0-17.7-14.3-32-32-32h-32c-17.7 0-32 14.3-32 32v144H32
-             c-17.7 0-32 14.3-32 32v32 c0 17.7 14.3 32 32 32h144v144
-             c0 17.7 14.3 32 32 32h32c17.7 0 32-14.3 32-32V304h144
-             c17.7 0 32-14.3 32-32v-32c0-17.7-14.3-32-32-32z"
-             style="fill:{color};"/>
-</svg>`
-
-
 const ZOOM_PLUS_MARKER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 80 40 40"
                               width="calc(40 * {scale})" height="calc(40 * {scale})">
     <circle style="fill: none; stroke: red; stroke-width: 3px; stroke-opacity: 0.4;"
@@ -82,7 +70,6 @@ const ZOOM_PLUS_MARKER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="8
     <line style="fill: rgb(216, 216, 216); stroke: blue; stroke-linecap: round; stroke-width: 6px; stroke-opacity: 0.4;"
           x1="90" y1="100" x2="110" y2="100"/>
 </svg>`
-
 
 //==============================================================================
 
@@ -112,7 +99,7 @@ const markerIconDefinitions: MarkerIconDefinition[] = [
     {
         id: ZOOM_MARKER_ID,
         svg: ZOOM_PLUS_MARKER_SVG
-    },
+    }
 ]
 
 //==============================================================================
