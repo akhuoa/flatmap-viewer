@@ -230,6 +230,12 @@ export interface FlatMapFeatureAnnotation
     coordinates?: Point2D[]
     featureId?: GeoJSONId
     geometry?: string
+    hyperlink?: string
+    hyperlinks?: {
+        description?: string
+        flatmap?: string
+        pmr?: string
+    }
     id?: string
     kind?: string
     label?: string
