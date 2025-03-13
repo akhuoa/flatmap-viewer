@@ -143,6 +143,13 @@ export interface CentrelineDetails
 
 //==============================================================================
 
+export interface EntityLabel {
+    entity: string
+    label: string
+}
+
+//==============================================================================
+
 export type FlatMapSourceSpecification = maplibregl.VectorSourceSpecification
                                        | maplibregl.RasterSourceSpecification
 
@@ -1718,7 +1725,7 @@ export class FlatMap
     /**
      * Select features on the map.
      *
-     * @param {Array.<string>}  externalIds  An array of anaotomical terms identifing features to select
+     * @param  externalIds  An array of anaotomical terms identifing features to select
      */
     selectFeatures(externalIds: string[])
     //====================================
@@ -1849,11 +1856,11 @@ export class FlatMap
     /**
      * Enable/disable the neuron paths associated with a nerve centreline.
      *
-     * @param   {string[]|string}   nerveModels   Anatomical identifiers of nerve centrelines
-     * @param   {boolean}  [enable=true]
+     * @param   nerveModels   Anatomical identifiers of nerve centrelines
+     * @param   [enable=true]
      */
-    enableNeuronPathsByNerve(nerveModels: string|string[], enable=true)
-    //=================================================================
+    enableNeuronPathsByNerve(nerveModels: string|string[], enable: boolean=true)
+    //==========================================================================
     {
         if (this.#userInteractions !== null) {
             this.#userInteractions.enableNeuronPathsByNerve(nerveModels, enable)
@@ -1869,19 +1876,12 @@ export class FlatMap
     }
 
     /**
-     * @typedef {Object} EntityLabel
-     * @property {string} entity
-     * @property {string} label
-     */
-
-    /**
      * Get labels for entities from the flatmap's server's knowledge store.
      *
-     * @param   {string[]|string}  entities  Anatomical identifiers of entities.
-     * @return  {EntityLabel[]}              An ``EntityLabel`` array.
+     * @param   entities  Anatomical identifiers of entities.
      */
-    async queryLabels(entities)
-    //=========================
+    async queryLabels(entities: string|string[]): Promise<EntityLabel[]>
+    //==================================================================
     {
         const entityLabels = []
         const entityArray = Array.isArray(entities) ? entities
@@ -1926,11 +1926,11 @@ export class FlatMap
     /**
      * Get knowledge about an entity from the flatmap's server's knowledge store.
      *
-     * @param   {string}  entity  The URI of an entity.
+     * @param   entity  The URI of an entity.
      * @return  {Object}          JSON describing the entity.
      */
-    async queryKnowledge(entity)
-    //==========================
+    async queryKnowledge(entity: string)
+    //==================================
     {
         const rows = (this.#mapServer.knowledgeSchema >= KNOWLEDGE_SOURCE_SCHEMA)
                    ? await this.#mapServer.queryKnowledge(

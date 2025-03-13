@@ -522,8 +522,8 @@ export class UserInteractions
         return this.#layerManager.layers
     }
 
-    enableLayer(layerId, enable=true)
-    //===============================
+    enableLayer(layerId: string, enable=true)
+    //=======================================
     {
         this.#layerManager.activate(layerId, enable)
     }
@@ -540,8 +540,8 @@ export class UserInteractions
         return this.#systemsManager.systems
     }
 
-    enableSystem(systemId, enable=true)
-    //=================================
+    enableSystem(systemId: string, enable=true)
+    //=========================================
     {
         this.#systemsManager.enable(systemId, enable)
     }
@@ -1086,8 +1086,8 @@ export class UserInteractions
         this.#resetActiveFeatures()
     }
 
-    #renderedFeatures(point): MapRenderedFeature[]
-    //============================================
+    #renderedFeatures(point: [number, number]): MapRenderedFeature[]
+    //==============================================================
     {
         const features = this.#layerManager.featuresAtPoint(point)
         return features.filter(feature => this.#featureEnabled(feature))
@@ -1099,8 +1099,8 @@ export class UserInteractions
         this.#updateActiveFeature(event.point, event.lngLat)
     }
 
-    #updateActiveFeature(eventPoint, lngLat: maplibregl.LngLat|null=null)
-    //===================================================================
+    #updateActiveFeature(eventPoint: [number, number], lngLat: maplibregl.LngLat|null=null)
+    //=====================================================================================
     {
         // No tooltip when context menu is open
         if (this.#modal) {
@@ -1457,14 +1457,14 @@ export class UserInteractions
         return this.#pathManager.nodePathModels(nodeId)
     }
 
-    enableSckanPaths(sckanState, enable=true)
-    //=======================================
+    enableSckanPaths(sckanState: string, enable=true)
+    //===============================================
     {
         this.#layerManager.enableSckanPaths(sckanState, enable)
     }
 
-    enableConnectivityByTaxonIds(taxonIds, enable=true)
-    //=================================================
+    enableConnectivityByTaxonIds(taxonIds: string|string[], enable=true)
+    //==================================================================
     {
         this.#taxonFacet.enable(Array.isArray(taxonIds) ? taxonIds : [taxonIds], enable)
         this.#layerManager.refresh()
@@ -1527,8 +1527,8 @@ export class UserInteractions
         return this.#lastMarkerId
     }
 
-    addMarker(anatomicalId: string, options: FlatMapMarkerOptions={})
-    //===============================================================
+    addMarker(anatomicalId: string, options: FlatMapMarkerOptions={}): number
+    //=======================================================================
     {
         const featureIds = this.#flatmap.modelFeatureIds(anatomicalId)
         let markerId = -1
@@ -1828,8 +1828,8 @@ export class UserInteractions
         return mapImageId
     }
 
-    removeImage(mapImageId)
-    //=====================
+    removeImage(mapImageId: string)
+    //=============================
     {
         if (this.#imageLayerIds.has(mapImageId)) {
             for (const imageId of this.#imageLayerIds.get(mapImageId)) {
@@ -1851,8 +1851,8 @@ export class UserInteractions
         return this.#pathManager.nerveCentrelineDetails
     }
 
-    enableNeuronPathsByNerve(nerveModels, enable=true, showCentreline=false)
-    //======================================================================
+    enableNeuronPathsByNerve(nerveModels: string|string[], enable=true, showCentreline=false)
+    //=======================================================================================
     {
         this.#nerveCentrelineFacet.enable(Array.isArray(nerveModels) ? nerveModels : [nerveModels], enable)
         this.#pathTypeFacet.enableCentrelines(showCentreline)
