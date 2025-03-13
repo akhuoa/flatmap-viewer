@@ -127,13 +127,13 @@ export class ClusteredMarkerLayer
         for (const feature of features) {
             const properties = feature.properties
             const position = properties.markerPosition.slice(1, -1).split(',').map(p => +p)
-            this.#ui.markerEvent(event, feature.id, position, properties)
+            this.#ui.markerEvent(event, +feature.id, position, properties)
         }
         event.originalEvent.stopPropagation()
     }
 
-    addMarker(id: string, position: [number, number], properties={})
-    //===================================================================
+    addMarker(id: number, position: [number, number], properties={})
+    //==============================================================
     {
 // TODO: Don't add the marker if there already is one at the exact position
         this.#points.features.push({

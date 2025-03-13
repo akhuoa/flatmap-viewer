@@ -24,6 +24,10 @@ import {SvgManager, SvgTemplateManager} from '../../thirdParty/maplibre-gl-svg/s
 
 //==============================================================================
 
+export const MARKER_DEFAULT_COLOUR = '#005974'
+
+//==============================================================================
+
 export const CLUSTERED_MARKER_ID = 'clustered-marker'
 export const UNCLUSTERED_MARKER_ID = 'unclustered-marker'
 export const ZOOM_MARKER_ID = 'zoom-marker'

@@ -45,6 +45,7 @@ import type {Point2D} from './flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
 import {inAnatomicalClusterLayer, LayerManager} from './layers'
 import {VECTOR_TILES_SOURCE} from './layers/styling'
+import {MARKER_DEFAULT_COLOUR} from './markers'
 import {latex2Svg} from './mathjax'
 import {NerveCentrelineDetails} from './pathways'
 import {PATHWAYS_LAYER, PathManager} from './pathways'
@@ -955,7 +956,7 @@ export class UserInteractions
                 location = options.annotationFeatureGeometry
             } else {
                 // Position popup at the feature's 'centre'
-                location = this.markerPosition(+featureId, ann)
+                location = this.markerPosition(ann)
             }
 
             // Make sure the feature is on screen
@@ -1486,9 +1487,10 @@ export class UserInteractions
 
     // Marker handling
 
-    markerPosition(featureId: number, annotation: FlatMapFeatureAnnotation, options:FlatMapMarkerOptions={}): Point2D
-    //===============================================================================================================
+    markerPosition(annotation: FlatMapFeatureAnnotation, options:FlatMapMarkerOptions={}): Point2D
+    //============================================================================================
     {
+        const featureId = +annotation.featureId
         if (this.#markerPositions.has(featureId)) {
             return this.#markerPositions.get(featureId)
         }
@@ -1500,7 +1502,8 @@ export class UserInteractions
             }
             return null
         }
-        if (!('markerPosition' in annotation) && !annotation.geometry.includes('Polygon')) {
+        if (!annotation.markerPosition
+         && (!annotation.geometry || !annotation.geometry.includes('Polygon'))) {
             return null
         }
         let position = annotation.markerPosition || annotation.centroid
@@ -1531,18 +1534,20 @@ export class UserInteractions
         return this.#lastMarkerId
     }
 
-    addMarker(anatomicalId, options: FlatMapMarkerOptions={})
-    //=======================================================
+    addMarker(anatomicalId: string, options: FlatMapMarkerOptions={})
+    //===============================================================
     {
         const featureIds = this.#flatmap.modelFeatureIds(anatomicalId)
         let markerId = -1
-
         for (const featureId of featureIds) {
             const annotation = this.#flatmap.annotation(featureId)
-            const markerPosition = this.markerPosition(featureId, annotation, options)
+            const markerPosition = this.markerPosition(annotation, options)
             if (markerPosition === null) {
                 continue
             }
+            // Only create a marker if there's not already one for the feature
+            // NB. If several features have the same anatomical id then each will have
+            //     a marker, all with the same marker id
             if (!('marker' in annotation)) {
                 if (markerId === -1) {
                     markerId = this.nextMarkerId()
@@ -1550,11 +1555,10 @@ export class UserInteractions
 
                 // MapLibre dynamically sets a transform on marker elements so in
                 // order to apply a scale transform we need to create marker icons
-                // inside the marker container <div>.
-                const colour = options.colour || '#005974'
+                // inside the marker container <div>
+                const colour = options.colour || MARKER_DEFAULT_COLOUR
                 const markerHTML = options.element ? new maplibregl.Marker({element: options.element})
                                                    : new maplibregl.Marker({color: colour, scale: 0.5})
-
                 const markerElement = document.createElement('div')
                 const markerIcon = document.createElement('div')
                 markerIcon.innerHTML = markerHTML.getElement().innerHTML
@@ -1564,28 +1568,21 @@ export class UserInteractions
                 if ('className' in options) {
                     markerOptions.className = options.className
                 }
-//                if (options.cluster && this.#layerManager) {
-//                    this.#layerManager.addMarker(markerId, markerPosition, annotation)
-//                } else {
-                    const marker = new maplibregl.Marker(markerOptions)
-                                                 .setLngLat(markerPosition)
-                                                 .addTo(this.#map)
-                    markerElement.addEventListener('mouseenter',
-                        this.#markerMouseEvent.bind(this, marker, anatomicalId))
-                    markerElement.addEventListener('mousemove',
-                        this.#markerMouseEvent.bind(this, marker, anatomicalId))
-                    markerElement.addEventListener('mouseleave',
-                        this.#markerMouseEvent.bind(this, marker, anatomicalId))
-                    markerElement.addEventListener('click',
-                        this.#markerMouseEvent.bind(this, marker, anatomicalId))
+                const marker = new maplibregl.Marker(markerOptions)
+                                             .setLngLat(markerPosition)
+                                             .addTo(this.#map)
+                markerElement.addEventListener('mouseenter', this.#markerMouseEvent.bind(this, marker))
+                markerElement.addEventListener('mousemove', this.#markerMouseEvent.bind(this, marker))
+                markerElement.addEventListener('mouseleave', this.#markerMouseEvent.bind(this, marker))
+                markerElement.addEventListener('click', this.#markerMouseEvent.bind(this, marker))
+                this.#markerIdByMarker.set(marker, markerId)
+                if (!this.#featureEnabled(this.mapFeature(featureId))) {
+                    markerElement.style.visibility = 'hidden'
+                }
 
-                    this.#markerIdByMarker.set(marker, markerId)
-                    this.#markerIdByFeatureId.set(+featureId, markerId)
-                    this.#annotationByMarkerId.set(markerId, annotation)
-                    if (!this.#featureEnabled(this.mapFeature(+featureId))) {
-                        markerElement.style.visibility = 'hidden'
-                    }
-//                }
+                this.#markerIdByFeatureId.set(featureId, markerId)
+                // Remember that the feature has a marker
+                this.#annotationByMarkerId.set(markerId, annotation)
             }
         }
         if (markerId === -1) {
@@ -1660,8 +1657,8 @@ export class UserInteractions
         return anatomicalIds
     }
 
-    #markerMouseEvent(marker, _anatomicalId, event)
-    //=============================================
+    #markerMouseEvent(marker, event)
+    //==============================
     {
         // No tooltip when context menu is open
         if (this.#modal
@@ -1686,8 +1683,8 @@ export class UserInteractions
         }
     }
 
-    markerEvent(event, markerId: number, markerPosition, annotation)
-    //==============================================================
+    markerEvent(event, markerId: number, markerPosition: [number, number], annotation)
+    //================================================================================
     {
         if (['mousemove', 'click'].includes(event.type)) {
 

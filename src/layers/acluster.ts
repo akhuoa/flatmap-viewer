@@ -150,7 +150,7 @@ export class ClusteredAnatomicalMarkerLayer
                             continue;
                         }
                         const markerId = this.#ui.nextMarkerId()
-                        const markerPosition = this.#ui.markerPosition(featureId, annotation)
+                        const markerPosition = this.#ui.markerPosition(annotation)
                         const markerPoint = {
                             type: 'Feature',
                             id: markerId,
