@@ -480,7 +480,7 @@ export class UserInteractions
     {
         // Relate external annotation identifiers to map (GeoJSON) ids
         this.#featureIdToMapId = new Map([...this.#flatmap.annotations.entries()]
-                                                  .map(idAnn => [idAnn[1].id, idAnn[0]]))
+                                                 .map(idAnn => [idAnn[1].id, idAnn[0]]))
         // Flag features that have annotations
         for (const mapId of this.#featureIdToMapId.values()) {
             const feature = this.mapFeature(mapId)
@@ -615,7 +615,7 @@ export class UserInteractions
     }
 
     enableMapFeature(feature: MapFeature, enable=true)
-    //========================================================
+    //================================================
     {
         if (feature) {
             const state = this.#getFeatureState(feature)
@@ -671,7 +671,7 @@ export class UserInteractions
     }
 
     #featureEnabled(feature: MapFeatureIdentifier): boolean
-    //===============================================
+    //=====================================================
     {
         if (feature.id) {
             const state = this.#getFeatureState(feature)

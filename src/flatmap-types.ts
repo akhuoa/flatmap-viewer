@@ -37,7 +37,6 @@ export type MapFeature = MapFeatureIdentifier & {
     }
 }
 
-
 export type MapRenderedFeature = maplibregl.MapGeoJSONFeature & {
     properties?: {
         featureId?: number
