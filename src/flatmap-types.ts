@@ -22,6 +22,11 @@ import maplibregl from 'maplibre-gl'
 
 //==============================================================================
 
+// The type of the ``id`` field in a GeoJSONFeature
+export type GeoJSONId = number|string
+
+//==============================================================================
+
 export type MapFeatureIdentifier = maplibregl.FeatureIdentifier & {
     flightPath?: boolean
     layer?: {
@@ -30,23 +35,20 @@ export type MapFeatureIdentifier = maplibregl.FeatureIdentifier & {
 }
 
 export type MapFeature = MapFeatureIdentifier & {
-    children?: number[]
+    children?: GeoJSONId[]
     properties?: {
-        featureId?: number
+        featureId?: GeoJSONId
         kind?: string
     }
 }
 
 export type MapRenderedFeature = maplibregl.MapGeoJSONFeature & {
     properties?: {
-        featureId?: number
+        featureId?: GeoJSONId
     }
 }
 
 //==============================================================================
-
-// The type of the ``id`` field in a GeoJSONFeature
-export type GeoJSONId = number|string
 
 // Lng, Lat coordinates
 export type MapExtent = [number, number, number, number]
@@ -117,9 +119,9 @@ export interface PathModelsType
 }
 
 export type PathDetailsType = {
-    lines: number[]                                 // line GeoJSON ids
-    nerves?: number[]                               // nerve cuff GeoJSON ids
-    nodes?: number[]                                // node GeoJSON ids
+    lines: GeoJSONId[]                                 // line GeoJSON ids
+    nerves?: GeoJSONId[]                               // nerve cuff GeoJSON ids
+    nodes?: GeoJSONId[]                                // node GeoJSON ids
     models?: string
     centrelines?: string[]
     pathType?: string
@@ -129,7 +131,7 @@ export type PathDetailsType = {
 export interface FlatMapPathways
 {
     models?: PathModelsType[]                       // model --> paths with model
-    'node-paths': Record<number, string[]>          // node --> associated paths
+    'node-paths': Record<GeoJSONId, string[]>       // node --> associated paths
     paths: Record<string, PathDetailsType>          // path --> path details
     'type-paths': Record<string, string[]>          // type --> paths with type
 }
@@ -224,7 +226,7 @@ export interface FlatMapFeatureAnnotation
     bounds?: string
     centreline?: boolean
     centroid?: Point2D
-    children?: number[]
+    children?: GeoJSONId[]
     colour?: string
     coordinates?: Point2D[]
     featureId?: GeoJSONId
@@ -281,7 +283,7 @@ export interface AnnotationEvent
 
 export interface AnnotatedFeature
 {
-    id: number
+    id: GeoJSONId
     action?: string
     geometry: FlatMapFeatureGeometry
     properties?: object
@@ -301,19 +303,9 @@ export interface FlatMapFeature
     source: string
     sourceLayer?: string
     type?: string
-    properties?: Record<string, string|number|boolean> & {
-        area?: number
-        bbox?: string
-        bounds?: string
-        label?: string
-        kind?: string
-        featureId: number
-        nerveId?: string
-        nodeId?: string
-    }
+    properties?: FlatMapFeatureAnnotation
     state?: Record<string, string|number|boolean>
-    children: number[]
-
+    children: GeoJSONId[]
 }
 
 //==============================================================================

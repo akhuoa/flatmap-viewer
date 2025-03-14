@@ -628,7 +628,7 @@ export class UserInteractions
             } else if (!enable) {
                 this.#setFeatureState(feature, { hidden: true })
             }
-            this.#enableFeatureMarker(+feature.id, enable)
+            this.#enableFeatureMarker(feature.id, enable)
         }
     }
 
@@ -646,8 +646,8 @@ export class UserInteractions
         }
     }
 
-    enableFeatureWithChildren(featureId: number, enable=true, force=false)
-    //====================================================================
+    enableFeatureWithChildren(featureId: GeoJSONId, enable=true, force=false)
+    //=======================================================================
     {
         const feature = this.mapFeature(featureId)
         if (feature) {
@@ -658,8 +658,8 @@ export class UserInteractions
         }
     }
 
-    #enableFeatureMarker(featureId: number, enable=true)
-    //==================================================
+    #enableFeatureMarker(featureId: GeoJSONId, enable=true)
+    //=====================================================
     {
         const markerId = this.#markerIdByFeatureId.get(featureId)
         if (markerId) {

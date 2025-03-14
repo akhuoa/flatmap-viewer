@@ -63,7 +63,7 @@ export type System = {
 
 export class SystemsManager
 {
-    #enabledChildren: Map<number, number> = new Map()
+    #enabledChildren: Map<GeoJSONId, number> = new Map()
     #flatmap: FlatMap
     #systems: Map<string, SystemDetail> = new Map()
     #ui: UserInteractions

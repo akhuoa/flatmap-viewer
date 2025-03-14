@@ -47,7 +47,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 
 //==============================================================================
 
-import type {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent} from '../flatmap-types'
+import type {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent, GeoJSONId} from '../flatmap-types'
 
 import {FlatMap} from '../flatmap'
 
@@ -67,12 +67,12 @@ export const DRAW_ANNOTATION_LAYERS = [...drawStyleIds.map(id => `${id}.cold`),
 
 export class AnnotationDrawControl
 {
-    #committedFeatures: Map<number, AnnotatedFeature> = new Map()
+    #committedFeatures: Map<GeoJSONId, AnnotatedFeature> = new Map()
     #container: HTMLElement|null = null
     #draw: MapboxDraw
     #flatmap: FlatMap
     #map: maplibregl.Map|null = null
-    #uncommittedFeatureIds: Set<number> = new Set()
+    #uncommittedFeatureIds: Set<GeoJSONId> = new Set()
     #visible: boolean
 
     constructor(flatmap: FlatMap, visible=false)
