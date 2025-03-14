@@ -1573,14 +1573,31 @@ export class FlatMap
      * @param      {string}  eventType     The event type
      * @param      {Object}  properties    Properties associated with the feature
      */
-    featureEvent(eventType: string, properties: object)
-    //=================================================
+    featureEvent(eventType: string, properties: object|object[])
+    //==========================================================
     {
-        const data = this.#exportedProperties(properties)
 
-        if (Object.keys(data).length > 0) {
-            this.callback(eventType, data)
-            return true
+        if (Array.isArray(properties)) {
+            const featureData = []
+            for (const p of properties) {
+                const data = this.#exportedProperties(p)
+                if (Object.keys(data).length > 0) {
+                    featureData.push(data)
+                }
+            }
+            if (featureData.length === 1) {
+                this.callback(eventType, featureData[0])
+                return true
+            } else if (featureData.length) {
+                this.callback(eventType, featureData)
+                return true
+            }
+        } else {
+            const data = this.#exportedProperties(properties)
+            if (Object.keys(data).length > 0) {
+                this.callback(eventType, data)
+                return true
+            }
         }
         return false
     }

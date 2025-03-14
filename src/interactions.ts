@@ -1058,16 +1058,32 @@ export class UserInteractions
                                       : `<div class='flatmap-feature-label'>${tooltip.join('<hr/>')}</div>`
     }
 
-    #featureEvent(type: string, feature: MapRenderedFeature, values={})
-    //=================================================================
+    #featureEvent(type: string, feature: MapRenderedFeature|MapRenderedFeature[], values={})
+    //======================================================================================
     {
-        const properties = Object.assign({}, feature.properties, values)
-        if (inAnatomicalClusterLayer(feature)) {
-            return this.#flatmap.markerEvent(type, feature.id, properties)
-        } else if (feature.sourceLayer === PATHWAYS_LAYER) {  // I suspect this is never true as source layer
-                                                              // names are like `neural_routes_pathways`
-            return this.#flatmap.featureEvent(type, this.#pathManager.pathProperties(feature))
-        } else if ('properties' in feature) {
+        let properties: object|object[]|null
+        if (Array.isArray(feature)) {
+            const properties_array = []
+            const seenModels: string[] = []
+            for (const f of feature) {
+                if (f.properties.models && !seenModels.includes(f.properties.models)) {
+                    properties_array.push(Object.assign({}, f.properties, values))
+                    seenModels.push(f.properties.models)
+                }
+            }
+            properties = properties_array
+        } else {
+            properties = Object.assign({}, feature.properties, values)
+            if (inAnatomicalClusterLayer(feature)) {  // >>>>>>>>>>>>>> feature.id v's marker id....
+                return this.#flatmap.markerEvent(type, +feature.id, properties)
+            } else if (feature.sourceLayer === PATHWAYS_LAYER) {  // I suspect this is never true as source layer
+                                                                  // names are like `neural_routes_pathways`
+                return this.#flatmap.featureEvent(type, this.#pathManager.pathProperties(feature))
+            } else if (!('properties' in feature)) {
+                properties = null
+            }
+        }
+        if (properties) {
             return this.#flatmap.featureEvent(type, properties)
         }
         return false
@@ -1346,8 +1362,15 @@ export class UserInteractions
             this.#lastClickLngLat = event.lngLat
             if (this.#flatmap.options.style !== FLATMAP_STYLE.CENTRELINE) {
                 this.#selectActiveFeatures(event.originalEvent)
-                this.#featureEvent('click', clickedFeature)
-            } else {
+                const lineFeatures = clickedFeatures.filter(feature => ('centreline' in feature.properties
+                                                              || ('type' in feature.properties
+                                                                && feature.properties.type.startsWith('line')) ))
+                if (lineFeatures.length > 0) {
+                    this.#featureEvent('click', lineFeatures)
+                } else {
+                    this.#featureEvent('click', clickedFeature)
+                }
+            } else {        // A ``centreline`` map -- we send the click's location along a centreline
                 const seenFeatures = new Set()
                 this.#selectActiveFeatures(event.originalEvent)
                 const centreline_click = (clickedFeature.properties.kind === 'centreline')
