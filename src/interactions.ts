@@ -40,7 +40,7 @@ import {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent,
         FlatMapFeature, FlatMapFeatureAnnotation,
         FlatMapMarkerOptions, FlatMapPopUpOptions, MapFeature,
         MapFeatureIdentifier, MapRenderedFeature} from './flatmap-types'
-import type {FeatureZoomOptions, GeoJSONId} from './flatmap-types'
+import type {Dataset, FeatureZoomOptions, GeoJSONId} from './flatmap-types'
 import type {Point2D} from './flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
 import {inAnatomicalClusterLayer, LayerManager} from './layers'
@@ -1633,8 +1633,8 @@ export class UserInteractions
         }
     }
 
-    addDatasetMarkers(datasets)
-    //=========================
+    addDatasetMarkers(datasets: Dataset[])
+    //====================================
     {
         if (this.#layerManager) {
             return this.#layerManager.addDatasetMarkers(datasets)
@@ -1649,8 +1649,8 @@ export class UserInteractions
         }
     }
 
-    removeDatasetMarker(datasetId)
-    //=============================
+    removeDatasetMarker(datasetId: string)
+    //====================================
     {
         if (this.#layerManager) {
             this.#layerManager.removeDatasetMarker(datasetId)

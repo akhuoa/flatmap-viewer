@@ -18,10 +18,9 @@ limitations under the License.
 
 ==============================================================================*/
 
+import {Dataset} from '../flatmap-types'
 import {ANATOMICAL_ROOT, MapTermGraph} from '../knowledge'
 import {DiGraph} from '../knowledge/graphs'
-
-import {Dataset} from './acluster'
 
 //==============================================================================
 

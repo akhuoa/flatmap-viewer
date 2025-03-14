@@ -37,6 +37,7 @@ import {
     AnnotatedFeature,
     AnnotationDrawMode,
     AnnotationEvent,
+    Dataset,
     FeatureZoomOptions,
     FlatMapAnnotations,
     FlatMapCallback,
@@ -1351,8 +1352,8 @@ export class FlatMap
      *                                                          specifying its identifier and an array of
      *                                                          associated anatomical terms
      */
-    addDatasetMarkers(datasets)
-    //=========================
+    addDatasetMarkers(datasets: Dataset[])
+    //====================================
     {
         if (this.#userInteractions !== null) {
             this.#userInteractions.addDatasetMarkers(datasets)
@@ -1373,11 +1374,11 @@ export class FlatMap
     /**
      * Remove markers for a dataset from the map.
      *
-     * @param {integer}  datasetId  The a dataset marker identifier as passed
-     *                              to ``addDatasetMarkers()``
+     * @param datasetId  A dataset marker identifier as passed
+     *                   to ``addDatasetMarkers()``
      */
-    removeDatasetMarker(datasetId)
-    //===========================
+    removeDatasetMarker(datasetId: string)
+    //====================================
     {
         if (this.#userInteractions !== null) {
             this.#userInteractions.removeDatasetMarker(datasetId)

@@ -24,6 +24,7 @@ import {DataDrivenPropertyValueSpecification, GeoJSONSource} from 'maplibre-gl'
 //==============================================================================
 
 import {FlatMap} from '../flatmap'
+import {Dataset} from '../flatmap-types'
 import type {GeoJSONId} from '../flatmap-types'
 import {UserInteractions} from '../interactions'
 import {MapTermGraph} from '../knowledge'
@@ -31,14 +32,6 @@ import {CLUSTERED_MARKER_ID} from '../markers'
 import {PropertiesType} from '../types'
 
 import {DatasetMarkerSet} from './anatomical-cluster'
-
-//==============================================================================
-
-export interface Dataset
-{
-    id: string
-    terms: string[]
-}
 
 //==============================================================================
 
