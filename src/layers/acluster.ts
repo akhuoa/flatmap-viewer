@@ -24,6 +24,7 @@ import {DataDrivenPropertyValueSpecification, GeoJSONSource} from 'maplibre-gl'
 //==============================================================================
 
 import {FlatMap} from '../flatmap'
+import type {GeoJSONId} from '../flatmap-types'
 import {UserInteractions} from '../interactions'
 import {MapTermGraph} from '../knowledge'
 import {CLUSTERED_MARKER_ID} from '../markers'
@@ -225,8 +226,9 @@ export class ClusteredAnatomicalMarkerLayer
         }
         this.#update()
     }
-    removeFeatureState(featureId: number, key: string)
-    //================================================
+
+    removeFeatureState(featureId: GeoJSONId, key: string)
+    //===================================================
     {
         if (key === 'hidden') {
             if (this.#featureToMarkerPoint.has(+featureId)) {
@@ -239,8 +241,8 @@ export class ClusteredAnatomicalMarkerLayer
         }
     }
 
-    setFeatureState(featureId: number, state: PropertiesType)
-    //=======================================================
+    setFeatureState(featureId: GeoJSONId, state: PropertiesType)
+    //==========================================================
     {
         if ('hidden' in state) {
             if (this.#featureToMarkerPoint.has(+featureId)) {

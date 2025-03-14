@@ -26,7 +26,7 @@ import {PropertiesFilter, StyleFilterType} from '../filters'
 import {DetailsFilter} from '../filters/facets/details'
 import {FilteredFacet} from '../filters/facets'
 import {FlatMapImageLayer, FlatMapLayer} from '../flatmap-types'
-import type {MapExtent, MapFeature, MapRenderedFeature} from '../flatmap-types'
+import type {GeoJSONId, MapExtent, MapFeature, MapRenderedFeature} from '../flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from '../flatmap'
 import {PATHWAYS_LAYER} from '../pathways'
 import {UserInteractions} from '../interactions'
@@ -511,15 +511,15 @@ export class LayerManager
         return features
     }
 
-    removeFeatureState(featureId: number, key: string)
-    //=======================================================
+    removeFeatureState(featureId: GeoJSONId, key: string)
+    //===================================================
     {
         this.#flightPathLayer.removeFeatureState(featureId, key)
         this.#markerLayer.removeFeatureState(featureId, key)
     }
 
-    setFeatureState(featureId: number, state)
-    //=======================================
+    setFeatureState(featureId: GeoJSONId, state)
+    //==========================================
     {
         this.#flightPathLayer.setFeatureState(featureId, state)
         this.#markerLayer.setFeatureState(featureId, state)
