@@ -23,6 +23,7 @@ import MiniSearch, {Suggestion} from 'minisearch'
 //==============================================================================
 
 import {FlatMapFeatureAnnotation} from './flatmap-types'
+import type {GeoJSONId} from './flatmap-types'
 
 //==============================================================================
 
@@ -39,7 +40,7 @@ export const indexedProperties = [
 
 export class SearchIndex
 {
-    #featureIds: string[] = []
+    #featureIds: GeoJSONId[] = []
     #searchEngine: MiniSearch
 
     constructor()
@@ -51,8 +52,8 @@ export class SearchIndex
         })
     }
 
-    indexMetadata(featureId: string, metadata: FlatMapFeatureAnnotation)
-    //==================================================================
+    indexMetadata(featureId: GeoJSONId, metadata: FlatMapFeatureAnnotation)
+    //=====================================================================
     {
         const textSeen: string[] = []
         for (const prop of indexedProperties) {
@@ -66,8 +67,8 @@ export class SearchIndex
         }
     }
 
-    indexText(featureId: string, text: string)
-    //========================================
+    indexText(featureId: GeoJSONId, text: string)
+    //===========================================
     {
         text = text.replace(/<br\/>/g, ' ')
                    .replace(/\n/g, ' ')
@@ -111,7 +112,7 @@ export class SearchIndex
 //==============================================================================
 
 export type SearchResult = {
-    featureId: string
+    featureId: GeoJSONId
     score: number
     terms: string[]
     text: string
@@ -121,7 +122,7 @@ export type SearchResult = {
 
 export class SearchResults
 {
-    #featureIds: string[]
+    #featureIds: GeoJSONId[]
     #results: SearchResult[]
 
     constructor(results: SearchResult[])
@@ -130,7 +131,7 @@ export class SearchResults
         this.#featureIds = results.map(r => r.featureId)
     }
 
-    get featureIds(): string[]
+    get featureIds(): GeoJSONId[]
     {
         return this.#featureIds
     }

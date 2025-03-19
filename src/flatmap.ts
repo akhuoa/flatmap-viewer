@@ -269,7 +269,7 @@ export class FlatMap
 
         for (const [featureId, annotation] of Object.entries(mapDescription.annotations)) {
             this.#saveAnnotation(+featureId, annotation)
-            this.#searchIndex.indexMetadata(featureId, annotation)
+            this.#searchIndex.indexMetadata(+featureId, annotation)
         }
 
         // Set base of source URLs in map's style
@@ -754,7 +754,7 @@ export class FlatMap
     annotation(geojsonId: GeoJSONId): FlatMapFeatureAnnotation
     //========================================================
     {
-        return this.#idToAnnotation.get(geojsonId)
+        return this.#idToAnnotation.get(+geojsonId)
     }
 
     /**
@@ -768,7 +768,7 @@ export class FlatMap
     {
         if (this.#annIdToFeatureId.has(annotationId)) {
             const geojsonId = this.#annIdToFeatureId.get(annotationId)
-            return this.#idToAnnotation.get(geojsonId)
+            return this.#idToAnnotation.get(+geojsonId)
         }
     }
 
@@ -824,7 +824,7 @@ export class FlatMap
     //==================================================================
     {
         ann.featureId = featureId
-        this.#idToAnnotation.set(featureId, ann)
+        this.#idToAnnotation.set(+featureId, ann)
         this.#updateFeatureIdMap('dataset', this.#datasetToFeatureIds, ann)
         this.#updateFeatureIdMap('models', this.#modelToFeatureIds, ann)
         this.#updateFeatureIdMap('source', this.#mapSourceToFeatureIds, ann)
@@ -895,7 +895,7 @@ export class FlatMap
     modelForFeature(featureId: GeoJSONId): string|null
     //================================================
     {
-        const ann = this.#idToAnnotation.get(featureId)
+        const ann = this.#idToAnnotation.get(+featureId)
         return (ann && 'models' in ann) ? utils.normaliseId(ann.models) : null
     }
 
@@ -2008,7 +2008,7 @@ export class FlatMap
         const uniqueIds = new Set(featureIds)
         const connectivityNodes: Set<string> = new Set()
         for (const featureId of uniqueIds) {
-            const annotation = this.#idToAnnotation.get(featureId)
+            const annotation = this.#idToAnnotation.get(+featureId)
             if ('anatomical-nodes' in annotation) {
                 for (const node of annotation['anatomical-nodes']) {
                     connectivityNodes.add(node)

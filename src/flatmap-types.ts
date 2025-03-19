@@ -22,8 +22,8 @@ import maplibregl from 'maplibre-gl'
 
 //==============================================================================
 
-// The type of the ``id`` field in a GeoJSONFeature
-export type GeoJSONId = number|string
+// The type of the ``id`` field in our GeoJSON features
+export type GeoJSONId = number
 
 //==============================================================================
 
