@@ -19,15 +19,16 @@ limitations under the License.
 ******************************************************************************/
 
 import { FlatMap, FlatMapOptions, MapViewer } from '../lib'
-import { FlatMapCallback } from '../src/flatmap-types'
-import { MapIdentifier } from '../src/viewer'
+
+import {DrawControl} from './annotator'
+import type {DrawEvent} from './annotator'
+import {PaneManager} from './multipane'
 
 //==============================================================================
 
 const MAX_VIEWER_PANES = 3
 
 const VIEWER_CANVAS = 'flatmap-viewer-panes'
-const VIEWER_BOTTOM_PANE = 'flatmap-viewer-bottom'
 
 const PROVENANCE_DISPLAY = false
 
@@ -64,6 +65,18 @@ window.onload = () => {
         debug: DEBUG,
         minimap: MINIMAP
     })
+}
+
+//==============================================================================
+
+export async function standaloneViewer(mapEndpoints={}, options={})
+//=================================================================
+{
+    const viewer = new StandaloneViewer(mapEndpoints, options)
+
+    // Everything setup so start by loading a map from a map server
+
+    await viewer.loadMapList()
 }
 
 //==============================================================================
@@ -120,72 +133,6 @@ function provenanceAsHtml(dict): string
         }
     }
     return html.join('\n')
-}
-
-//==============================================================================
-
-type DrawEvent = Event & {
-    feature
-}
-
-class DrawControl
-{
-    #cancelBtn: HTMLElement|null
-    #flatmap: FlatMap
-    #idField: HTMLElement|null
-    #lastEvent: DrawEvent|null = null
-    #okBtn: HTMLElement|null
-
-    constructor(flatmap: FlatMap)
-    {
-        this.#flatmap = flatmap
-        this.#idField = document.getElementById('drawing-id')
-
-        this.#okBtn = document.getElementById('drawing-ok')
-        if (this.#okBtn) {
-            this.#okBtn.addEventListener('click', e => {
-                if (this.#lastEvent) {
-                    const feature = this.#flatmap.refreshAnnotationFeatureGeometry(this.#lastEvent.feature)
-                    this.#flatmap.commitAnnotationEvent(this.#lastEvent)
-                    this.#idField!.innerText = ''
-                    this.#lastEvent = null
-                    // Send `feature`, along with user comments, to the annotation service
-                }
-            })
-        }
-
-        this.#cancelBtn = document.getElementById('drawing-cancel')
-        if (this.#cancelBtn) {
-            this.#cancelBtn.addEventListener('click', e => {
-                if (this.#lastEvent) {
-                    this.#flatmap.rollbackAnnotationEvent(this.#lastEvent)
-                    this.#idField!.innerText = ''
-                    this.#lastEvent = null
-                }
-            })
-        }
-    }
-
-    handleEvent(event: DrawEvent)
-    //===========================
-    {
-        console.log(event)
-        if (this.#idField && event.type !== 'modeChanged' && event.type !== 'selectionChanged') {
-            this.#idField.innerText = `Annotation ${event.type}, Id: ${event.feature.id}`
-            this.#lastEvent = event
-        }
-    }
-}
-
-//==============================================================================
-
-export async function standaloneViewer(mapEndpoints={}, options={})
-{
-    const viewer = new StandaloneViewer(mapEndpoints, options)
-
-    // Everything setup so start by loading a map from a map server
-
-    await viewer.loadMapList()
 }
 
 //==============================================================================
@@ -288,7 +235,7 @@ class StandaloneViewer
                 canvas.style.height = 'auto'
             }
         }
-        this.#paneManager = new PaneManager(VIEWER_CANVAS, MAX_VIEWER_PANES)
+        this.#paneManager = new PaneManager(VIEWER_CANVAS, MAX_VIEWER_PANES, BOTTOM_MAP_ID)
 
         this.changeMapServer(this.#currentServer)
     }
@@ -493,142 +440,6 @@ class StandaloneViewer
             this.#mapProvenance.innerHTML = provenanceAsHtml(Object.assign({server: this.#mapEndpoints[this.#currentServer!]},
                                                              map.mapMetadata))
         }
-    }
-}
-//==============================================================================
-
-class PaneManager
-{
-    #activeBottom: boolean = false
-    #activePanes: number = 0
-    #bottomPane: HTMLElement|null = null
-    #container: string
-    #containerElement: HTMLElement|null = null
-    #lastPaneUsed: string
-    #mapsByContainer: Map<string, FlatMap> = new Map()
-    #paneNumber: number = 0
-    #maxPanes: number
-
-    constructor(container: string, maxPanes: number=1)
-    {
-        this.#bottomPane = document.getElementById(VIEWER_BOTTOM_PANE)
-        this.#container = container
-        this.#containerElement = document.getElementById(container)
-        this.#lastPaneUsed = container
-        this.#maxPanes = maxPanes
-        if (this.#maxPanes > 1) {
-            this.#containerElement!.style.display = 'flex'
-        }
-    }
-
-    closeMaps()
-    //=========
-    {
-        for (const [containerId, flatmap] of this.#mapsByContainer.entries()) {
-            if (containerId !== VIEWER_BOTTOM_PANE) {
-                flatmap.close()
-                if (this.#maxPanes > 1) {
-                    const container = document.getElementById(containerId)
-                    if (container) {
-                        container.remove()
-                    }
-                }
-                this.#mapsByContainer.delete(containerId)
-            }
-        }
-    }
-
-    async #closePaneCallback(eventType: string, data: Record<string, any>)
-    //====================================================================
-    {
-        if (eventType === 'close-pane') {
-            const containerId = data.container
-            if (this.#mapsByContainer.size > 1) {
-                this.#mapsByContainer.delete(containerId)
-                if (containerId === VIEWER_BOTTOM_PANE && this.#bottomPane) {
-                    this.#bottomPane.style.display = 'none'
-                    this.#activeBottom = false
-                } else {
-                    const container = document.getElementById(containerId)
-                    if (container) {
-                        container.remove()
-                        this.#activePanes -= 1
-                    }
-                }
-            }
-            if (this.#activePanes === 0) {
-                this.#containerElement!.style.display = 'none'
-            }
-            if (this.#mapsByContainer.size <= 1) {
-                for (const flatmap of this.#mapsByContainer.values()) {
-                    flatmap.removeCloseControl()
-                }
-            }
-            return true
-        }
-    }
-
-    async loadMap(viewer: MapViewer, mapId: MapIdentifier, callback: FlatMapCallback, options: FlatMapOptions={}): Promise<FlatMap>
-    //=============================================================================================================================
-    {
-        // Don't load an already open map
-        const map = await viewer.findMap(mapId)
-        if (map === null) {
-            throw new Error(`Unknown map: ${JSON.stringify(mapId)}`)
-        }
-        const mapUuid = ('uuid' in map) ? map.uuid : map.id
-        for (const flatmap of this.#mapsByContainer.values()) {
-            if (mapUuid === flatmap.uuid) {
-                return flatmap
-            }
-        }
-
-        if (this.#maxPanes <= 1) {
-            this.#lastPaneUsed = this.#container
-        } else if (mapId === BOTTOM_MAP_ID && this.#bottomPane) {
-            this.#bottomPane.style.display = 'block'
-            this.#lastPaneUsed = VIEWER_BOTTOM_PANE
-            if (this.#activePanes === 0) {
-                this.#containerElement!.style.display = 'none'
-            }
-            this.#activeBottom = true
-            options.addCloseControl = !!this.#activePanes
-        } else if (this.#activePanes >= this.#maxPanes) {
-            const flatmap = this.#mapsByContainer.get(this.#lastPaneUsed)
-            if (flatmap) {
-                flatmap.close()
-            }
-        } else if (this.#containerElement) {
-            this.#paneNumber += 1
-            this.#lastPaneUsed = `${this.#container}-${this.#paneNumber}`
-            const mapPane = document.createElement('div')
-            mapPane.id = this.#lastPaneUsed
-            mapPane.setAttribute('class', 'flatmap-viewer-pane')
-            this.#containerElement.append(mapPane)
-            this.#containerElement!.style.display = 'flex'
-            this.#activePanes += 1
-            options.addCloseControl = this.#activeBottom || (this.#activePanes > 1)
-            if (this.#activeBottom && (this.#activePanes === 1)) {
-                const bottomMap = this.#mapsByContainer.get(VIEWER_BOTTOM_PANE)
-                if (bottomMap) {
-                    bottomMap.resize()
-                }
-            }
-        }
-        options.container = this.#lastPaneUsed
-        if (options.addCloseControl) {
-            for (const flatmap of this.#mapsByContainer.values()) {
-                flatmap.addCloseControl()
-            }
-        }
-        // Don't clutter the screen with controls if a multipane viewer
-        options.allControls = (this.#maxPanes <= 1)
-
-        const flatmap = await viewer.loadMap(mapId, callback, options)
-        this.#mapsByContainer.set(this.#lastPaneUsed, flatmap)
-        flatmap.addCallback(this.#closePaneCallback.bind(this))
-
-        return flatmap
     }
 }
 
