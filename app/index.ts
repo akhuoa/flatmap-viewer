@@ -608,6 +608,12 @@ class PaneManager
             this.#containerElement!.style.display = 'flex'
             this.#activePanes += 1
             options.addCloseControl = this.#activeBottom || (this.#activePanes > 1)
+            if (this.#activeBottom && (this.#activePanes === 1)) {
+                const bottomMap = this.#mapsByContainer.get(VIEWER_BOTTOM_PANE)
+                if (bottomMap) {
+                    bottomMap.resize()
+                }
+            }
         }
         options.container = this.#lastPaneUsed
         if (options.addCloseControl) {
