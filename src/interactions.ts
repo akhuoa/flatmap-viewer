@@ -628,7 +628,7 @@ export class UserInteractions
             } else if (!enable) {
                 this.#setFeatureState(feature, { hidden: true })
             }
-            this.#enableFeatureMarker(feature.id, enable)
+            this.#enableFeatureMarker(+feature.id, enable)
         }
     }
 
@@ -762,8 +762,8 @@ export class UserInteractions
     {
         if (feature) {
             this.#setFeatureState(feature, { active: true })
-            if (!this.#activeFeatures.has(feature.id)) {
-                this.#activeFeatures.set(feature.id, feature)
+            if (!this.#activeFeatures.has(+feature.id)) {
+                this.#activeFeatures.set(+feature.id, feature)
             }
         }
     }
@@ -1152,7 +1152,7 @@ export class UserInteractions
          && (this.#lastFeatureModelsMouse === null
           || this.#lastFeatureModelsMouse !== featureModels)) {
             if (this.#featureEvent('mouseenter', feature,
-                                    this.#locationOnLine(featureId, lngLat))) {
+                                    this.#locationOnLine(+featureId, lngLat))) {
                 this.#lastFeatureMouseEntered = featureId
                 this.#lastFeatureModelsMouse = featureModels
             } else {
@@ -1162,7 +1162,7 @@ export class UserInteractions
         } else if (this.#flatmap.options.style === FLATMAP_STYLE.CENTRELINE
                 && feature.properties.centreline) {
             if (this.#lastFeatureMouseEntered === featureId) {
-                const location = this.#locationOnLine(featureId, lngLat)
+                const location = this.#locationOnLine(+featureId, lngLat)
                 if ('location' in location) {
                     this.#featureEvent('mousemove', feature, location)
                 }
@@ -1379,7 +1379,7 @@ export class UserInteractions
                         seenFeatures.add(feature.properties.id)
                         if (!centreline_click || centreline_click && (feature.properties.kind === 'centreline')) {
                             this.#featureEvent('click', feature,
-                                                this.#locationOnLine(feature.id, event.lngLat))
+                                                this.#locationOnLine(+feature.id, event.lngLat))
                         }
                     }
                 }
