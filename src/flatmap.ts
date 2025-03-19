@@ -1986,7 +1986,7 @@ export class FlatMap
         for (const anatomicalId of featureEntities) {
             featureIds.push(...this.modelFeatureIds(anatomicalId))
         }
-        const featurePaths = await this.queryPathsForGeoJsonFeatures(featureIds)
+        const featurePaths = await this.getPathsForGeoJsonFeatures(featureIds)
         return featurePaths
     }
 
