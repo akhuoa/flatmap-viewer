@@ -356,6 +356,12 @@ export class FlatMap
                 this.#startupState = 2
                 this.#map.setRenderWorldCopies(true)
                 this.#bounds = this.#map.getBounds()
+                if (this.#bounds.getEast() >= 180) {
+                    this.#bounds.setNorthEast(new maplibregl.LngLat(179.9, this.#bounds.getNorth()))
+                }
+                if (this.#bounds.getWest() <= -180) {
+                    this.#bounds.setSouthWest(new maplibregl.LngLat(-179.9, this.#bounds.getSouth()))
+                }
                 const bounds = this.#bounds.toArray()
                 const sw = maplibregl.MercatorCoordinate.fromLngLat(bounds[0])
                 const ne = maplibregl.MercatorCoordinate.fromLngLat(bounds[1])
