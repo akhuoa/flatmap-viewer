@@ -65,6 +65,7 @@ export class PaneManager
                     const container = document.getElementById(containerId)
                     if (container) {
                         container.remove()
+                        this.#activePanes -= 1
                     }
                 }
                 this.#mapsByContainer.delete(containerId)
