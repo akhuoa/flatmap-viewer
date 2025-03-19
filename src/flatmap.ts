@@ -1039,12 +1039,13 @@ export class FlatMap
         this.#callbacks.unshift(callback)
     }
 
-    callback(type: string, data, ...args)
-    //===================================
+    async callback(type: string, properties: Record<string, any>, ...args: unknown[])
+    //===============================================================================
     {
-        data.mapUUID = this.#uuid
+        const data = {...properties, mapUUID: this.#uuid}
         for (const callback of this.#callbacks) {
-            if (callback(type, data, ...args)) {
+            const handled = await callback(type, data, ...args)
+            if (handled) {
                 break
             }
         }

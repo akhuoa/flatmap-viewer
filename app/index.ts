@@ -438,24 +438,28 @@ class StandaloneViewer
         })
     }
 
-    async mapCallback(eventType: string, ...args: any[])
-    //==================================================
+    async mapCallback(eventType: string, data: Record<string, any>, ...args: unknown[])
+    //=================================================================================
     {
-        if (args[0].type === 'control' && args[0].control === 'background') {
-            this.#mapOptions.background = args[0].value
+        if (data.type === 'control' && data.control === 'background') {
+            this.#mapOptions.background = data.value
+            return true
         } else if (eventType === 'annotation') {
             if (this.#drawControl) {
-                this.#drawControl.handleEvent(args[0])
+                this.#drawControl.handleEvent(data as DrawEvent)
             }
+            return true
         } else if (eventType === 'click') {
             console.log(eventType, ...args)
-            if ('hyperlinks' in args[0]) {
-                if ('flatmap' in args[0].hyperlinks) {
-                    await this.#currentViewer!.loadMap(args[0].hyperlinks.flatmap, this.mapCallback.bind(this), this.#mapOptions)
+            if ('hyperlinks' in data) {
+                if ('flatmap' in data.hyperlinks) {
+                    await this.#paneManager.loadMap(this.#currentViewer!, data.hyperlinks.flatmap, this.mapCallback.bind(this), this.#mapOptions)
                 }
             }
-        } else if (args[0].type === 'marker') {
+            return true
+        } else if (data.type === 'marker') {
             console.log(eventType, ...args)
+            return true
         }
     }
 

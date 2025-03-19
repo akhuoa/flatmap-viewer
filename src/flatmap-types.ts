@@ -163,7 +163,7 @@ export interface FlatMapLayer
 
 //==============================================================================
 
-export type FlatMapCallback = (type: string, ...args: unknown[]) => undefined|boolean
+export type FlatMapCallback = (type: string, data: Record<string, any>, ...args: unknown[]) => Promise<undefined|boolean>
 
 export interface FlatMapLayerOptions
 {
