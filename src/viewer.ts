@@ -85,16 +85,11 @@ export class MapViewer
      */
     static version = VIEWER_VERSION
 
-    #container: string
-    #containerElement: HTMLElement
     #initialisingMutex: utils.Mutex = new utils.Mutex()
     #initialised: boolean = false
     #mapList: MapListEntry[] = []
-    #mapNumber: number = 0
-    #mapsByPane: Map<number, FlatMap> = new Map()
     #mapServer: FlatMapServer
     #images: PreloadedImage[]
-    #panes: number
     #sparcTermGraph = new SparcTermGraph()
 
     // also have a callback for viewer events...
@@ -106,13 +101,7 @@ export class MapViewer
     constructor(mapServerUrl: string, options: MapViewerOptions)
     {
         this.#mapServer = new FlatMapServer(mapServerUrl)
-        this.#container = options.container
-        this.#containerElement = document.getElementById(this.#container)
         this.#images = options.images || []
-        this.#panes = options.panes || 1
-        if (this.#panes > 1) {
-            this.#containerElement.style.display = 'flex'
-        }
     }
 
     async #ensureInitialised()
@@ -154,8 +143,8 @@ export class MapViewer
         return allMaps
     }
 
-    async #findMap(identifier: MapIdentifier): Promise<MapListEntry>
-    //==============================================================
+    async findMap(identifier: MapIdentifier): Promise<MapListEntry>
+    //=============================================================
     {
         await this.#ensureInitialised()
         return this.#lookupMap(identifier)
@@ -231,7 +220,7 @@ export class MapViewer
     async loadMap(identifier: MapIdentifier, callback: FlatMapCallback, options: FlatMapOptions={}): Promise<FlatMap>
     //===============================================================================================================
     {
-        const map = await this.#findMap(identifier)
+        const map = await this.findMap(identifier)
         if (map === null) {
             throw new Error(`Unknown map: ${JSON.stringify(identifier)}`)
         }
@@ -240,14 +229,6 @@ export class MapViewer
 
         const mapId = ('uuid' in map) ? map.uuid : map.id
         const mapIndex = await this.#mapServer.mapIndex(mapId)
-
-        // Don't create a new pane for an already open map
-        for (const flatmap of this.#mapsByPane.values()) {
-            if (mapId === flatmap.uuid) {
-                return flatmap
-            }
-        }
-
         const mapIndexId = ('uuid' in mapIndex) ? mapIndex.uuid : mapIndex.id
         if (mapId !== mapIndexId) {
             throw new Error(`Map '${mapId}' has wrong ID in index`)
@@ -361,40 +342,9 @@ export class MapViewer
 
         let containerId: string = options.container || null
 
-        if (containerId) {
-            // Saves a nest
-        } else if (this.#panes <= 1) {
-            containerId = this.#container
-        } else if (this.#mapsByPane.size >= this.#panes) {
-            const flatmap = this.#mapsByPane.get(this.#mapNumber)
-            if (flatmap) {
-                flatmap.close()
-            }
-            containerId = `${this.#container}-${this.#mapNumber}`
-        } else {
-            this.#mapNumber += 1
-            containerId = `${this.#container}-${this.#mapNumber}`
-            const mapPane = document.createElement('div')
-            mapPane.id = containerId
-            mapPane.setAttribute('class', 'flatmap-viewer-pane')
-            this.#containerElement.append(mapPane)
-        }
-        if (!options.container) {
-            mapOptions.addCloseControl = (this.#panes > 1) && (this.#mapsByPane.size >= 1)
-            if (this.#mapsByPane.size === 1) {
-                for (const flatmap of this.#mapsByPane.values()) {
-                    flatmap.addCloseControl()
-                }
-            }
-        }
-
-        // Don't clutter the screen with controls if a multipane viewer
-
-        mapOptions.allControls = (this.#panes <= 1)
-
         // Display the map
 
-        const flatmap = new FlatMap(this, containerId, this.#mapServer,
+        const flatmap = new FlatMap(containerId, this.#mapServer,
             {
                 id: map.id,
                 uuid: mapId,
@@ -404,7 +354,6 @@ export class MapViewer
                 style: mapStyle,
                 options: mapOptions,
                 layers: mapLayers,
-                number: this.#mapNumber,
                 sparcTermGraph: this.#sparcTermGraph,
                 annotations,
                 callback,
@@ -412,42 +361,7 @@ export class MapViewer
                 mapMetadata
             })
         await flatmap.mapLoaded()
-
-        this.#mapsByPane.set(this.#mapNumber, flatmap)
         return flatmap
-    }
-
-    closeMaps()
-    //=========
-    {
-        for (const [mapNumber, flatmap] of this.#mapsByPane.entries()) {
-            flatmap.close()
-            if (!flatmap.options.container && this.#panes > 1) {
-                const container = document.getElementById(`${this.#container}-${mapNumber}`)
-                container.remove()
-            }
-        }
-        this.#mapsByPane.clear()
-        this.#mapNumber = 0
-    }
-
-    closePane(mapNumber: number)
-    //==========================
-    {
-        if (this.#mapsByPane.size > 1) {
-            const flatmap = this.#mapsByPane.get(mapNumber)
-            if (flatmap) {
-                flatmap.close()
-                this.#mapsByPane.delete(mapNumber)
-            }
-            const container = document.getElementById(`${this.#container}-${mapNumber}`)
-            container.remove()
-        }
-        if (this.#mapsByPane.size <= 1) {
-            for (const flatmap of this.#mapsByPane.values()) {
-                flatmap.removeCloseControl()
-            }
-        }
     }
 }
 

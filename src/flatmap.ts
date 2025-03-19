@@ -163,8 +163,6 @@ export type FlatMapStyleSpecification = maplibregl.StyleSpecification & {
 //==============================================================================
 
 export type MapDescriptionOptions = FlatMapOptions & {
-    addCloseControl: boolean
-    allControls: boolean
     bounds: [number, number, number, number]
     images?: {
         id: string
@@ -184,7 +182,6 @@ export type MapDescription = {
     style: FlatMapStyleSpecification
     options: MapDescriptionOptions
     layers: FlatMapLayer[]
-    number: number
     sparcTermGraph: SparcTermGraph
     annotations: FlatMapAnnotations
     callback: FlatMapCallback
@@ -208,6 +205,7 @@ export class FlatMap
     #biologicalSex: string
     #bounds: maplibregl.LngLatBounds
     #callbacks: FlatMapCallback[] = []
+    #container: string
     #created: string
     #datasetToFeatureIds: FeatureIdMap = new Map()
     #details: FlatMapIndex
@@ -217,10 +215,8 @@ export class FlatMap
     #layers: FlatMapLayer[]
     #idToAnnotation: Map<GeoJSONId, FlatMapFeatureAnnotation> = new Map()
     #knowledgeSource = ''
-    #viewer: MapViewer
     #map: maplibregl.Map|null = null
     #mapMetadata: FlatMapMetadata
-    #mapNumber: number
     #mapServer: FlatMapServer
     #mapSourceToFeatureIds: FeatureIdMap = new Map()
     #mapTermGraph: MapTermGraph
@@ -237,9 +233,9 @@ export class FlatMap
     #userInteractions: UserInteractions|null = null
     #uuid: string
 
-    constructor(viewer: MapViewer, container: string, mapServer: FlatMapServer, mapDescription: MapDescription)
+    constructor(container: string, mapServer: FlatMapServer, mapDescription: MapDescription)
     {
-        this.#viewer = viewer
+        this.#container = container
         this.#mapServer = mapServer
         this.#baseUrl = mapServer.url()
         this.#id = mapDescription.id
@@ -249,7 +245,6 @@ export class FlatMap
         this.#created = mapDescription.mapMetadata.created
         this.#taxon = mapDescription.taxon
         this.#biologicalSex = mapDescription.biologicalSex
-        this.#mapNumber = mapDescription.number
         this.#callbacks.push(mapDescription.callback)
         this.#layers = mapDescription.layers
         this.#options = mapDescription.options
@@ -736,7 +731,7 @@ export class FlatMap
     get uniqueId()
     //============
     {
-        return `${this.#uuid}-${this.#mapNumber}`
+        return `${this.#uuid}-${this.#container}`
     }
 
     get annotations(): Map<GeoJSONId, FlatMapFeatureAnnotation>
@@ -1063,7 +1058,8 @@ export class FlatMap
     closePane()
     //=========
     {
-        this.#viewer.closePane(this.#mapNumber)
+        this.close()
+        this.callback('close-pane', {container: this.#container})
     }
 
     resize()

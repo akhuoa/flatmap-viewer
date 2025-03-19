@@ -175,6 +175,8 @@ export interface FlatMapLayerOptions
 
 export interface FlatMapOptions
 {
+    addCloseControl?: boolean
+    allControls?: boolean
     annotator?: boolean
     background?: string
     container?: string

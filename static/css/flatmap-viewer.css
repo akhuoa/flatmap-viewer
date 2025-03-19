@@ -11,11 +11,6 @@
 .maplibregl-ctrl-minimap {
     border: 1px solid #444;
 }
-.flatmap-viewer-pane {
-    position: relative !important;
-    width: 100%;
-    border: 1px solid darkgreen;
-}
 
 /* Context menu */
 

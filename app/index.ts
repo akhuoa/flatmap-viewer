@@ -19,6 +19,12 @@ limitations under the License.
 ******************************************************************************/
 
 import { FlatMap, FlatMapOptions, MapViewer } from '../lib'
+import { FlatMapCallback } from '../src/flatmap-types'
+import { MapIdentifier } from '../src/viewer'
+
+//==============================================================================
+
+const MAX_VIEWER_PANES = 3
 
 //==============================================================================
 
@@ -197,6 +203,7 @@ class StandaloneViewer
     #mapId: string|null = null
     #mapSex: string|null = null
     #mapTaxon: string|null = null
+    #paneManager: PaneManager
     #requestUrl: URL
 
     #viewMapId: string|null = null
@@ -269,6 +276,8 @@ class StandaloneViewer
         this.#mapGeneration = document.getElementById('map-generation') as HTMLSelectElement
         this.#mapProvenance = document.getElementById('provenance-display')
 
+        this.#paneManager = new PaneManager('flatmap-viewer-canvas', MAX_VIEWER_PANES)
+
         this.changeMapServer(this.#currentServer)
     }
 
@@ -282,8 +291,7 @@ class StandaloneViewer
             this.#currentMap.close()
         }
         this.#currentViewer = new MapViewer(this.#mapEndpoints[server], {
-            container: 'flatmap-viewer-canvas',
-            panes: 3,
+            container: '',
             images: [
                 {
                     id: 'label-background',
@@ -410,7 +418,7 @@ class StandaloneViewer
     async loadMap(viewer: MapViewer, id: string, taxon: string|null=null, sex: string|null=null)
     //==========================================================================================
     {
-        viewer.closeMaps()
+        this.#paneManager.closeMaps()
 
         this.#mapProvenance!.innerHTML = ''
         if (id !== null) {
@@ -430,7 +438,7 @@ class StandaloneViewer
         // Update address bar URL to current map
         window.history.pushState('data', document.title, this.#requestUrl)
 
-        await viewer.loadMap(id, this.mapCallback.bind(this), this.#mapOptions)
+        await this.#paneManager.loadMap(viewer, id, this.mapCallback.bind(this), this.#mapOptions)
         .then(this.mapLoaded.bind(this))
         .catch(error => {
             console.log(error)
@@ -469,6 +477,113 @@ class StandaloneViewer
         this.#currentMap = map
         this.#mapProvenance!.innerHTML = provenanceAsHtml(Object.assign({server: this.#mapEndpoints[this.#currentServer!]},
                                                              map.provenance))
+    }
+}
+//==============================================================================
+
+class PaneManager
+{
+    #container: string
+    #containerElement: HTMLElement|null = null
+    #lastContainerUsed: string
+    #mapsByContainer: Map<string, FlatMap> = new Map()
+    #paneNumber: number = 0
+    #panes: number
+
+    constructor(container: string, panes: number=1)
+    {
+        this.#container = container
+        this.#containerElement = document.getElementById(container)
+        this.#lastContainerUsed = container
+        this.#panes = panes
+        if (this.#panes > 1) {
+            this.#containerElement!.style.display = 'flex'
+        }
+    }
+
+    closeMaps()
+    //=========
+    {
+        for (const [containerId, flatmap] of this.#mapsByContainer.entries()) {
+            flatmap.close()
+            if (this.#panes > 1) {
+                const container = document.getElementById(containerId)
+                if (container) {
+                    container.remove()
+                }
+            }
+        }
+        this.#mapsByContainer.clear()
+        this.#paneNumber = 0
+    }
+
+    async #closePaneCallback(eventType: string, data: Record<string, any>)
+    //====================================================================
+    {
+        if (eventType === 'close-pane') {
+            const containerId = data.container
+            if (this.#mapsByContainer.size > 1) {
+                this.#mapsByContainer.delete(containerId)
+                const container = document.getElementById(containerId)
+                if (container) {
+                    container.remove()
+                }
+            }
+            if (this.#mapsByContainer.size <= 1) {
+                for (const flatmap of this.#mapsByContainer.values()) {
+                    flatmap.removeCloseControl()
+                }
+            }
+            return true
+        }
+    }
+
+    async loadMap(viewer: MapViewer, mapId: MapIdentifier, callback: FlatMapCallback, options: FlatMapOptions={}): Promise<FlatMap>
+    //=============================================================================================================================
+    {
+        // Don't load an already open map
+        const map = await viewer.findMap(mapId)
+        if (map === null) {
+            throw new Error(`Unknown map: ${JSON.stringify(mapId)}`)
+        }
+        const mapUuid = ('uuid' in map) ? map.uuid : map.id
+        for (const flatmap of this.#mapsByContainer.values()) {
+            if (mapUuid === flatmap.uuid) {
+                return flatmap
+            }
+        }
+
+        if (this.#panes <= 1) {
+            this.#lastContainerUsed = this.#container
+        } else if (this.#mapsByContainer.size >= this.#panes) {
+            const flatmap = this.#mapsByContainer.get(this.#lastContainerUsed)
+            if (flatmap) {
+                flatmap.close()
+            }
+            options.container = this.#lastContainerUsed
+        } else if (this.#containerElement) {
+            this.#paneNumber += 1
+            this.#lastContainerUsed = `${this.#container}-${this.#paneNumber}`
+            const mapPane = document.createElement('div')
+            mapPane.id = this.#lastContainerUsed
+            mapPane.setAttribute('class', 'flatmap-viewer-pane')
+            this.#containerElement.append(mapPane)
+        }
+        options.container = this.#lastContainerUsed
+        options.addCloseControl = (this.#panes > 1) && (this.#mapsByContainer.size >= 1)
+        if (this.#mapsByContainer.size === 1) {
+            for (const flatmap of this.#mapsByContainer.values()) {
+                flatmap.addCloseControl()
+            }
+        }
+
+        // Don't clutter the screen with controls if a multipane viewer
+        options.allControls = (this.#panes <= 1)
+
+        const flatmap = await viewer.loadMap(mapId, callback, options)
+        this.#mapsByContainer.set(options.container!, flatmap)
+        flatmap.addCallback(this.#closePaneCallback.bind(this))
+        return flatmap
     }
 }
 
