@@ -29,6 +29,8 @@ const MAX_VIEWER_PANES = 3
 const VIEWER_CANVAS = 'flatmap-viewer-panes'
 const VIEWER_BOTTOM_PANE = 'flatmap-viewer-bottom'
 
+const PROVENANCE_DISPLAY = false
+
 const BOTTOM_MAP_ID = 'RAAS'
 
 //==============================================================================
@@ -280,7 +282,12 @@ class StandaloneViewer
         this.#mapSelector = document.getElementById('map-selector') as HTMLSelectElement
         this.#mapGeneration = document.getElementById('map-generation') as HTMLSelectElement
         this.#mapProvenance = document.getElementById('provenance-display')
-
+        if (!PROVENANCE_DISPLAY) {
+            const canvas = document.getElementById(VIEWER_CANVAS)
+            if (canvas) {
+                canvas.style.height = 'auto'
+            }
+        }
         this.#paneManager = new PaneManager(VIEWER_CANVAS, MAX_VIEWER_PANES)
 
         this.changeMapServer(this.#currentServer)
@@ -481,8 +488,11 @@ class StandaloneViewer
     //===========================
     {
         this.#currentMap = map
-        this.#mapProvenance!.innerHTML = provenanceAsHtml(Object.assign({server: this.#mapEndpoints[this.#currentServer!]},
-                                                             map.provenance))
+        if (this.#mapProvenance && PROVENANCE_DISPLAY) {
+            this.#mapProvenance.style.display = 'block'
+            this.#mapProvenance.innerHTML = provenanceAsHtml(Object.assign({server: this.#mapEndpoints[this.#currentServer!]},
+                                                             map.mapMetadata))
+        }
     }
 }
 //==============================================================================
