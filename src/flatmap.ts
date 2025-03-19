@@ -1073,7 +1073,7 @@ export class FlatMap
     {
         // Resize our map
 
-        this.#map.resize()
+        this.#map.resize(undefined, false)
     }
 
     getIdentifier()
