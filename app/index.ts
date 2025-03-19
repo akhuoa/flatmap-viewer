@@ -36,7 +36,7 @@ const BOTTOM_MAP_ID = 'RAAS'
 //==============================================================================
 
 const DEBUG = false;
-const MINIMAP = true; // { width: '10%', background: '#FCC' };
+const MINIMAP = false; // { width: '10%', background: '#FCC' };
 
 const MAP_ENDPOINTS = {
     local: 'http://localhost:8000',
