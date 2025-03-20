@@ -160,7 +160,7 @@ export class PaneManager
         options.allControls = (this.#maxPanes <= 1)
 
         // Use a pane's saved BG colour
-        const background = localStorage.getItem(`${mapPaneId}-background`)
+        const background = localStorage.getItem(`${map.id}-background`)
         if (background) {
             options.background = background
         }
@@ -174,7 +174,7 @@ export class PaneManager
             if (eventType === 'change'
              && data.type === 'control'
              && data.control === 'background') {
-                localStorage.setItem(`${mapPaneId}-background`, data.value)
+                localStorage.setItem(`${map.id}-background`, data.value)
                 return true
             }
         })
