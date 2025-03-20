@@ -28,7 +28,7 @@ import {PaneManager} from './multipane'
 
 const MAX_VIEWER_PANES = 3
 
-const VIEWER_CANVAS = 'flatmap-viewer-panes'
+const VIEWER_CANVAS = 'flatmap-viewer-canvas'
 
 const PROVENANCE_DISPLAY = false
 
@@ -229,12 +229,6 @@ class StandaloneViewer
         this.#mapSelector = document.getElementById('map-selector') as HTMLSelectElement
         this.#mapGeneration = document.getElementById('map-generation') as HTMLSelectElement
         this.#mapProvenance = document.getElementById('provenance-display')
-        if (!PROVENANCE_DISPLAY) {
-            const canvas = document.getElementById(VIEWER_CANVAS)
-            if (canvas) {
-                canvas.style.height = 'auto'
-            }
-        }
         this.#paneManager = new PaneManager(VIEWER_CANVAS, MAX_VIEWER_PANES, BOTTOM_MAP_ID)
 
         this.changeMapServer(this.#currentServer)
@@ -421,7 +415,7 @@ class StandaloneViewer
             console.log(eventType, ...args)
             if ('hyperlinks' in data) {
                 if ('flatmap' in data.hyperlinks) {
-                    await this.#paneManager.loadMap(this.#currentViewer!, data.hyperlinks.flatmap, this.mapCallback.bind(this), this.#mapOptions)
+                    await this.#paneManager.loadMap(this.#currentViewer!, data.hyperlinks.flatmap, this.mapCallback.bind(this), this.#mapOptions, true)
                 }
             }
             return true

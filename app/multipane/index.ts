@@ -25,50 +25,71 @@ import { MapIdentifier } from '../../src/viewer'
 
 //==============================================================================
 
-const VIEWER_BOTTOM_PANE = 'flatmap-viewer-bottom'
+import {HorizontalPanes, VerticalPanes} from './paneset'
 
 //==============================================================================
 
 export class PaneManager
 {
     #activeBottom: boolean = false
-    #activePanes: number = 0
-    #bottomMapId: string
     #bottomPane: HTMLElement|null = null
-    #container: string
-    #containerElement: HTMLElement|null = null
-    #lastPaneUsed: string
-    #mapsByContainer: Map<string, FlatMap> = new Map()
-    #paneNumber: number = 0
+    #bottomMapId: string
+    #mapsByPane: Map<string, FlatMap> = new Map()
+    #mapsContainer: HTMLElement
+    #mapPanes: HorizontalPanes
     #maxPanes: number
+    #verticalPanes: VerticalPanes|null = null
 
-    constructor(container: string, maxPanes: number=1, bottomMapId: string='')
+    constructor(containerId: string, maxPanes: number=1, bottomMapId: string='')
     {
-        this.#bottomPane = document.getElementById(VIEWER_BOTTOM_PANE)
         this.#bottomMapId = bottomMapId
-        this.#container = container
-        this.#containerElement = document.getElementById(container)
-        this.#lastPaneUsed = container
+        const containerElement = document.getElementById(containerId)!
         this.#maxPanes = maxPanes
-        if (this.#maxPanes > 1) {
-            this.#containerElement!.style.display = 'flex'
+        if (bottomMapId !== '') {
+            this.#verticalPanes = new VerticalPanes(containerElement)
+            this.#mapsContainer = this.#verticalPanes.addPane()
+            this.#bottomPane = this.#verticalPanes.addPane({scale: 0.4})
+        } else {
+            this.#mapsContainer = containerElement
+        }
+        this.#mapPanes = new HorizontalPanes(this.#mapsContainer)
+        this.#mapPanes.addPane()
+        if (this.#verticalPanes) {
+            this.#verticalPanes.showPane(this.#mapsContainer.id, false)
         }
     }
 
     closeMaps()
     //=========
     {
-        for (const [containerId, flatmap] of this.#mapsByContainer.entries()) {
-            if (containerId !== VIEWER_BOTTOM_PANE) {
+        for (const [paneId, flatmap] of this.#mapsByPane.entries()) {
+            if (this.#bottomPane === null || paneId !== this.#bottomPane.id) {
                 flatmap.close()
-                if (this.#maxPanes > 1) {
-                    const container = document.getElementById(containerId)
-                    if (container) {
-                        container.remove()
-                        this.#activePanes -= 1
-                    }
+                this.#mapPanes.removePane(paneId)
+                this.#mapsByPane.delete(paneId)
+            }
+        }
+    }
+
+    #closePane(paneId: string)
+    //========================
+    {
+        if (this.#mapsByPane.size > 1) {
+            this.#mapsByPane.delete(paneId)
+            if (this.#bottomPane && paneId === this.#bottomPane.id) {
+                this.#verticalPanes!.showPane(this.#bottomPane.id, false)
+                this.#activeBottom = false
+            } else {
+                if (this.#mapPanes.size > 1) {
+                    this.#mapPanes.removePane(paneId)
+                } else if (this.#verticalPanes) {
+                    this.#verticalPanes.showPane(this.#mapsContainer.id, false)
                 }
-                this.#mapsByContainer.delete(containerId)
+            }
+        }
+        if (this.#mapsByPane.size <= 1) {
+            for (const flatmap of this.#mapsByPane.values()) {
+                flatmap.removeCloseControl()
             }
         }
     }
@@ -77,34 +98,14 @@ export class PaneManager
     //====================================================================
     {
         if (eventType === 'close-pane') {
-            const containerId = data.container
-            if (this.#mapsByContainer.size > 1) {
-                this.#mapsByContainer.delete(containerId)
-                if (containerId === VIEWER_BOTTOM_PANE && this.#bottomPane) {
-                    this.#bottomPane.style.display = 'none'
-                    this.#activeBottom = false
-                } else {
-                    const container = document.getElementById(containerId)
-                    if (container) {
-                        container.remove()
-                        this.#activePanes -= 1
-                    }
-                }
-            }
-            if (this.#activePanes === 0) {
-                this.#containerElement!.style.display = 'none'
-            }
-            if (this.#mapsByContainer.size <= 1) {
-                for (const flatmap of this.#mapsByContainer.values()) {
-                    flatmap.removeCloseControl()
-                }
-            }
+            this.#closePane(data.container)
             return true
         }
     }
 
-    async loadMap(viewer: MapViewer, mapId: MapIdentifier, callback: FlatMapCallback, options: FlatMapOptions={}): Promise<FlatMap>
-    //=============================================================================================================================
+    async loadMap(viewer: MapViewer, mapId: MapIdentifier, callback: FlatMapCallback,
+                  options: FlatMapOptions={}, newPane: boolean=false): Promise<FlatMap>
+    //=================================================================================
     {
         // Don't load an already open map
         const map = await viewer.findMap(mapId)
@@ -112,55 +113,72 @@ export class PaneManager
             throw new Error(`Unknown map: ${JSON.stringify(mapId)}`)
         }
         const mapUuid = ('uuid' in map) ? map.uuid : map.id
-        for (const flatmap of this.#mapsByContainer.values()) {
+        for (const flatmap of this.#mapsByPane.values()) {
             if (mapUuid === flatmap.uuid) {
                 return flatmap
             }
         }
 
+        let mapPaneId: string = ''
         if (this.#maxPanes <= 1) {
-            this.#lastPaneUsed = this.#container
+            mapPaneId = this.#mapPanes.lastPane.id
         } else if (mapId === this.#bottomMapId && this.#bottomPane) {
-            this.#bottomPane.style.display = 'block'
-            this.#lastPaneUsed = VIEWER_BOTTOM_PANE
-            if (this.#activePanes === 0) {
-                this.#containerElement!.style.display = 'none'
+            if (!this.#activeBottom) {
+                this.#verticalPanes!.showPane(this.#bottomPane.id, true)
+                this.#activeBottom = true
             }
-            this.#activeBottom = true
-            options.addCloseControl = !!this.#activePanes
-        } else if (this.#activePanes >= this.#maxPanes) {
-            const flatmap = this.#mapsByContainer.get(this.#lastPaneUsed)
-            if (flatmap) {
-                flatmap.close()
+            mapPaneId = this.#bottomPane.id
+            options.addCloseControl = (this.#mapPanes.size > 0)
+        } else if (this.#mapPanes.size >= this.#maxPanes) {
+            mapPaneId = this.#mapPanes.lastPane.id
+        } else {
+            if (this.#verticalPanes) {
+                this.#verticalPanes.showPane(this.#mapsContainer.id, true)
             }
-        } else if (this.#containerElement) {
-            this.#paneNumber += 1
-            this.#lastPaneUsed = `${this.#container}-${this.#paneNumber}`
-            const mapPane = document.createElement('div')
-            mapPane.id = this.#lastPaneUsed
-            mapPane.setAttribute('class', 'flatmap-viewer-pane')
-            this.#containerElement.append(mapPane)
-            this.#containerElement!.style.display = 'flex'
-            this.#activePanes += 1
-            options.addCloseControl = this.#activeBottom || (this.#activePanes > 1)
-            if (this.#activeBottom && (this.#activePanes === 1)) {
-                const bottomMap = this.#mapsByContainer.get(VIEWER_BOTTOM_PANE)
-                if (bottomMap) {
-                    bottomMap.resize()
-                }
+            if (!this.#activeBottom && this.#bottomPane) {
+                this.#verticalPanes!.showPane(this.#bottomPane.id, false)
             }
+            // We want to reuse panes if possible...
+            if (newPane || this.#mapPanes.size === 0) {
+                mapPaneId = this.#mapPanes.addPane().id
+            } else {
+                mapPaneId = this.#mapPanes.lastPane.id
+            }
+            options.addCloseControl = this.#activeBottom || (this.#mapPanes.size > 1)
         }
-        options.container = this.#lastPaneUsed
+        if (this.#mapsByPane.has(mapPaneId)) {
+            this.#mapsByPane.get(mapPaneId)!.close()
+        }
+
+        // Make sure all existing maps have a close control if the new map is getting one
         if (options.addCloseControl) {
-            for (const flatmap of this.#mapsByContainer.values()) {
+            for (const flatmap of this.#mapsByPane.values()) {
                 flatmap.addCloseControl()
             }
         }
         // Don't clutter the screen with controls if a multipane viewer
         options.allControls = (this.#maxPanes <= 1)
 
+        // Use a pane's saved BG colour
+        const background = localStorage.getItem(`${mapPaneId}-background`)
+        if (background) {
+            options.background = background
+        }
+
+        options.container = mapPaneId
         const flatmap = await viewer.loadMap(mapId, callback, options)
-        this.#mapsByContainer.set(this.#lastPaneUsed, flatmap)
+        this.#mapsByPane.set(mapPaneId, flatmap)
+
+        // We get a control change event when the BG colour is changed
+        flatmap.addCallback(async (eventType, data) => {
+            if (eventType === 'change'
+             && data.type === 'control'
+             && data.control === 'background') {
+                localStorage.setItem(`${mapPaneId}-background`, data.value)
+                return true
+            }
+        })
+
         flatmap.addCallback(this.#closePaneCallback.bind(this))
 
         return flatmap
