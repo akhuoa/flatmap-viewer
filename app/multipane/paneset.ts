@@ -51,8 +51,8 @@ class WidthHeight
 
 class Resizer
 {
-    #boundMouseMoveHandler
-    #boundMouseUpHandler
+    #boundMouseMoveHandler: any
+    #boundMouseUpHandler: any
     #direction: Direction
     #element: HTMLElement
     #parent: HTMLElement
