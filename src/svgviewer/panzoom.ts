@@ -18,7 +18,7 @@ limitations under the License.
 
 ******************************************************************************/
 
-import {Point} from './points'
+import {Point, PointLike} from './points'
 
 //==============================================================================
 
@@ -73,8 +73,8 @@ export class PanZoom
         return this.#panning
     }
 
-    get scale()
-    //=========
+    get zoom()
+    //========
     {
         return this.#scale
     }
@@ -193,16 +193,25 @@ export class PanZoom
     #wheelEvent(event: WheelEvent)
     //============================
     {
+        // Normalise in case shift modifier is used on macOS
+        const delta = event.deltaY === 0 && event.deltaX ? event.deltaX : event.deltaY
+        const wheel = delta < 0 ? 1 : -1
+        this.setZoom(this.#scale*Math.exp((wheel*this.#step)/3), {
+            x: (event.clientX-this.#containerOrigin.x)/this.#containerSize.x - 0.5,
+            y: (event.clientY-this.#containerOrigin.y)/this.#containerSize.y - 0.5
+        })
+    }
+
+    // Centre is normalised, [0, 0] == viewbox centre, X, Y range -0.5 to 0.5
+    setZoom(zoom: number, centre: PointLike={x: 0, y:0})
+    //==================================================
+    {
         if (this.#svgDiagram) {
-            // Normalise in case shift modifier is used on macOS
-            const delta = event.deltaY === 0 && event.deltaX ? event.deltaX : event.deltaY
-            const wheel = delta < 0 ? 1 : -1
-            const toScale = this.#scale*Math.exp((wheel*this.#step)/3)
-            this.#scale = Math.min(Math.max(toScale, this.#minScale), this.#maxScale)
+            this.#scale = Math.min(Math.max(zoom, this.#minScale), this.#maxScale)
             const viewSize = this.#containerSize.scalarScale(1.0/this.#scale)
             const viewbox = this.#currentViewbox()
-            viewbox[0] += (viewbox[2]-viewSize.x)*(event.clientX-this.#containerOrigin.x)/this.#containerSize.x
-            viewbox[1] += (viewbox[3]-viewSize.y)*(event.clientY-this.#containerOrigin.y)/this.#containerSize.y
+            viewbox[0] += (viewbox[2]-viewSize.x)*(centre.x + 0.5)
+            viewbox[1] += (viewbox[3]-viewSize.y)*(centre.y + 0.5)
             viewbox[2] = viewSize.x
             viewbox[3] = viewSize.y
             this.#setViewbox(viewbox)

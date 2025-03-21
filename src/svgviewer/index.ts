@@ -42,9 +42,8 @@ export class SvgMap
 
         this.#panzoom.enable(this.#container.firstElementChild as SVGSVGElement)
 
-        // needs margins and pan/zoom
-
-        // margins by setting zoom? So map just inside viewport, say zoom *= 0.95
+        // Set margins by setting zoom
+        this.#panzoom.setZoom(0.95*this.#panzoom.zoom)
     }
 }
 
