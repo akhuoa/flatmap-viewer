@@ -179,6 +179,7 @@ li.flatmap-contextmenu-item:hover {
     stroke: #8300bf;
     color: #8300bf;
     font-size: 12pt;
+    text-align: center;
 }
 
 /* Additional control buttons */
