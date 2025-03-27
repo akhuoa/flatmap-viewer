@@ -32,8 +32,6 @@ const VIEWER_CANVAS = 'flatmap-viewer-canvas'
 
 const PROVENANCE_DISPLAY = false
 
-const BOTTOM_MAP_ID = 'RAAS'
-
 //==============================================================================
 
 const DEBUG = false;
@@ -229,7 +227,7 @@ class StandaloneViewer
         this.#mapSelector = document.getElementById('map-selector') as HTMLSelectElement
         this.#mapGeneration = document.getElementById('map-generation') as HTMLSelectElement
         this.#mapProvenance = document.getElementById('provenance-display')
-        this.#paneManager = new PaneManager(VIEWER_CANVAS, MAX_VIEWER_PANES, BOTTOM_MAP_ID)
+        this.#paneManager = new PaneManager(VIEWER_CANVAS, MAX_VIEWER_PANES)
 
         this.changeMapServer(this.#currentServer)
     }
@@ -371,9 +369,7 @@ class StandaloneViewer
     async loadMap(viewer: MapViewer, id: string, taxon: string|null=null, sex: string|null=null)
     //==========================================================================================
     {
-        if (id !== BOTTOM_MAP_ID) {
-            this.#paneManager.closeMaps()
-        }
+        this.#paneManager.closeMaps()
         this.#mapProvenance!.innerHTML = ''
         if (id !== null) {
             this.#requestUrl.searchParams.set('id', id)

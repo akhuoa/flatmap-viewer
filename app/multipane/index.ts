@@ -33,7 +33,7 @@ import {HorizontalPanes, VerticalPanes} from './paneset'
 export class PaneManager
 {
     #activeBottom: boolean = false
-    #bottomPane: HTMLElement|null = null
+    #bottomPane: HTMLElement
     #bottomMapId: string
     #mapsByPane: Map<string, FlatMap> = new Map()
     #mapsContainer: HTMLElement
@@ -41,18 +41,13 @@ export class PaneManager
     #maxPanes: number
     #verticalPanes: VerticalPanes|null = null
 
-    constructor(containerId: string, maxPanes: number=1, bottomMapId: string='')
+    constructor(containerId: string, maxPanes: number=1)
     {
-        this.#bottomMapId = bottomMapId
         const containerElement = document.getElementById(containerId)!
         this.#maxPanes = maxPanes
-        if (bottomMapId !== '') {
-            this.#verticalPanes = new VerticalPanes(containerElement)
-            this.#mapsContainer = this.#verticalPanes.addPane()
-            this.#bottomPane = this.#verticalPanes.addPane({scale: 0.4})
-        } else {
-            this.#mapsContainer = containerElement
-        }
+        this.#verticalPanes = new VerticalPanes(containerElement)
+        this.#mapsContainer = this.#verticalPanes.addPane()
+        this.#bottomPane = this.#verticalPanes.addPane({scale: 0.4})
         this.#mapPanes = new HorizontalPanes(this.#mapsContainer)
         this.#mapPanes.addPane()
         if (this.#verticalPanes) {
@@ -64,7 +59,7 @@ export class PaneManager
     //=========
     {
         for (const [paneId, flatmap] of this.#mapsByPane.entries()) {
-            if (this.#bottomPane === null || paneId !== this.#bottomPane.id) {
+            if (paneId !== this.#bottomPane.id) {
                 flatmap.close()
                 this.#mapPanes.removePane(paneId)
                 this.#mapsByPane.delete(paneId)
@@ -77,7 +72,7 @@ export class PaneManager
     {
         if (this.#mapsByPane.size > 1) {
             this.#mapsByPane.delete(paneId)
-            if (this.#bottomPane && paneId === this.#bottomPane.id) {
+            if (paneId === this.#bottomPane.id) {
                 this.#verticalPanes!.showPane(this.#bottomPane.id, false)
                 this.#activeBottom = false
             } else {
@@ -113,17 +108,17 @@ export class PaneManager
         if (map === null) {
             throw new Error(`Unknown map: ${JSON.stringify(mapId)}`)
         }
-        const mapUuid = ('uuid' in map) ? map.uuid : map.id
+        const mapUuid = map.uuid || map.id
         for (const flatmap of this.#mapsByPane.values()) {
             if (mapUuid === flatmap.uuid) {
                 return flatmap
             }
         }
-
+        const mapIndex = (await viewer.mapServer.mapIndex(mapUuid))!
         let mapPaneId: string = ''
         if (this.#maxPanes <= 1) {
             mapPaneId = this.#mapPanes.lastPane.id
-        } else if (mapId === this.#bottomMapId && this.#bottomPane) {
+        } else if ((mapIndex['map-kinds'] || []).includes('control')) {
             if (!this.#activeBottom) {
                 this.#verticalPanes!.showPane(this.#bottomPane.id, true)
                 this.#activeBottom = true
@@ -136,7 +131,7 @@ export class PaneManager
             if (this.#verticalPanes) {
                 this.#verticalPanes.showPane(this.#mapsContainer.id, true)
             }
-            if (!this.#activeBottom && this.#bottomPane) {
+            if (!this.#activeBottom) {
                 this.#verticalPanes!.showPane(this.#bottomPane.id, false)
             }
             // We want to reuse panes if possible...

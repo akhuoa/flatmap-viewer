@@ -46,6 +46,7 @@ export type MapIdentifier = {
 export type MapListEntry = FlatMapServerIndex & {
     describes?: string
     id?: string
+    'map-kinds'?: string[]
     separateLayers?: boolean
 }
 
@@ -102,6 +103,12 @@ export class MapViewer
     {
         this.#mapServer = new FlatMapServer(mapServerUrl)
         this.#images = options.images || []
+    }
+
+    get mapServer()
+    //=============
+    {
+        return this.#mapServer
     }
 
     async #ensureInitialised()
