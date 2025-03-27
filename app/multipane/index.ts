@@ -168,12 +168,13 @@ export class PaneManager
 
         options.container = mapPaneId
 
-        if (mapId === this.#bottomMapId) {
-            const svgViewer = new SvgViewer(viewer.mapServerUrl)
-            const flatmap = await svgViewer.loadMap(mapId, callback, options)
-            return flatmap
-        }
-
+/*
+ *      if (mapId === this.#bottomMapId) {
+ *          const svgViewer = new SvgViewer(viewer.mapServerUrl)
+ *          const flatmap = await svgViewer.loadMap(mapId, callback, options)
+ *          return flatmap
+ *      }
+ */
         const flatmap = await viewer.loadMap(mapId, callback, options)
         this.#mapsByPane.set(mapPaneId, flatmap)
 
