@@ -144,7 +144,6 @@ export class ClusteredAnatomicalMarkerLayer
             for (const datasetMarker of datasetMarkerSet.markers) {
                 if (!termToMarkerPoints.has(datasetMarker.term)) {
                     const zoomCount = Array(this.#maxZoom + 1).fill(0)
-                    const datasetIds = []
                     const markerPoints: MarkerPoint[] = []
                     for (const featureId of this.#flatmap.modelFeatureIds(datasetMarker.term)) {
                         const annotation = this.#flatmap.annotation(featureId)
@@ -158,7 +157,7 @@ export class ClusteredAnatomicalMarkerLayer
                             type: 'Feature',
                             id: markerId,
                             properties: {
-                                'dataset-ids': datasetIds,
+                                'dataset-ids': [],
                                 featureId,
                                 label: annotation.label,
                                 'models': datasetMarker.term,
