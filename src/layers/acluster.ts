@@ -58,11 +58,20 @@ function zoomCountText(maxZoom: number)
 
 //==============================================================================
 
+type MarkerProperties = {
+    'dataset-ids': string[]
+    featureId: GeoJSONId
+    hidden?: boolean
+    label: string
+    models: string
+    'zoom-count': number[]
+}
+
 interface MarkerPoint
 {
     type: string
     id: number
-    properties: PropertiesType
+    properties: MarkerProperties
     geometry: GeoJSON.Point
 }
 
@@ -179,7 +188,7 @@ export class ClusteredAnatomicalMarkerLayer
                             zoomCount[zoom] += 1
                         }
                     }
-                    (markerPoint.properties['dataset-ids'] as string[]).push(datasetMarker.datasetId)
+                    markerPoint.properties['dataset-ids'].push(datasetMarker.datasetId)
                 } else {
                     // shouldn't get here...
                     console.error(`Can't find marker for ${datasetMarker.term}...`)
@@ -240,7 +249,7 @@ export class ClusteredAnatomicalMarkerLayer
         if ('hidden' in state) {
             if (this.#featureToMarkerPoint.has(+featureId)) {
                 const markerPoint = this.#featureToMarkerPoint.get(+featureId)
-                markerPoint.properties.hidden = state.hidden
+                markerPoint.properties.hidden = !!state.hidden
                 this.#showPoints()
             }
         }
