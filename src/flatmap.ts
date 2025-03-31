@@ -127,19 +127,19 @@ const ENCODED_FEATURE_PROPERTIES = [
 //==============================================================================
 
 export type ExportedFeatureProperties = {
-    id: string
-    featureId: number
-    'connectivity',   // <<<<<<<<<<<
-    dataset: string
-    'dataset-ids': string[]
+    id?: string
+    featureId?: number
+    'connectivity'?,   // <<<<<<<<<<<
+    dataset?: string
+    'dataset-ids'?: string[]
     kind?: string
     label?: string
     models?: string
     source?: string
     taxons?: string[]
     hyperlinks?: string
-    'completeness',   // <<<<<<<<<<<
-    'missing-nodes',  // <<<<<<<<<<<
+    'completeness'?,   // <<<<<<<<<<<
+    'missing-nodes'?,  // <<<<<<<<<<<
     alert?: string
     'biological-sex'?: string
     location?: number
@@ -1636,8 +1636,8 @@ export class FlatMap
      * @param      featureId  The feature's internal (GeoJSON) id
      * @returns               Properties associated with the feature
      */
-    featureProperties(featureId: GeoJSONId): FlatMapFeatureAnnotation
-    //===============================================================
+    featureProperties(featureId: GeoJSONId): ExportedFeatureProperties
+    //================================================================
     {
         const properties = this.annotation(featureId)
         return properties ? this.exportedFeatureProperties(properties) : {}
