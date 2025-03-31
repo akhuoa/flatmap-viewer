@@ -1461,7 +1461,7 @@ export class FlatMap
                     } else if (property === 'featureId') {
                         data[property] = +value;  // Ensure numeric
                     } else if (ENCODED_FEATURE_PROPERTIES.includes(property)) {
-                        data[property] = JSON.parse(value)
+                        data[property] = JSON.parse(`${value}`)
                     } else {
                         data[property] = value
                     }
