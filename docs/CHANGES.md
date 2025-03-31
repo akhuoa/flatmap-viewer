@@ -1,8 +1,15 @@
-* `FlatMap.mapMetadata` has been added as an alias for `FlatMap.provenance`.
-
-### FUTURE DEPRECATION
+## FUTURE DEPRECATION
 
 * `FlatMap.provenance` will be removed as it has been replaced by `FlatMap.mapMetadata`.
+
+## 4.0.3
+
+* Return all features corresponding to a clustered dataset marker in event messages (#53).
+* maplibre: make sure a map doesn't wrap around the anti-meridian when we have a long narrow viewport.
+* Send a single click message, with an array of feature properties, when a pointer click is on several paths (#52).
+* functional: View details of a feature by clicking on their zoom marker instead of automatically zooming into them.
+* Update `maplibre-gl` to version 5.2.0
+* `FlatMap.mapMetadata` has been added as an alias for `FlatMap.provenance`.
 
 ## 4.0.2
 
@@ -13,7 +20,6 @@
 ## 4.0.1
 
 * Allow `container` as an option for `loadMap()`, as the container in which to load the map instead of using a pane.
-
 
 ## 4.0.0
 
