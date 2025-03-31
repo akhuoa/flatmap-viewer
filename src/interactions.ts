@@ -1076,6 +1076,19 @@ export class UserInteractions
             properties = Object.assign({}, feature.properties, values)
             if (inAnatomicalClusterLayer(feature)) {  // >>>>>>>>>>>>>> feature.id v's marker id....
                 properties['dataset-ids'] = JSON.parse(properties['dataset-ids'])
+                const datasetFeatures = this.#layerManager.datasetFeatures()
+                const datasetFeatureList = []
+                for (const datasetId of properties['dataset-ids']) {
+                    const featureProperties = []
+                    for (const featureId of datasetFeatures.get(datasetId)) {
+                        featureProperties.push(this.#flatmap.exportedFeatureProperties(this.#flatmap.annotation(featureId)))
+                    }
+                    datasetFeatureList.push({
+                        dataset: datasetId,
+                        features: featureProperties
+                    })
+                }
+                properties['dataset-features'] = datasetFeatureList
                 return this.#flatmap.markerEvent(type, +feature.id, properties)
             } else if (feature.sourceLayer === PATHWAYS_LAYER) {  // I suspect this is never true as source layer
                                                                   // names are like `neural_routes_pathways`

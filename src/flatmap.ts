@@ -105,6 +105,7 @@ const EXPORTED_FEATURE_PROPERTIES = [
     'featureId',
     'connectivity',
     'dataset',
+    'dataset-features',
     'dataset-ids',
     'kind',
     'label',
@@ -120,7 +121,6 @@ const EXPORTED_FEATURE_PROPERTIES = [
 ]
 
 const ENCODED_FEATURE_PROPERTIES = [
-    'dataset-ids',
     'hyperlinks',
 ]
 
@@ -1447,8 +1447,8 @@ export class FlatMap
         return false
     }
 
-    #exportedFeatureProperties(properties: FlatMapFeatureAnnotation): ExportedFeatureProperties
-    //=========================================================================================
+    exportedFeatureProperties(properties: FlatMapFeatureAnnotation): ExportedFeatureProperties
+    //========================================================================================
     {
         const data = {}
         for (const property of EXPORTED_FEATURE_PROPERTIES) {
@@ -1608,7 +1608,7 @@ export class FlatMap
         if (Array.isArray(properties)) {
             const featureData = []
             for (const p of properties) {
-                const data = this.#exportedProperties(p)
+                const data = this.exportedFeatureProperties(p)
                 if (Object.keys(data).length > 0) {
                     featureData.push(data)
                 }
@@ -1621,7 +1621,7 @@ export class FlatMap
                 return true
             }
         } else {
-            const data = this.#exportedProperties(properties)
+            const data = this.exportedFeatureProperties(properties)
             if (Object.keys(data).length > 0) {
                 this.callback(eventType, data)
                 return true
@@ -1640,7 +1640,7 @@ export class FlatMap
     //===============================================================
     {
         const properties = this.annotation(featureId)
-        return properties ? this.#exportedProperties(properties) : {}
+        return properties ? this.exportedFeatureProperties(properties) : {}
     }
 
     /**
@@ -1654,7 +1654,7 @@ export class FlatMap
     //====================================================================================
     {
 
-        const data = Object.assign({}, this.#exportedProperties(properties), {
+        const data = Object.assign({}, this.exportedFeatureProperties(properties), {
             type: 'marker',
             id: markerId
         })

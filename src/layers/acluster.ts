@@ -31,7 +31,7 @@ import {MapTermGraph} from '../knowledge'
 import {CLUSTERED_MARKER_ID} from '../markers'
 import {PropertiesType} from '../types'
 
-import {DatasetMarkerSet} from './anatomical-cluster'
+import {DatasetMarkerSet, MAX_MARKER_ZOOM} from './anatomical-cluster'
 
 //==============================================================================
 
@@ -79,6 +79,7 @@ interface MarkerPoint
 
 export class ClusteredAnatomicalMarkerLayer
 {
+    #datasetFeatures: Map<string, Set<number>> = new Map()
     #featureToMarkerPoint: Map<number, MarkerPoint> = new Map()
     #flatmap: FlatMap
     #map: MapLibreMap
@@ -129,6 +130,12 @@ export class ClusteredAnatomicalMarkerLayer
         })
     }
 
+    get datasetFeatures()
+    //===================
+    {
+        return this.#datasetFeatures
+    }
+
     #showPoints()
     //===========
     {
@@ -173,6 +180,12 @@ export class ClusteredAnatomicalMarkerLayer
                             markerPoint.properties['hidden'] = markerState.hidden
                         }
                         this.#featureToMarkerPoint.set(+featureId, markerPoint)
+                        if (datasetMarker.maxZoom === MAX_MARKER_ZOOM) {    // A terminal marker
+                            if (!this.#datasetFeatures.has(datasetMarker.datasetId)) {
+                                this.#datasetFeatures.set(datasetMarker.datasetId, new Set())
+                            }
+                            this.#datasetFeatures.get(datasetMarker.datasetId).add(+featureId)
+                        }
                         markerPoints.push(markerPoint)
                     }
                     termToMarkerPoints.set(datasetMarker.term, markerPoints)

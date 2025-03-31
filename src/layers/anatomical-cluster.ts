@@ -33,8 +33,8 @@ export type DatasetMarker = {
 
 //==============================================================================
 
-const MIN_ZOOM =  2
-const MAX_ZOOM = 12
+export const MIN_MARKER_ZOOM =  2
+export const MAX_MARKER_ZOOM = 12
 
 //==============================================================================
 
@@ -69,7 +69,7 @@ export class DatasetMarkerSet
                                                        .filter(term => term !== ANATOMICAL_ROOT
                                                             && this.#connectedTermGraph.degree(term) == 1)) {
             const marker = this.#markers.get(terminal)
-            marker.maxZoom = MAX_ZOOM
+            marker.maxZoom = MAX_MARKER_ZOOM
             this.#setZoomFromParents(marker)
         }
     }
@@ -89,9 +89,10 @@ export class DatasetMarkerSet
     #depthToZoomRange(depth: number): [number, number]
     //================================================
     {
-        const zoom = MIN_ZOOM + Math.floor((MAX_ZOOM - MIN_ZOOM)*depth/this.#maxDepth)
+        const zoom = MIN_MARKER_ZOOM
+                   + Math.floor((MAX_MARKER_ZOOM - MIN_MARKER_ZOOM)*depth/this.#maxDepth)
         return (zoom < 0)         ? [0, 1]
-             : (zoom >= MAX_ZOOM) ? [MAX_ZOOM, MAX_ZOOM]
+             : (zoom >= MAX_MARKER_ZOOM) ? [MAX_MARKER_ZOOM, MAX_MARKER_ZOOM]
              :                      [zoom, zoom+1]
     }
 
