@@ -126,6 +126,27 @@ const ENCODED_FEATURE_PROPERTIES = [
 
 //==============================================================================
 
+export type ExportedFeatureProperties = {
+    id: string
+    featureId: number
+    'connectivity',   // <<<<<<<<<<<
+    dataset: string
+    'dataset-ids': string[]
+    kind?: string
+    label?: string
+    models?: string
+    source?: string
+    taxons?: string[]
+    hyperlinks?: string
+    'completeness',   // <<<<<<<<<<<
+    'missing-nodes',  // <<<<<<<<<<<
+    alert?: string
+    'biological-sex'?: string
+    location?: number
+}
+
+//==============================================================================
+
 export class FLATMAP_STYLE
 {
     static FUNCTIONAL = 'functional'
@@ -1426,8 +1447,8 @@ export class FlatMap
         return false
     }
 
-    #exportedProperties(properties)
-    //=============================
+    #exportedFeatureProperties(properties: FlatMapFeatureAnnotation): ExportedFeatureProperties
+    //=========================================================================================
     {
         const data = {}
         for (const property of EXPORTED_FEATURE_PROPERTIES) {
@@ -1580,8 +1601,8 @@ export class FlatMap
      * @param      {string}  eventType     The event type
      * @param      {Object}  properties    Properties associated with the feature
      */
-    featureEvent(eventType: string, properties: object|object[])
-    //==========================================================
+    featureEvent(eventType: string, properties: FlatMapFeatureAnnotation|FlatMapFeatureAnnotation[])
+    //==============================================================================================
     {
 
         if (Array.isArray(properties)) {
@@ -1615,8 +1636,8 @@ export class FlatMap
      * @param      featureId  The feature's internal (GeoJSON) id
      * @returns               Properties associated with the feature
      */
-    featureProperties(featureId: GeoJSONId): object
-    //=============================================
+    featureProperties(featureId: GeoJSONId): FlatMapFeatureAnnotation
+    //===============================================================
     {
         const properties = this.annotation(featureId)
         return properties ? this.#exportedProperties(properties) : {}
@@ -1629,8 +1650,8 @@ export class FlatMap
      * @param      {integer}  markerId   The marker's GeoJSON identifier
      * @param      {Object}  properties  Properties associated with the marker
      */
-    markerEvent(eventType: string, markerId: number, properties: object)
-    //==================================================================
+    markerEvent(eventType: string, markerId: number, properties: FlatMapFeatureAnnotation)
+    //====================================================================================
     {
 
         const data = Object.assign({}, this.#exportedProperties(properties), {
