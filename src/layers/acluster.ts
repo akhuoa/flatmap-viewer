@@ -24,14 +24,14 @@ import {DataDrivenPropertyValueSpecification, GeoJSONSource} from 'maplibre-gl'
 //==============================================================================
 
 import {FlatMap} from '../flatmap'
-import {Dataset} from '../flatmap-types'
+import {DatasetTerms} from '../flatmap-types'
 import type {GeoJSONId} from '../flatmap-types'
 import {UserInteractions} from '../interactions'
 import {MapTermGraph} from '../knowledge'
 import {CLUSTERED_MARKER_ID} from '../markers'
 import {PropertiesType} from '../types'
 
-import {DatasetMarkerSet, MAX_MARKER_ZOOM} from './anatomical-cluster'
+import {DatasetClusterSet, MAX_MARKER_ZOOM} from './datasetcluster'
 
 //==============================================================================
 
@@ -84,7 +84,7 @@ export class ClusteredAnatomicalMarkerLayer
     #flatmap: FlatMap
     #map: MapLibreMap
     #mapTermGraph: MapTermGraph
-    #markersByDataset: Map<string, DatasetMarkerSet> = new Map()
+    #clustersByDataset: Map<string, DatasetClusterSet> = new Map()
     #maxZoom: number
     #points: GeoJSON.FeatureCollection = {
        type: 'FeatureCollection',
@@ -147,12 +147,12 @@ export class ClusteredAnatomicalMarkerLayer
     //=======
     {
         const termToMarkerPoints: Map<string, MarkerPoint[]> = new Map()
-        for (const datasetMarkerSet of this.#markersByDataset.values()) {
-            for (const datasetMarker of datasetMarkerSet.markers) {
-                if (!termToMarkerPoints.has(datasetMarker.term)) {
+        for (const datasetClusterSet of this.#clustersByDataset.values()) {
+            for (const datasetCluster of datasetClusterSet.clusters) {
+                if (!termToMarkerPoints.has(datasetCluster.term)) {
                     const zoomCount = Array(this.#maxZoom + 1).fill(0)
                     const markerPoints: MarkerPoint[] = []
-                    for (const featureId of this.#flatmap.modelFeatureIds(datasetMarker.term)) {
+                    for (const featureId of this.#flatmap.modelFeatureIds(datasetCluster.term)) {
                         const annotation = this.#flatmap.annotation(featureId)
                         if (annotation.centreline
                          || !('markerPosition' in annotation) && !annotation.geometry.includes('Polygon')) {
@@ -167,7 +167,7 @@ export class ClusteredAnatomicalMarkerLayer
                                 'dataset-ids': [],
                                 featureId,
                                 label: annotation.label,
-                                'models': datasetMarker.term,
+                                'models': datasetCluster.term,
                                 'zoom-count': zoomCount
                             },
                             geometry: {
@@ -180,30 +180,32 @@ export class ClusteredAnatomicalMarkerLayer
                             markerPoint.properties['hidden'] = markerState.hidden
                         }
                         this.#featureToMarkerPoint.set(+featureId, markerPoint)
-                        if (datasetMarker.maxZoom === MAX_MARKER_ZOOM) {    // A terminal marker
-                            if (!this.#datasetFeatures.has(datasetMarker.datasetId)) {
-                                this.#datasetFeatures.set(datasetMarker.datasetId, new Set())
+                        if (datasetCluster.maxZoom === MAX_MARKER_ZOOM) {    // A terminal marker
+                            if (!this.#datasetFeatures.has(datasetCluster.datasetId)) {
+                                this.#datasetFeatures.set(datasetCluster.datasetId, new Set())
                             }
-                            this.#datasetFeatures.get(datasetMarker.datasetId).add(+featureId)
+                            this.#datasetFeatures.get(datasetCluster.datasetId).add(+featureId)
                         }
                         markerPoints.push(markerPoint)
                     }
-                    termToMarkerPoints.set(datasetMarker.term, markerPoints)
+                    termToMarkerPoints.set(datasetCluster.term, markerPoints)
                 }
-                const markerPoint = termToMarkerPoints.get(datasetMarker.term)[0]
+                const markerPoint = termToMarkerPoints.get(datasetCluster.term)[0]
                 if (markerPoint) {
                     // We only need to update these property fields once, as all of the dataset's markers
                     // refer to the same two property variables
                     const zoomCount = markerPoint.properties['zoom-count']
                     for (let zoom = 0; zoom <= this.#maxZoom; zoom += 1) {
-                        if (datasetMarker.minZoom <= zoom && zoom < datasetMarker.maxZoom) {
+                        if (datasetCluster.minZoom <= zoom && zoom < datasetCluster.maxZoom) {
                             zoomCount[zoom] += 1
                         }
                     }
-                    markerPoint.properties['dataset-ids'].push(datasetMarker.datasetId)
+                    markerPoint.properties['dataset-ids'].push(datasetCluster.datasetId)
+
+
                 } else {
                     // shouldn't get here...
-                    console.error(`Can't find marker for ${datasetMarker.term}...`)
+                    console.error(`Can't find marker for ${datasetCluster.term}...`)
                 }
             }
         }
@@ -214,12 +216,12 @@ export class ClusteredAnatomicalMarkerLayer
         this.#showPoints()
     }
 
-    addDatasetMarkers(datasets: Dataset[])
-    //====================================
+    addDatasetMarkers(datasets: DatasetTerms[])
+    //=========================================
     {
         for (const dataset of datasets) {
             if (dataset.terms.length) {
-                this.#markersByDataset.set(dataset.id, new DatasetMarkerSet(dataset, this.#mapTermGraph))
+                this.#clustersByDataset.set(dataset.id, new DatasetClusterSet(dataset, this.#mapTermGraph))
             }
         }
         this.#update()
@@ -228,15 +230,15 @@ export class ClusteredAnatomicalMarkerLayer
     clearDatasetMarkers()
     //===================
     {
-        this.#markersByDataset.clear()
+        this.#clustersByDataset.clear()
         this.#update()
     }
 
     removeDatasetMarker(datasetId: string)
     //====================================
     {
-        if (this.#markersByDataset.has(datasetId)) {
-            this.#markersByDataset.delete(datasetId)
+        if (this.#clustersByDataset.has(datasetId)) {
+            this.#clustersByDataset.delete(datasetId)
         }
         this.#update()
     }

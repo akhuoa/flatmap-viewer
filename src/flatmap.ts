@@ -37,7 +37,7 @@ import {
     AnnotatedFeature,
     AnnotationDrawMode,
     AnnotationEvent,
-    Dataset,
+    DatasetTerms,
     FeatureZoomOptions,
     FlatMapAnnotations,
     FlatMapCallback,
@@ -1379,8 +1379,8 @@ export class FlatMap
      *                                                          specifying its identifier and an array of
      *                                                          associated anatomical terms
      */
-    addDatasetMarkers(datasets: Dataset[])
-    //====================================
+    addDatasetMarkers(datasets: DatasetTerms[])
+    //=========================================
     {
         if (this.#userInteractions !== null) {
             this.#userInteractions.addDatasetMarkers(datasets)
