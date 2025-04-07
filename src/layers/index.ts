@@ -491,10 +491,16 @@ export class LayerManager
         this.#markerLayer.clearDatasetMarkers()
     }
 
-    datasetFeatures(): Map<string, Set<number>>
-    //=========================================
+    datasetFeatureIds(): Map<string, Set<number>>
+    //===========================================
     {
-        return this.#markerLayer.datasetFeatures
+        return this.#markerLayer.datasetFeatureIds()
+    }
+
+    datasetIds(term: string, zoomLevel: number): string[]
+    //===================================================
+    {
+        return this.#markerLayer.datasetIds(term, zoomLevel)
     }
 
     removeDatasetMarker(datasetId: string)

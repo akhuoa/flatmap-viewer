@@ -1074,13 +1074,13 @@ export class UserInteractions
             properties = properties_array
         } else {
             properties = Object.assign({}, feature.properties, values)
-            if (inAnatomicalClusterLayer(feature)) {  // >>>>>>>>>>>>>> feature.id v's marker id....
-                properties['dataset-ids'] = JSON.parse(properties['dataset-ids'])
-                const datasetFeatures = this.#layerManager.datasetFeatures()
+            if (inAnatomicalClusterLayer(feature)) {
+                const datasetIds = this.#layerManager.datasetIds(properties['models'], this.#map.getZoom())
+                const datasetFeatureIds = this.#layerManager.datasetFeatureIds()
                 const datasetFeatureList = []
-                for (const datasetId of properties['dataset-ids']) {
+                for (const datasetId of datasetIds) {
                     const featureProperties = []
-                    for (const featureId of datasetFeatures.get(datasetId)) {
+                    for (const featureId of datasetFeatureIds.get(datasetId)) {
                         featureProperties.push(this.#flatmap.exportedFeatureProperties(this.#flatmap.annotation(featureId)))
                     }
                     datasetFeatureList.push({
