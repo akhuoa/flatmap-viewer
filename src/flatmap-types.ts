@@ -331,7 +331,7 @@ export type FlatMapPopUpOptions = maplibregl.PopupOptions & {
 //==============================================================================
 //==============================================================================
 
-export interface Dataset
+export interface DatasetTerms
 {
     id: string
     terms: string[]

@@ -18,13 +18,13 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {Dataset} from '../flatmap-types'
+import {DatasetTerms} from '../flatmap-types'
 import {ANATOMICAL_ROOT, MapTermGraph} from '../knowledge'
 import {DiGraph} from '../knowledge/graphs'
 
 //==============================================================================
 
-export type DatasetMarker = {
+export type DatasetCluster = {
     term: string
     datasetId: string
     minZoom: number
@@ -33,20 +33,20 @@ export type DatasetMarker = {
 
 //==============================================================================
 
-const MIN_ZOOM =  2
-const MAX_ZOOM = 12
+export const MIN_MARKER_ZOOM =  2
+export const MAX_MARKER_ZOOM = 12
 
 //==============================================================================
 
-export class DatasetMarkerSet
+export class DatasetClusterSet
 {
     #connectedTermGraph: DiGraph
     #datasetId: string
     #mapTermGraph: MapTermGraph
-    #markers: Map<string, DatasetMarker>
+    #clustersByTerm: Map<string, DatasetCluster>
     #maxDepth: number
 
-    constructor(dataset: Dataset, mapTermGraph: MapTermGraph)
+    constructor(dataset: DatasetTerms, mapTermGraph: MapTermGraph)
     {
         this.#datasetId = dataset.id
         this.#mapTermGraph = mapTermGraph
@@ -55,7 +55,7 @@ export class DatasetMarkerSet
         const datasetTerms = new Array(...dataset.terms)
         const mapTerms = new Set(this.#validatedTerms(datasetTerms))
         this.#connectedTermGraph = mapTermGraph.connectedTermGraph([...mapTerms.values()])
-        this.#markers = new Map(this.#connectedTermGraph.nodes().map(term => {
+        this.#clustersByTerm = new Map(this.#connectedTermGraph.nodes().map(term => {
             const d = mapTermGraph.depth(term)
             const zoomRange = this.#depthToZoomRange(d)
             return [ term, {
@@ -68,9 +68,9 @@ export class DatasetMarkerSet
         for (const terminal of this.#connectedTermGraph.nodes()
                                                        .filter(term => term !== ANATOMICAL_ROOT
                                                             && this.#connectedTermGraph.degree(term) == 1)) {
-            const marker = this.#markers.get(terminal)
-            marker.maxZoom = MAX_ZOOM
-            this.#setZoomFromParents(marker)
+            const cluster = this.#clustersByTerm.get(terminal)
+            cluster.maxZoom = MAX_MARKER_ZOOM
+            this.#setZoomFromParents(cluster)
         }
     }
 
@@ -80,34 +80,35 @@ export class DatasetMarkerSet
         return this.#datasetId
     }
 
-    get markers(): DatasetMarker[]
-    //============================
+    get clusters(): DatasetCluster[]
+    //==============================
     {
-        return [...this.#markers.values()]
+        return [...this.#clustersByTerm.values()]
     }
 
     #depthToZoomRange(depth: number): [number, number]
     //================================================
     {
-        const zoom = MIN_ZOOM + Math.floor((MAX_ZOOM - MIN_ZOOM)*depth/this.#maxDepth)
+        const zoom = MIN_MARKER_ZOOM
+                   + Math.floor((MAX_MARKER_ZOOM - MIN_MARKER_ZOOM)*depth/this.#maxDepth)
         return (zoom < 0)         ? [0, 1]
-             : (zoom >= MAX_ZOOM) ? [MAX_ZOOM, MAX_ZOOM]
+             : (zoom >= MAX_MARKER_ZOOM) ? [MAX_MARKER_ZOOM, MAX_MARKER_ZOOM]
              :                      [zoom, zoom+1]
     }
 
-    #setZoomFromParents(marker: DatasetMarker)
-    //========================================
+    #setZoomFromParents(cluster: DatasetCluster)
+    //==========================================
     {
-        if (marker.term === ANATOMICAL_ROOT) {
-            marker.minZoom = 0
+        if (cluster.term === ANATOMICAL_ROOT) {
+            cluster.minZoom = 0
             return
         }
-        for (const parent of this.#connectedTermGraph.parents(marker.term)) {
-            const parentMarker = this.#markers.get(parent)
-            if (parentMarker.maxZoom < marker.minZoom) {
-                parentMarker.maxZoom = marker.minZoom
+        for (const parent of this.#connectedTermGraph.parents(cluster.term)) {
+            const parentCluster = this.#clustersByTerm.get(parent)
+            if (parentCluster.maxZoom < cluster.minZoom) {
+                parentCluster.maxZoom = cluster.minZoom
             }
-            this.#setZoomFromParents(parentMarker)
+            this.#setZoomFromParents(parentCluster)
         }
     }
 

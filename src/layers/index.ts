@@ -25,7 +25,7 @@ import {Map as MapLibreMap} from 'maplibre-gl'
 import {PropertiesFilter, StyleFilterType} from '../filters'
 import {DetailsFilter} from '../filters/facets/details'
 import {FilteredFacet} from '../filters/facets'
-import {Dataset, FlatMapImageLayer, FlatMapLayer} from '../flatmap-types'
+import {DatasetTerms, FlatMapImageLayer, FlatMapLayer} from '../flatmap-types'
 import type {GeoJSONId, MapExtent, MapFeature, MapRenderedFeature} from '../flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from '../flatmap'
 import {PATHWAYS_LAYER} from '../pathways'
@@ -479,8 +479,8 @@ export class LayerManager
         //this.#markerLayer.clearMarkers()
     }
 
-    addDatasetMarkers(datasets: Dataset[])
-    //====================================
+    addDatasetMarkers(datasets: DatasetTerms[])
+    //=========================================
     {
         this.#markerLayer.addDatasetMarkers(datasets)
     }
@@ -489,6 +489,18 @@ export class LayerManager
     //===================
     {
         this.#markerLayer.clearDatasetMarkers()
+    }
+
+    datasetFeatureIds(): Map<string, Set<number>>
+    //===========================================
+    {
+        return this.#markerLayer.datasetFeatureIds()
+    }
+
+    datasetIds(term: string, zoomLevel: number): string[]
+    //===================================================
+    {
+        return this.#markerLayer.datasetIds(term, zoomLevel)
     }
 
     removeDatasetMarker(datasetId: string)

@@ -40,7 +40,7 @@ import {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent,
         FlatMapFeature, FlatMapFeatureAnnotation,
         FlatMapMarkerOptions, FlatMapPopUpOptions, MapFeature,
         MapFeatureIdentifier, MapRenderedFeature} from './flatmap-types'
-import type {Dataset, FeatureZoomOptions, GeoJSONId} from './flatmap-types'
+import type {DatasetTerms, FeatureZoomOptions, GeoJSONId} from './flatmap-types'
 import type {Point2D} from './flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
 import {inAnatomicalClusterLayer, LayerManager} from './layers'
@@ -1074,7 +1074,21 @@ export class UserInteractions
             properties = properties_array
         } else {
             properties = Object.assign({}, feature.properties, values)
-            if (inAnatomicalClusterLayer(feature)) {  // >>>>>>>>>>>>>> feature.id v's marker id....
+            if (inAnatomicalClusterLayer(feature)) {
+                const datasetIds = this.#layerManager.datasetIds(properties['models'], this.#map.getZoom())
+                const datasetFeatureIds = this.#layerManager.datasetFeatureIds()
+                const datasetFeatureList = []
+                for (const datasetId of datasetIds) {
+                    const featureProperties = []
+                    for (const featureId of datasetFeatureIds.get(datasetId)) {
+                        featureProperties.push(this.#flatmap.exportedFeatureProperties(this.#flatmap.annotation(featureId)))
+                    }
+                    datasetFeatureList.push({
+                        dataset: datasetId,
+                        features: featureProperties
+                    })
+                }
+                properties['dataset-features'] = datasetFeatureList
                 return this.#flatmap.markerEvent(type, +feature.id, properties)
             } else if (feature.sourceLayer === PATHWAYS_LAYER) {  // I suspect this is never true as source layer
                                                                   // names are like `neural_routes_pathways`
@@ -1633,8 +1647,8 @@ export class UserInteractions
         }
     }
 
-    addDatasetMarkers(datasets: Dataset[])
-    //====================================
+    addDatasetMarkers(datasets: DatasetTerms[])
+    //=========================================
     {
         if (this.#layerManager) {
             return this.#layerManager.addDatasetMarkers(datasets)

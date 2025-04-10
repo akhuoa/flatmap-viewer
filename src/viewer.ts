@@ -18,8 +18,14 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {FlatMap, FLATMAP_STYLE, MapDescriptionOptions} from './flatmap'
-import {FlatMapCallback, FlatMapLayer, FlatMapOptions, FlatMapServerIndex} from './flatmap-types'
+import {
+    FlatMap, FLATMAP_STYLE, MapDescriptionOptions,
+    FlatMapStyleSpecification
+} from './flatmap'
+import {
+    FlatMapCallback, FlatMapIndex, FlatMapLayer,
+    FlatMapMetadata, FlatMapOptions, FlatMapServerIndex
+} from './flatmap-types'
 import {SparcTermGraph} from './knowledge'
 import {FlatMapServer} from './mapserver'
 import * as utils from './utils'
@@ -27,7 +33,7 @@ import * as utils from './utils'
 //==============================================================================
 
 // The released version of the viewer
-export const VIEWER_VERSION = '4.1.0'
+export const VIEWER_VERSION = '4.1.1'
 
 //==============================================================================
 
@@ -144,14 +150,14 @@ export class MapViewer
         await this.#ensureInitialised()
         const allMaps = {}
         for (const map of this.#mapList) {
-            const id = ('uuid' in map) ? map.uuid : map.id
+            const id = map.uuid || map.id
             allMaps[id] = map
         }
         return allMaps
     }
 
-    async findMap(identifier: MapIdentifier): Promise<MapListEntry>
-    //=============================================================
+    async findMap(identifier: MapIdentifier): Promise<MapListEntry|null>
+    //==================================================================
     {
         await this.#ensureInitialised()
         return this.#lookupMap(identifier)
@@ -169,7 +175,7 @@ export class MapViewer
         const biologicalSex = (typeof identifier === 'string' || identifier instanceof String)
                                 ? null
                                 : identifier.biologicalSex || null
-        let latestMap = null
+        let latestMap: MapListEntry|null = null
         let lastCreatedTime: string = ''
         for (const map of this.#mapList) {
             if (('uuid' in map && mapDescribes === map.uuid
@@ -224,8 +230,8 @@ export class MapViewer
     *                     {uuid: 'a563be90-9225-51c1-a84d-00ed2d03b7dc'},
     *                     'div-4')
     */
-    async loadMap(identifier: MapIdentifier, callback: FlatMapCallback, options: FlatMapOptions={}): Promise<FlatMap>
-    //===============================================================================================================
+    async loadMap(identifier: MapIdentifier, callback: FlatMapCallback, options: FlatMapOptions={}): Promise<FlatMap|null>
+    //====================================================================================================================
     {
         const map = await this.findMap(identifier)
         if (map === null) {
@@ -234,8 +240,8 @@ export class MapViewer
 
         // Load the maps index file
 
-        const mapId = ('uuid' in map) ? map.uuid : map.id
-        const mapIndex = await this.#mapServer.mapIndex(mapId)
+        const mapId = map.uuid || map.id
+        const mapIndex: FlatMapIndex|null = (await this.#mapServer.mapIndex(mapId))!
         const mapIndexId = ('uuid' in mapIndex) ? mapIndex.uuid : mapIndex.id
         if (mapId !== mapIndexId) {
             throw new Error(`Map '${mapId}' has wrong ID in index`)
@@ -275,7 +281,7 @@ export class MapViewer
 
         let mapLayers: FlatMapLayer[] = []
         if (!('version' in mapIndex) || mapIndex.version <= 1.0) {
-            for (const layer of mapIndex.layers) {
+            for (const layer of (mapIndex.layers || [])) {
                 // Set layer data if the layer just has an id specified
                 if (typeof layer === 'string') {
                     mapLayers.push({
@@ -287,12 +293,12 @@ export class MapViewer
                 }
             }
         } else {
-            mapLayers = await this.#mapServer.mapLayers(mapId)
+            mapLayers = (await this.#mapServer.mapLayers(mapId))!
         }
 
         // Get the map's style file
 
-        const mapStyle = await this.#mapServer.mapStyle(mapId)
+        const mapStyle: FlatMapStyleSpecification|null = (await this.#mapServer.mapStyle(mapId))!
 
         // Make sure the style has glyphs defined
 
@@ -302,15 +308,15 @@ export class MapViewer
 
         // Get the map's pathways
 
-        const pathways = await this.#mapServer.mapPathways(mapId)
+        const pathways = (await this.#mapServer.mapPathways(mapId))!
 
         // Get the map's annotations
 
-        const annotations = await this.#mapServer.mapAnnotations(mapId)
+        const annotations = (await this.#mapServer.mapAnnotations(mapId))!
 
         // Get metadata about the map
 
-        const mapMetadata = await this.#mapServer.mapMetadata(mapId)
+        const mapMetadata: FlatMapMetadata|null = (await this.#mapServer.mapMetadata(mapId))!
 
         // Set zoom range if not specified as an option
 
@@ -343,21 +349,21 @@ export class MapViewer
 
         // Are features in separate vector tile source layers?
 
-        mapOptions.separateLayers = map.separateLayers
+        mapOptions.separateLayers = !!map.separateLayers
 
-        // Create a container for the map if in multi-pane mode and no container is given
-
-        let containerId: string = options.container || null
+        let containerId: string = options.container || ''
 
         // Display the map
-
+        if (containerId === '') {
+            return null
+        }
         const flatmap = new FlatMap(containerId, this.#mapServer,
             {
                 id: map.id,
                 uuid: mapId,
                 details: mapIndex,
-                taxon: map.taxon,
-                biologicalSex: map.biologicalSex,
+                taxon: map.taxon || null,
+                biologicalSex: map.biologicalSex || null,
                 style: mapStyle,
                 options: mapOptions,
                 layers: mapLayers,
