@@ -32,21 +32,26 @@ export type MapFeatureIdentifier = maplibregl.FeatureIdentifier & {
     layer?: {
         id: string
     }
+    properties: {
+        [name: string]: unknown
+    }
 }
 
 export type MapFeature = MapFeatureIdentifier & {
     children?: GeoJSONId[]
-    properties?: {
+    properties: {
         featureId?: GeoJSONId
         kind?: string
     }
 }
 
 export type MapRenderedFeature = maplibregl.MapGeoJSONFeature & {
-    properties?: {
+    properties: {
         featureId?: GeoJSONId
     }
 }
+
+export type MapPointFeature = MapFeatureIdentifier | MapRenderedFeature
 
 //==============================================================================
 
@@ -379,12 +384,6 @@ export type ExportedFeatureProperties = {
 //==============================================================================
 
 export type DatasetMarkerKind = 'dataset' | 'multiscale'
-
-export interface DatasetResult
-{
-    id: string
-    kind: DatasetMarkerKind
-}
 
 export interface DatasetTerms
 {

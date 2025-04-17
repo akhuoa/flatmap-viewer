@@ -25,7 +25,7 @@ import {Model, Geometry} from '@luma.gl/engine'
 //==============================================================================
 
 import {PropertiesFilter} from '../filters'
-import type {GeoJSONId, MapFeature, MapFeatureIdentifier} from '../flatmap-types'
+import type {GeoJSONId, MapFeatureIdentifier} from '../flatmap-types'
 import {FlatMap} from '../flatmap'
 import {pathColourArray, PathStyle} from '../pathways'
 import {UserInteractions} from '../interactions'
@@ -267,8 +267,8 @@ export class FlightPathLayer
         }
     }
 
-    #makeMapFeature(pickedObject: PropertiesType): MapFeature
-    //=======================================================
+    #makeMapFeature(pickedObject: PropertiesType): MapFeatureIdentifier
+    //===============================================================
     {
         // Mock up a map vector feature
         return {

@@ -24,7 +24,7 @@ import {DataDrivenPropertyValueSpecification, GeoJSONSource} from 'maplibre-gl'
 //==============================================================================
 
 import {FlatMap} from '../flatmap'
-import {DatasetMarkerKind, DatasetResult, DatasetTerms} from '../flatmap-types'
+import {DatasetMarkerKind, DatasetTerms} from '../flatmap-types'
 import type {GeoJSONId} from '../flatmap-types'
 import {UserInteractions} from '../interactions'
 import {MapTermGraph} from '../knowledge'

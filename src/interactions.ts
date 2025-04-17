@@ -38,10 +38,10 @@ import {PathTypeFacet} from './filters/facets/pathtype'
 import {TaxonFacet} from './filters/facets/taxon'
 import {PropertiesFilterExpression} from './filters'
 import {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent,
-        ExportedFeatureProperties, FlatMapFeature, FlatMapFeatureAnnotation,
+        FlatMapFeature, FlatMapFeatureAnnotation,
         FlatMapMarkerOptions, FlatMapPopUpOptions, FlatMapState, MapFeature,
-        MapFeatureIdentifier, MapRenderedFeature} from './flatmap-types'
-import type {BoundingBox, DatasetFeatures, DatasetTerms, FeatureZoomOptions, GeoJSONId} from './flatmap-types'
+        MapFeatureIdentifier, MapPointFeature, MapRenderedFeature} from './flatmap-types'
+import type {BoundingBox, DatasetTerms, FeatureZoomOptions, GeoJSONId} from './flatmap-types'
 import type {Point2D} from './flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
 import {inAnatomicalClusterLayer, LayerManager} from './layers'
@@ -333,8 +333,9 @@ export class UserInteractions
         this.#map.on('dblclick', event => {
             const clickedFeatures = this.#layerManager.featuresAtPoint(event.point)
             for (const feature of clickedFeatures) {
-                if (feature.properties.kind === 'expandable'
-                 && this.#map.getZoom() > (feature.properties.maxzoom - 2)) {
+                if (feature.properties && feature.properties.kind === 'expandable'
+                 && this.#map.getZoom() > (feature.properties.maxzoom - 2)
+                 && 'geometry' in feature) {
                     event.preventDefault()
                     this.#map.fitBounds(featureBounds(feature), {
                         padding: 0,
@@ -566,7 +567,8 @@ export class UserInteractions
                 sourceLayer: (this.#flatmap.options.separateLayers
                              ? `${annotation['layer']}_${annotation['tile-layer']}`
                              : annotation['tile-layer']).replaceAll('/', '_'),
-                children: annotation.children || []
+                children: annotation.children || [],
+                properties: {}
             }
         }
         return null
@@ -786,8 +788,8 @@ export class UserInteractions
         }
     }
 
-    activateLineFeatures(lineFeatures: MapRenderedFeature[])
-    //======================================================
+    activateLineFeatures(lineFeatures: MapPointFeature[])
+    //===================================================
     {
         for (const lineFeature of lineFeatures) {
             this.activateFeature(lineFeature)
@@ -1025,8 +1027,8 @@ export class UserInteractions
         }
     }
 
-    #lineTooltip(lineFeatures: MapRenderedFeature[])
-    //==============================================
+    #lineTooltip(lineFeatures: MapPointFeature[])
+    //===========================================
     {
         const tooltips: string[] = []
         for (const lineFeature of lineFeatures) {
@@ -1078,8 +1080,8 @@ export class UserInteractions
                                       : `<div class='flatmap-feature-label'>${tooltip.join('<hr/>')}</div>`
     }
 
-    #featureEvent(type: string, feature: MapRenderedFeature|MapRenderedFeature[], values={})
-    //======================================================================================
+    #featureEvent(type: string, feature: MapPointFeature|MapPointFeature[], values={})
+    //================================================================================
     {
         let properties: FlatMapFeatureAnnotation|FlatMapFeatureAnnotation[]|null
         if (Array.isArray(feature)) {
@@ -1124,8 +1126,8 @@ export class UserInteractions
         this.#resetActiveFeatures()
     }
 
-    #renderedFeatures(point: [number, number]): MapRenderedFeature[]
-    //==============================================================
+    #renderedFeatures(point: [number, number]): MapPointFeature[]
+    //===========================================================
     {
         const features = this.#layerManager.featuresAtPoint(point)
         return features.filter(feature => this.#featureEnabled(feature))
@@ -1193,7 +1195,7 @@ export class UserInteractions
 
         let info = ''
         let tooltip = ''
-        let tooltipFeature: MapRenderedFeature|null = null
+        let tooltipFeature: MapPointFeature|null = null
         const eventLngLat = this.#map.unproject(eventPoint)
         if (displayInfo) {
             if (!('tooltip' in features[0].properties)) {
@@ -1279,8 +1281,8 @@ export class UserInteractions
         this.#showToolTip(tooltip, eventLngLat, tooltipFeature)
     }
 
-    #showToolTip(html, lngLat, feature: MapRenderedFeature|null=null)
-    //===============================================================
+    #showToolTip(html, lngLat, feature: MapPointFeature|null=null)
+    //============================================================
     {
         // Show a tooltip
         if (html !== ''
@@ -1435,8 +1437,8 @@ export class UserInteractions
         return {}
     }
 
-    #activateRelatedFeatures(feature: MapRenderedFeature)
-    //===================================================
+    #activateRelatedFeatures(feature: MapPointFeature)
+    //================================================
     {
         if ('nerveId' in feature.properties) {
             const nerveId = feature.properties.nerveId

@@ -25,8 +25,8 @@ import {Map as MapLibreMap} from 'maplibre-gl'
 import {PropertiesFilter, StyleFilterType} from '../filters'
 import {DetailsFilter} from '../filters/facets/details'
 import {FilteredFacet} from '../filters/facets'
-import {DatasetResult, DatasetTerms, FlatMapImageLayer, FlatMapLayer} from '../flatmap-types'
-import type {GeoJSONId, MapExtent, MapFeature, MapRenderedFeature} from '../flatmap-types'
+import {DatasetTerms, FlatMapImageLayer, FlatMapLayer} from '../flatmap-types'
+import type {GeoJSONId, MapExtent, MapFeature, MapRenderedFeature, MapPointFeature} from '../flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from '../flatmap'
 import {PATHWAYS_LAYER} from '../pathways'
 import {UserInteractions} from '../interactions'
@@ -503,10 +503,10 @@ export class LayerManager
         this.#markerLayer.removeDatasetMarker(datasetId)
     }
 
-    featuresAtPoint(point): MapRenderedFeature[]
-    //==========================================
+    featuresAtPoint(point): MapPointFeature[]
+    //=======================================
     {
-        let features: MapRenderedFeature[] = []
+        let features: MapPointFeature[] = []
         features = this.#flightPathLayer.queryFeaturesAtPoint(point)
         if (features.length === 0) {
             features = this.#map.queryRenderedFeatures(point, {layers: [ANATOMICAL_MARKERS_LAYER]})
