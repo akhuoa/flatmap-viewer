@@ -28,14 +28,14 @@ import {PanZoom} from './panzoom'
 
 export class SvgMap
 {
-    #callback: FlatMapCallback
+//WIP    #callback: FlatMapCallback
     #container: HTMLElement
     #panzoom: PanZoom
 
-    constructor(containerId: string, callback: FlatMapCallback, svg: string)
+    constructor(containerId: string, _callback: FlatMapCallback, svg: string)
     {
-        this.#container = document.getElementById(containerId)
-        this.#callback = callback
+        this.#container = document.getElementById(containerId)!
+//WIP        this.#callback = callback
         this.#panzoom = new PanZoom(this.#container)
 
         this.#container.innerHTML = svg

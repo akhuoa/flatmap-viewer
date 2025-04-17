@@ -33,32 +33,33 @@ import '../static/css/flatmap-viewer.css'
 
 //==============================================================================
 
+import {PropertiesFilterExpression} from './filters'
 import {
     AnnotatedFeature,
     AnnotationDrawMode,
     AnnotationEvent,
     DatasetTerms,
+    ExportedFeatureProperties,
     FeatureZoomOptions,
     FlatMapAnnotations,
     FlatMapCallback,
     FlatMapFeatureAnnotation,
     FlatMapIndex,
     FlatMapLayer,
+    FlatMapMarkerOptions,
     FlatMapMetadata,
     FlatMapOptions,
     FlatMapPathways,
-    FlatMapMarkerOptions,
-    FlatMapPopUpOptions
+    FlatMapPopUpOptions,
+    FlatMapState
 } from './flatmap-types'
-import type {GeoJSONId} from './flatmap-types'
-
+import type {GeoJSONId, Point2D, Size2D} from './flatmap-types'
 import {UserInteractions} from './interactions'
 import {MapTermGraph, SparcTermGraph} from './knowledge'
 import {KNOWLEDGE_SOURCE_SCHEMA, FlatMapServer} from './mapserver'
 import {loadMarkerIcons} from './markers'
 import {APINATOMY_PATH_PREFIX} from './pathways'
 import {SearchIndex} from './search'
-import {MapViewer} from './viewer'
 
 import * as images from './images'
 import * as utils from './utils'
@@ -126,27 +127,6 @@ const ENCODED_FEATURE_PROPERTIES = [
 
 //==============================================================================
 
-export type ExportedFeatureProperties = {
-    id?: string
-    featureId?: number
-    'connectivity'?,   // <<<<<<<<<<<
-    dataset?: string
-    'dataset-ids'?: string[]
-    kind?: string
-    label?: string
-    models?: string
-    source?: string
-    taxons?: string[]
-    hyperlinks?: string
-    'completeness'?,   // <<<<<<<<<<<
-    'missing-nodes'?,  // <<<<<<<<<<<
-    alert?: string
-    'biological-sex'?: string
-    location?: number
-}
-
-//==============================================================================
-
 export class FLATMAP_STYLE
 {
     static FUNCTIONAL = 'functional'
@@ -198,8 +178,8 @@ export type MapDescription = {
     id: string
     uuid: string
     details: FlatMapIndex
-    taxon: string
-    biologicalSex: string
+    taxon: string|null
+    biologicalSex: string|null
     style: FlatMapStyleSpecification
     options: MapDescriptionOptions
     layers: FlatMapLayer[]
@@ -223,7 +203,7 @@ export class FlatMap
 {
     #annIdToFeatureId: Map<string, GeoJSONId> = new Map()
     #baseUrl: string
-    #biologicalSex: string
+    #biologicalSex: string|null
     #bounds: maplibregl.LngLatBounds
     #callbacks: FlatMapCallback[] = []
     #container: string
@@ -232,7 +212,7 @@ export class FlatMap
     #details: FlatMapIndex
     #featurePropertyValues = new Map()
     #id: string
-    #initialState = null
+    #initialState: FlatMapState|null = null
     #layers: FlatMapLayer[]
     #idToAnnotation: Map<GeoJSONId, FlatMapFeatureAnnotation> = new Map()
     #knowledgeSource = ''
@@ -248,7 +228,7 @@ export class FlatMap
     #pathways: FlatMapPathways
     #searchIndex: SearchIndex = new SearchIndex()
     #startupState = -1
-    #taxon: string
+    #taxon: string|null
     #taxonNames = new Map()
     #taxonToFeatureIds: FeatureIdMap = new Map()
     #userInteractions: UserInteractions|null = null
@@ -276,9 +256,9 @@ export class FlatMap
         if (!sckanProvenance) {
             this.#knowledgeSource = this.#mapServer.latestSource
         } else if ('knowledge-source' in sckanProvenance) {
-            this.#knowledgeSource = sckanProvenance['knowledge-source']
+            this.#knowledgeSource = sckanProvenance['knowledge-source'] || ''
         } else if ('npo' in sckanProvenance) {
-            this.#knowledgeSource = `${sckanProvenance.npo.release}-npo`
+            this.#knowledgeSource = `${sckanProvenance.npo!.release}-npo`     // NB. Drop `-npo` (server will need to check...) <<<<<<<<<
         } else {
             this.#knowledgeSource = this.#mapServer.latestSource
         }
@@ -295,7 +275,7 @@ export class FlatMap
                 source.url = this.makeServerUrl(source.url)
             }
             if (source.tiles) {
-                const tiles = []
+                const tiles: string[] = []
                 for (const tileUrl of source.tiles) {
                     tiles.push(this.makeServerUrl(tileUrl))
                 }
@@ -310,14 +290,14 @@ export class FlatMap
         }
         for (const image of images.LABEL_BACKGROUNDS) {
             let found = false
-            for (const im of mapDescription.options.images) {
+            for (const im of mapDescription.options.images || []) {
                 if (image.id === im.id) {
                     found = true
                     break
                 }
             }
             if (!found) {
-                mapDescription.options.images.push(image)
+                mapDescription.options.images!.push(image)
             }
         }
 
@@ -330,7 +310,7 @@ export class FlatMap
         }
 
         if ('maxZoom' in mapDescription.options) {
-            mapOptions.maxZoom = mapDescription.options.maxZoom - 0.001
+            mapOptions.maxZoom = mapDescription.options.maxZoom! - 0.001
         }
         if ('minZoom' in mapDescription.options) {
             mapOptions.minZoom = mapDescription.options.minZoom
@@ -375,8 +355,8 @@ export class FlatMap
                 await this.#setupUserInteractions()
             } else if (this.#startupState === 1) {
                 this.#startupState = 2
-                this.#map.setRenderWorldCopies(true)
-                this.#bounds = this.#map.getBounds()
+                this.#map!.setRenderWorldCopies(true)
+                this.#bounds = this.#map!.getBounds()
                 if (this.#bounds.getEast() >= 180) {
                     this.#bounds.setNorthEast(new maplibregl.LngLat(179.9, this.#bounds.getNorth()))
                 }
@@ -389,14 +369,14 @@ export class FlatMap
                 this.#normalisedOrigin = [sw.x, ne.y]
                 this.#normalised_size = [ne.x - sw.x, sw.y - ne.y]
                 if ('state' in this.#options) {
-                    this.#userInteractions.setState(this.#options.state)
+                    this.#userInteractions!.setState(this.#options.state)
                 }
                 this.#initialState = this.getState()
-                if (this.#userInteractions.minimap) {
-                    this.#userInteractions.minimap.initialise()
+                if (this.#userInteractions!.minimap) {
+                    this.#userInteractions!.minimap.initialise()
                 }
-                this.#map.setMaxBounds(this.#bounds)
-                this.#map.fitBounds(this.#bounds, {animate: false})
+                this.#map!.setMaxBounds(this.#bounds)
+                this.#map!.fitBounds(this.#bounds, {animate: false})
                 this.#startupState = 3
 
                 idleSubscription.unsubscribe()
@@ -422,15 +402,15 @@ export class FlatMap
         }
 
         // Load any images required by the map
-        for (const image of this.#options.images) {
+        for (const image of this.#options.images || []) {
             await this.#addImage(image.id, image.url, '', image.options)
         }
 
         // Load icons used for clustered markers
-        await loadMarkerIcons(this.#map)
+        await loadMarkerIcons(this.#map!)
 
         // Load anatomical term hierarchy for the flatmap
-        const termGraph = await this.#mapServer.mapTermGraph(this.#uuid)
+        const termGraph = (await this.#mapServer.mapTermGraph(this.#uuid))!
         this.#mapTermGraph.load(termGraph)
 
         // Layers have now loaded so finish setting up
@@ -499,8 +479,8 @@ export class FlatMap
      *
      * @param {PropertiesFilterExpression}  [filterExpression=true]  The filter specification
      */
-    setVisibilityFilter(filterExpression=true)
-    //========================================
+    setVisibilityFilter(filterExpression: PropertiesFilterExpression=true)
+    //====================================================================
     {
         if (this.#userInteractions !== null) {
             this.#userInteractions.setVisibilityFilter(filterExpression)
@@ -529,7 +509,7 @@ export class FlatMap
     zoomIn()
     //======
     {
-        this.#map.zoomIn()
+        this.#map!.zoomIn()
     }
 
     /**
@@ -538,7 +518,7 @@ export class FlatMap
     zoomOut()
     //=======
     {
-        this.#map.zoomOut()
+        this.#map!.zoomOut()
     }
 
     /**
@@ -608,7 +588,7 @@ export class FlatMap
     //===========================
     {
 
-        const response = await this.#map.loadImage(url)
+        const response = await this.#map!.loadImage(url)
         return response.data
     }
 
@@ -625,16 +605,16 @@ export class FlatMap
     async #addImage(id, path, baseUrl, options={})
     //============================================
     {
-        if (!this.#map.hasImage(id)) {
+        if (!this.#map!.hasImage(id)) {
             const image = await (path.startsWith('data:image') ? this.#loadEncodedImage(path)
                                                                : this.#loadImage(path.startsWith('/') ? this.makeServerUrl(path)
-                                                                                                      : new URL(path, baseUrl)))
-            this.#map.addImage(id, <ImageBitmap>image, options)
+                                                                                                      : new URL(path, baseUrl).href))
+            this.#map!.addImage(id, <ImageBitmap>image, options)
         }
     }
 
-    makeServerUrl(url, resource='flatmap/')
-    //=====================================
+    makeServerUrl(url, resource='flatmap/'): string
+    //==============================================
     {
         if (url.startsWith('http://') || url.startsWith('https://')) {
             return url
@@ -659,11 +639,9 @@ export class FlatMap
 
     /**
      * The biological sex identifier of the species described by the map.
-     *
-     * @type string
      */
-    get biologicalSex()
-    //=================
+    get biologicalSex(): string|null
+    //==============================
     {
         return this.#biologicalSex
     }
@@ -773,10 +751,10 @@ export class FlatMap
      * @param      {string}  geojsonId  The features's GeoJSON identifier
      * @return     {FlatMapFeatureAnnotation}                    The feature's annotations
      */
-    annotation(geojsonId: GeoJSONId): FlatMapFeatureAnnotation
-    //========================================================
+    annotation(geojsonId: GeoJSONId): FlatMapFeatureAnnotation|null
+    //=============================================================
     {
-        return this.#idToAnnotation.get(+geojsonId)
+        return this.#idToAnnotation.get(+geojsonId) || null
     }
 
     /**
@@ -785,13 +763,14 @@ export class FlatMap
      * @param      {string}  annotationId  The features's external identifier
      * @return     {Object}                The feature's annotations
      */
-    annotationById(annotationId: string): FlatMapFeatureAnnotation
-    //============================================================
+    annotationById(annotationId: string): FlatMapFeatureAnnotation|null
+    //=================================================================
     {
         if (this.#annIdToFeatureId.has(annotationId)) {
-            const geojsonId = this.#annIdToFeatureId.get(annotationId)
-            return this.#idToAnnotation.get(+geojsonId)
+            const geojsonId = this.#annIdToFeatureId.get(annotationId) || -1
+            return this.#idToAnnotation.get(+geojsonId) || null
         }
+        return null
     }
 
     /**
@@ -807,20 +786,23 @@ export class FlatMap
         }
     }
 
-    #updateFeatureIdMapEntry(propertyId: string, featureIdMap: FeatureIdMap, featureId: GeoJSONId)
-    //============================================================================================
+    #updateFeatureIdMapEntry(propertyId: string, featureIdMap: FeatureIdMap, featureId?: GeoJSONId)
+    //=============================================================================================
     {
-        const id = utils.normaliseId(propertyId)
-        const featureIds = featureIdMap.get(id)
-        if (featureIds) {
-            featureIds.push(featureId)
-        } else {
-            featureIdMap.set(id, [featureId])
+        if (featureId) {
+            const id = utils.normaliseId(propertyId)
+            const featureIds = featureIdMap.get(id)
+            if (featureIds) {
+                featureIds.push(featureId)
+            } else {
+                featureIdMap.set(id, [featureId])
+            }
         }
     }
 
-    #updateFeatureIdMap(property: string, featureIdMap: FeatureIdMap, annotation: FlatMapFeatureAnnotation, missingId=null)
-    //===================================================================================
+    #updateFeatureIdMap(property: string, featureIdMap: FeatureIdMap,
+                        annotation: FlatMapFeatureAnnotation, missingId: string|null=null)
+    //====================================================================================
     {
         // Exclude centrelines from our set of annotated features
         if (this.options.style !== FLATMAP_STYLE.CENTRELINE && annotation.centreline) {
@@ -837,7 +819,7 @@ export class FlatMap
             }
         } else if (missingId !== null
                && 'models' in annotation
-               && annotation.models.startsWith(APINATOMY_PATH_PREFIX)) {
+               && annotation.models!.startsWith(APINATOMY_PATH_PREFIX)) {
             this.#updateFeatureIdMapEntry(missingId, featureIdMap, annotation.featureId)
         }
     }
@@ -872,7 +854,7 @@ export class FlatMap
 
         // Pre-compute LineStrings of centrelines in centreline maps
         if (this.options.style === FLATMAP_STYLE.CENTRELINE && ann.centreline) {
-            ann['lineString'] = turf.lineString(ann.coordinates)
+            ann['lineString'] = turf.lineString(ann.coordinates!)
             ann['lineLength'] = turfLength.length(ann.lineString)
         }
     }
@@ -899,12 +881,12 @@ export class FlatMap
             // We couldn't find a feature by anatomical id, so check dataset and source
             if (Array.isArray(anatomicalIds)) {
                 for (const id of anatomicalIds) {
-                    featureIds.extend(this.#datasetToFeatureIds.get(id))
-                    featureIds.extend(this.#mapSourceToFeatureIds.get(id))
+                    featureIds.extend(this.#datasetToFeatureIds.get(id) || [])
+                    featureIds.extend(this.#mapSourceToFeatureIds.get(id) || [])
                 }
             } else {
-                featureIds.extend(this.#datasetToFeatureIds.get(anatomicalIds))
-                featureIds.extend(this.#mapSourceToFeatureIds.get(anatomicalIds))
+                featureIds.extend(this.#datasetToFeatureIds.get(anatomicalIds) || [])
+                featureIds.extend(this.#mapSourceToFeatureIds.get(anatomicalIds) || [])
             }
         }
         if (featureIds.length == 0 && this.#userInteractions !== null) {
@@ -918,7 +900,7 @@ export class FlatMap
     //================================================
     {
         const ann = this.#idToAnnotation.get(+featureId)
-        return (ann && 'models' in ann) ? utils.normaliseId(ann.models) : null
+        return (ann && 'models' in ann) ? utils.normaliseId(ann.models!) : null
     }
 
     /**
@@ -947,6 +929,7 @@ export class FlatMap
         if (this.#userInteractions !== null) {
             return [...this.#userInteractions.pathModelNodes(modelId)]
         }
+        return []
     }
 
     /**
@@ -971,8 +954,8 @@ export class FlatMap
         return taxonId
     }
 
-    async #setTaxonName(taxonId: string)
-    //==================================
+    async #setTaxonName(taxonId: string|null)
+    //=======================================
     {
         if (taxonId && !this.#taxonNames.has(taxonId)) {
             const result = await this.queryLabels(taxonId)
@@ -988,8 +971,8 @@ export class FlatMap
         return this.#layers
     }
 
-    get map(): maplibregl.Map
-    //=======================
+    get map(): maplibregl.Map|null
+    //============================
     {
         return this.#map
     }
@@ -1049,9 +1032,9 @@ export class FlatMap
     {
         return {
             mapUUID: this.#uuid,
-            minZoom: this.#map.getMinZoom(),
-            zoom:    this.#map.getZoom(),
-            maxZoom: this.#map.getMaxZoom()
+            minZoom: this.#map!.getMinZoom(),
+            zoom:    this.#map!.getZoom(),
+            maxZoom: this.#map!.getMaxZoom()
         }
     }
 
@@ -1061,8 +1044,8 @@ export class FlatMap
         this.#callbacks.unshift(callback)
     }
 
-    async callback(type: string, properties: Record<string, any>, ...args: unknown[])
-    //===============================================================================
+    async callback(type: string, properties: ExportedFeatureProperties|ExportedFeatureProperties[], ...args: unknown[])
+    //=================================================================================================================
     {
         const data = {...properties, mapUUID: this.#uuid}
         for (const callback of this.#callbacks) {
@@ -1094,7 +1077,7 @@ export class FlatMap
     {
         // Resize our map
 
-        this.#map.resize(undefined, false)
+        this.#map!.resize(undefined, false)
     }
 
     getIdentifier()
@@ -1109,10 +1092,10 @@ export class FlatMap
         }
     }
 
-    getState()
-    //========
+    getState(): FlatMapState|null
+    //===========================
     {
-        return (this.#userInteractions !== null) ? this.#userInteractions.getState() : {}
+        return (this.#userInteractions !== null) ? this.#userInteractions.getState() : null
     }
 
     setState(state)
@@ -1142,8 +1125,8 @@ export class FlatMap
         }
     }
 
-    setPaint(options=null)
-    //====================
+    setPaint(options={})
+    //==================
     {
         options = utils.setDefaults(options, {
             colour: true,
@@ -1154,8 +1137,8 @@ export class FlatMap
         }
     }
 
-    setColour(options=null)
-    //=====================
+    setColour(options={})
+    //===================
     {
         console.log('`setColour()` is deprecated; please use `setPaint()` instead.')
         this.setPaint(options)
@@ -1171,7 +1154,7 @@ export class FlatMap
     getBackgroundColour(): string
     //===========================
     {
-        return this.#map.getPaintProperty('background', 'background-color') as string
+        return this.#map!.getPaintProperty('background', 'background-color') as string
     }
 
     /**
@@ -1182,7 +1165,7 @@ export class FlatMap
     getBackgroundOpacity(): number
     //============================
     {
-        return this.#map.getPaintProperty('background', 'background-opacity') as number
+        return this.#map!.getPaintProperty('background', 'background-opacity') as number
     }
 
     /**
@@ -1195,10 +1178,10 @@ export class FlatMap
     {
         localStorage.setItem('flatmap-background-colour', colour)
 
-        this.#map.setPaintProperty('background', 'background-color', colour)
+        this.#map!.setPaintProperty('background', 'background-color', colour)
 
-        if (this.#userInteractions.minimap) {
-            this.#userInteractions.minimap.setBackgroundColour(colour)
+        if (this.#userInteractions!.minimap) {
+            this.#userInteractions!.minimap.setBackgroundColour(colour)
         }
     }
 
@@ -1210,10 +1193,10 @@ export class FlatMap
     setBackgroundOpacity(opacity: number)
     //===================================
     {
-        this.#map.setPaintProperty('background', 'background-opacity', opacity)
+        this.#map!.setPaintProperty('background', 'background-opacity', opacity)
 
-        if (this.#userInteractions.minimap) {
-            this.#userInteractions.minimap.setBackgroundOpacity(opacity)
+        if (this.#userInteractions!.minimap) {
+            this.#userInteractions!.minimap.setBackgroundOpacity(opacity)
         }
     }
 
@@ -1225,8 +1208,8 @@ export class FlatMap
     showMinimap(show: boolean)
     //========================
     {
-        if (this.#userInteractions.minimap) {
-            this.#userInteractions.minimap.show(show)
+        if (this.#userInteractions!.minimap) {
+            this.#userInteractions!.minimap.show(show)
         }
 
     }
@@ -1333,7 +1316,7 @@ export class FlatMap
     //==============================================================================
     {
         options = Object.assign({cluster: true}, options)
-        const markerIds = []
+        const markerIds: number[] = []
         for (const anatomicalId of anatomicalIds) {
             if (this.#userInteractions !== null) {
                 markerIds.push(this.#userInteractions.addMarker(anatomicalId, options))
@@ -1579,6 +1562,7 @@ export class FlatMap
         if (this.#userInteractions) {
             return this.#userInteractions.refreshAnnotationFeatureGeometry(feature)
         }
+        return null
     }
 
     /**
@@ -1603,7 +1587,7 @@ export class FlatMap
     {
 
         if (Array.isArray(properties)) {
-            const featureData = []
+            const featureData: ExportedFeatureProperties[] = []
             for (const p of properties) {
                 const data = this.exportedFeatureProperties(p)
                 if (Object.keys(data).length > 0) {
@@ -1697,14 +1681,14 @@ export class FlatMap
     panZoomEvent(type: string)
     //========================
     {
-        const bounds = this.#map.getBounds()
+        const bounds = this.#map!.getBounds()
         if (this.#normalisedOrigin) {
             const sw = maplibregl.MercatorCoordinate.fromLngLat(bounds.toArray()[0])
             const ne = maplibregl.MercatorCoordinate.fromLngLat(bounds.toArray()[1])
-            const top_left = [(sw.x - this.#normalisedOrigin[0])/this.#normalised_size[0],
-                              (ne.y - this.#normalisedOrigin[1])/this.#normalised_size[1]]
-            const size = [(ne.x - sw.x)/this.#normalised_size[0],
-                          (sw.y - ne.y)/this.#normalised_size[1]]
+            const top_left: Point2D = [(sw.x - this.#normalisedOrigin[0])/this.#normalised_size[0],
+                                       (ne.y - this.#normalisedOrigin[1])/this.#normalised_size[1]]
+            const size: Size2D = [(ne.x - sw.x)/this.#normalised_size[0],
+                                  (sw.y - ne.y)/this.#normalised_size[1]]
             this.callback('pan-zoom', {
                 type: type,
                 origin: top_left,
@@ -1729,7 +1713,7 @@ export class FlatMap
             const sw_y = ne_y + size[1]*this.#normalised_size[1]
             const sw = (new maplibregl.MercatorCoordinate(sw_x, sw_y, 0)).toLngLat()
             const ne = (new maplibregl.MercatorCoordinate(ne_x, ne_y, 0)).toLngLat()
-            this.#map.fitBounds([sw, ne], {animate: false})
+            this.#map!.fitBounds([sw, ne], {animate: false})
         }
     }
 
@@ -1840,8 +1824,8 @@ export class FlatMap
      * @param  geojsonIds  An array of  GeoJSON feature identifiers
      * @param {boolean} [options.zoomIn=false]  Zoom in the map (always zoom out as necessary)
      */
-    zoomToGeoJSONFeatures(geojsonIds: GeoJSONId[], options: { zoomIn?: boolean }=null)
-    //================================================================================
+    zoomToGeoJSONFeatures(geojsonIds: GeoJSONId[], options?: {zoomIn?: boolean})
+    //==========================================================================
     {
         options = utils.setDefaults(options, {
             select: true,
@@ -1934,7 +1918,7 @@ export class FlatMap
     async queryLabels(entities: string|string[]): Promise<EntityLabel[]>
     //==================================================================
     {
-        const entityLabels = []
+        const entityLabels: {entity: string, label: string}[] = []
         const entityArray = Array.isArray(entities) ? entities
                           : entities ? [entities]
                           : []
@@ -1946,7 +1930,7 @@ export class FlatMap
                                            and entity in (?${', ?'.repeat(entityArray.length-1)})
                                         order by entity, source desc`,
                                     [this.#knowledgeSource, ...entityArray])
-                let last_entity = null
+                let last_entity: string|null = null
                 for (const row of rows) {
                     // In entity, source[desc] order; we use the most recent label
                     if (row[1] !== last_entity) {
@@ -2006,7 +1990,7 @@ export class FlatMap
         const featureEntities = Array.isArray(entities) ? entities
                               : entities ? [entities]
                               : []
-        const featureIds = []
+        const featureIds: number[] = []
         for (const anatomicalId of featureEntities) {
             featureIds.push(...this.modelFeatureIds(anatomicalId))
         }
@@ -2033,8 +2017,8 @@ export class FlatMap
         const connectivityNodes: Set<string> = new Set()
         for (const featureId of uniqueIds) {
             const annotation = this.#idToAnnotation.get(+featureId)
-            if ('anatomical-nodes' in annotation) {
-                for (const node of annotation['anatomical-nodes']) {
+            if (annotation && 'anatomical-nodes' in annotation) {
+                for (const node of annotation['anatomical-nodes']!) {
                     connectivityNodes.add(node)
                 }
             }

@@ -23,10 +23,9 @@ import {colord} from 'colord'
 //==============================================================================
 
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
-import {MapRenderedFeature} from './flatmap-types'
 import type {GeoJSONId, PathDetailsType} from './flatmap-types'
 import {UserInteractions} from './interactions'
-import {Callback, PropertiesType} from './types'
+import {Callback} from './types'
 import {reverseMap} from './utils'
 
 export const PATHWAYS_LAYER = 'pathways'
@@ -72,12 +71,15 @@ const PathTypeMap: Map<string, PathType> = new Map(PATH_TYPES.map(t => [t.type, 
 export const PATH_STYLE_RULES =
     PATH_TYPES.flatMap(pathType => [['==', ['get', 'kind'], pathType.type], pathType.colour])
 
-export function pathColourArray(pathType: string, alpha: number=255): [number, number, number, number]
-//====================================================================================================
+
+export type RGBAArray = [number, number, number, number]
+
+export function pathColourArray(pathType: string, alpha: number=255): RGBAArray
+//=============================================================================
 {
     const rgb = colord(PathTypeMap.has(pathType)
-                        ? PathTypeMap.get(pathType).colour
-                        : PathTypeMap.get('other').colour).toRgb()
+                        ? PathTypeMap.get(pathType)!.colour
+                        : PathTypeMap.get('other')!.colour).toRgb()
     return [rgb.r, rgb.g, rgb.b, alpha]
 }
 
@@ -160,7 +162,7 @@ export class PathManager
                 this.#paths[pathId] = path
                 this.#paths[pathId].systemCount = 0
                 if ('models' in path) {
-                    const modelId = path['models']
+                    const modelId = path['models']!
                     if (!(modelId in this.#pathModelPaths)) {
                         this.#pathModelPaths[modelId] = []
                     }
@@ -171,7 +173,7 @@ export class PathManager
                     if (!this.#pathsByCentreline.has(id)) {
                         this.#pathsByCentreline.set(id, new Set())
                     }
-                    this.#pathsByCentreline.get(id).add(pathId)
+                    this.#pathsByCentreline.get(id)!.add(pathId)
                 }
             }
         }
@@ -212,7 +214,7 @@ export class PathManager
                     if (flatmap.options.style === FLATMAP_STYLE.CENTRELINE
                      || this.#pathsByCentreline.has(id)) {
                         if (annotation && 'models' in annotation) {
-                            this.#nerveCentrelineDetails.set(annotation.models, annotation.label || annotation.models)
+                            this.#nerveCentrelineDetails.set(annotation.models!, annotation.label || annotation.models!)
                         }
                     }
                 }

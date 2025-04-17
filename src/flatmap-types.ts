@@ -53,6 +53,9 @@ export type MapRenderedFeature = maplibregl.MapGeoJSONFeature & {
 // Lng, Lat coordinates
 export type MapExtent = [number, number, number, number]
 
+// [minX,   minY,   maxX,   maxY]
+export type BoundingBox = [number, number, number, number]
+
 //==============================================================================
 
 // Flatmap types as received from server...
@@ -163,7 +166,11 @@ export interface FlatMapLayer
 
 //==============================================================================
 
-export type FlatMapCallback = (type: string, data: Record<string, any>, ...args: unknown[]) => Promise<undefined|boolean>
+export type FlatMapCallback = (
+    type: string,
+    data: ExportedFeatureProperties|ExportedFeatureProperties[],
+    ...args: unknown[]
+) => Promise<undefined|boolean>
 
 export interface FlatMapLayerOptions
 {
@@ -223,15 +230,16 @@ export interface FlatMapMetadata
 
 export interface FlatMapFeatureAnnotation
 {
+    id?: string
     alert?: string
     'anatomical-nodes'?: string[]
-    bounds?: string
+    bounds?: BoundingBox
     centreline?: boolean
     centroid?: Point2D
     children?: GeoJSONId[]
     colour?: string
     coordinates?: Point2D[]
-    featureId?: GeoJSONId
+    featureId: GeoJSONId
     geometry?: string
     hyperlink?: string
     hyperlinks?: {
@@ -239,7 +247,6 @@ export interface FlatMapFeatureAnnotation
         flatmap?: string
         pmr?: string
     }
-    id?: string
     kind?: string
     label?: string
     lineLength?: number
@@ -259,8 +266,19 @@ export type FlatMapAnnotations = Record<number, FlatMapFeatureAnnotation>
 //==============================================================================
 
 export type Point2D = [number, number]
+export type Size2D = [number, number]
 
 export type FlatMapFeatureGeometry = GeoJSON.LineString | GeoJSON.Point | GeoJSON.Polygon
+
+//==============================================================================
+//==============================================================================
+
+export type FlatMapState = {
+    center: [number, number]
+    zoom: number
+    bearing: number
+    pitch: number
+}
 
 //==============================================================================
 //==============================================================================
@@ -323,9 +341,38 @@ export type FlatMapMarkerOptions = maplibregl.MarkerOptions & {
 //==============================================================================
 
 export type FlatMapPopUpOptions = maplibregl.PopupOptions & {
-    annotationFeatureGeometry?: boolean
+    annotationFeatureGeometry?: Point2D
     positionAtLastClick?: boolean
     preserveSelection?: boolean
+}
+
+//==============================================================================
+//==============================================================================
+
+export type ExportedFeatureProperties = {
+    id?: string
+    featureId?: number
+    'connectivity'?: object,
+    container?: string
+    control?: string
+    dataset?: string
+    'dataset-ids'?: string[]
+    feature?: AnnotatedFeature
+    kind?: string
+    label?: string
+    models?: string
+    origin?: Point2D
+    size?: Size2D
+    source?: string
+    taxons?: string[]
+    hyperlinks?: string
+    'completeness'?: boolean,
+    'missing-nodes'?: string[],
+    alert?: string
+    'biological-sex'?: string
+    location?: number
+    type?: string
+    value?: string
 }
 
 //==============================================================================

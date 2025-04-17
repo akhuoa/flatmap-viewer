@@ -96,8 +96,8 @@ export class AnnotationDrawControl
         })
     }
 
-    onAdd(map: maplibregl.Map)
-    //========================
+    onAdd(map: maplibregl.Map): HTMLElement
+    //====================================
     {
         this.#map = map
         this.#container = this.#draw.onAdd(map)
@@ -118,7 +118,7 @@ export class AnnotationDrawControl
         map.on('draw.update', this.updatedFeature.bind(this))
         map.on('draw.selectionchange', this.selectionChangedEvent.bind(this))
         this.show(this.#visible)
-        return this.#container
+        return this.#container!
     }
 
     onRemove()

@@ -351,7 +351,7 @@ export class MapViewer
 
         mapOptions.separateLayers = !!map.separateLayers
 
-        let containerId: string = options.container || ''
+        const containerId: string = options.container || ''
 
         // Display the map
         if (containerId === '') {
