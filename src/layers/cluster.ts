@@ -24,7 +24,7 @@ import maplibregl from 'maplibre-gl';
 
 import {FlatMap} from '../flatmap'
 import {UserInteractions} from '../interactions'
-import {CLUSTERED_MARKER_ID, UNCLUSTERED_MARKER_ID} from '../markers'
+import {DATASET_MARKER_ID, UNCLUSTERED_MARKER_ID} from '../markers'
 
 //==============================================================================
 
@@ -67,7 +67,7 @@ export class ClusteredMarkerLayer
             source: 'markers',
             filter: ['has', 'point_count'],
             layout: {
-                'icon-image': CLUSTERED_MARKER_ID,
+                'icon-image': DATASET_MARKER_ID,
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true,
                 'icon-offset': [0, -17],

@@ -68,7 +68,7 @@ export class DatasetClusterSet
         for (const terminal of this.#connectedTermGraph.nodes()
                                                        .filter(term => term !== ANATOMICAL_ROOT
                                                             && this.#connectedTermGraph.degree(term) == 1)) {
-            const cluster = this.#clustersByTerm.get(terminal)
+            const cluster = this.#clustersByTerm.get(terminal)!
             cluster.maxZoom = MAX_MARKER_ZOOM
             this.#setZoomFromParents(cluster)
         }
@@ -104,7 +104,7 @@ export class DatasetClusterSet
             return
         }
         for (const parent of this.#connectedTermGraph.parents(cluster.term)) {
-            const parentCluster = this.#clustersByTerm.get(parent)
+            const parentCluster = this.#clustersByTerm.get(parent)!
             if (parentCluster.maxZoom < cluster.minZoom) {
                 parentCluster.maxZoom = cluster.minZoom
             }
@@ -121,7 +121,7 @@ export class DatasetClusterSet
             return null
         }
         const maxDepth = -1
-        let furthestParent = null
+        let furthestParent: string|null = null
         for (const parent of parents) {
             const depth = this.#mapTermGraph.depth(parent)
             if (depth > maxDepth) {
@@ -136,7 +136,7 @@ export class DatasetClusterSet
     #validatedTerms(terms: string[]): string[]
     //========================================
     {
-        const mapTerms = []
+        const mapTerms: string[] = []
         for (let term of terms) {
             term = term.trim()
             if (term === '') {

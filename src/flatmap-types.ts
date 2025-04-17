@@ -331,10 +331,25 @@ export type FlatMapPopUpOptions = maplibregl.PopupOptions & {
 //==============================================================================
 //==============================================================================
 
+export type DatasetMarkerKind = 'dataset' | 'multiscale'
+
+export interface DatasetResult
+{
+    id: string
+    kind: DatasetMarkerKind
+}
+
 export interface DatasetTerms
 {
     id: string
+    kind?: DatasetMarkerKind
     terms: string[]
+}
+
+export type DatasetFeatures = {
+    dataset: string
+    kind?: DatasetMarkerKind
+    features: ExportedFeatureProperties[]
 }
 
 //==============================================================================

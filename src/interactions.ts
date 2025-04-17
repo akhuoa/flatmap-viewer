@@ -40,7 +40,7 @@ import {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent,
         FlatMapFeature, FlatMapFeatureAnnotation,
         FlatMapMarkerOptions, FlatMapPopUpOptions, MapFeature,
         MapFeatureIdentifier, MapRenderedFeature} from './flatmap-types'
-import type {DatasetTerms, FeatureZoomOptions, GeoJSONId} from './flatmap-types'
+import type {DatasetFeatures, DatasetTerms, FeatureZoomOptions, GeoJSONId} from './flatmap-types'
 import type {Point2D} from './flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
 import {inAnatomicalClusterLayer, LayerManager} from './layers'
@@ -1061,39 +1061,39 @@ export class UserInteractions
     #featureEvent(type: string, feature: MapRenderedFeature|MapRenderedFeature[], values={})
     //======================================================================================
     {
-        let properties: object|object[]|null
+        let properties: FlatMapFeatureAnnotation|FlatMapFeatureAnnotation[]|null
         if (Array.isArray(feature)) {
-            const properties_array = []
+            const properties_array: FlatMapFeatureAnnotation[] = []
             const seenModels: string[] = []
             for (const f of feature) {
                 if (f.properties.models && !seenModels.includes(f.properties.models)) {
-                    properties_array.push(Object.assign({}, f.properties, values))
+                    properties_array.push(Object.assign({}, f.properties, values) as FlatMapFeatureAnnotation)
                     seenModels.push(f.properties.models)
                 }
             }
             properties = properties_array
         } else {
-            properties = Object.assign({}, feature.properties, values)
             if (inAnatomicalClusterLayer(feature)) {
-                const datasetIds = this.#layerManager.datasetIds(properties['models'], this.#map.getZoom())
+                const markerProperties: object = Object.assign({}, feature.properties, values)
+                const datasets = this.#layerManager.datasets(markerProperties['models'], this.#map.getZoom())
                 const datasetFeatureIds = this.#layerManager.datasetFeatureIds()
-                const datasetFeatureList = []
-                for (const datasetId of datasetIds) {
-                    const featureProperties = []
-                    for (const featureId of datasetFeatureIds.get(datasetId)) {
-                        featureProperties.push(this.#flatmap.exportedFeatureProperties(this.#flatmap.annotation(featureId)))
+                const datasetFeatureList: DatasetFeatures[] = []
+                for (const dataset of datasets) {
+                    const featureProperties: ExportedFeatureProperties[] = []
+                    for (const featureId of datasetFeatureIds.get(dataset.id)!) {
+                        featureProperties.push(this.#flatmap.exportedFeatureProperties(this.#flatmap.annotation(featureId)!))
                     }
                     datasetFeatureList.push({
-                        dataset: datasetId,
+                        dataset: dataset.id,
+                        kind: dataset.kind,
                         features: featureProperties
                     })
                 }
-                properties['dataset-features'] = datasetFeatureList
-                return this.#flatmap.markerEvent(type, +feature.id, properties)
-            } else if (feature.sourceLayer === PATHWAYS_LAYER) {  // I suspect this is never true as source layer
-                                                                  // names are like `neural_routes_pathways`
-                return this.#flatmap.featureEvent(type, this.#pathManager.pathProperties(feature))
-            } else if (!('properties' in feature)) {
+                markerProperties['dataset-features'] = datasetFeatureList
+                return this.#flatmap.markerEvent(type, +feature.id!, markerProperties as FlatMapFeatureAnnotation)
+            } else if ('properties' in feature) {
+                properties = Object.assign({}, feature.properties, values) as FlatMapFeatureAnnotation
+            } else {
                 properties = null
             }
         }
