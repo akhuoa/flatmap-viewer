@@ -398,6 +398,11 @@ export type DatasetFeatures = {
     features: ExportedFeatureProperties[]
 }
 
+export type DatasetMarkerResult = {
+    term: string
+    kind: DatasetMarkerKind
+}
+
 //==============================================================================
 
 export type FeatureZoomOptions = {

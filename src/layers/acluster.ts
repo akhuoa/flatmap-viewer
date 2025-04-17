@@ -24,7 +24,7 @@ import {DataDrivenPropertyValueSpecification, GeoJSONSource} from 'maplibre-gl'
 //==============================================================================
 
 import {FlatMap} from '../flatmap'
-import {DatasetMarkerKind, DatasetTerms} from '../flatmap-types'
+import {DatasetMarkerKind, DatasetMarkerResult, DatasetTerms} from '../flatmap-types'
 import type {GeoJSONId} from '../flatmap-types'
 import {UserInteractions} from '../interactions'
 import {MapTermGraph} from '../knowledge'
@@ -97,6 +97,7 @@ export class ClusteredAnatomicalMarkerLayer
     #featureToTerm: Map<number, string> = new Map()
     #flatmap: FlatMap
     #kindByDataset: Map<string, DatasetMarkerKind> = new Map()
+    #kindByTerm: Map<string, DatasetMarkerKind> = new Map()
     #map: MapLibreMap
     #mapTermGraph: MapTermGraph
     #markerTerms: Map<string, Set<string>> = new Map()
@@ -146,10 +147,16 @@ export class ClusteredAnatomicalMarkerLayer
         })
     }
 
-    markerTerms(): Map<string, Set<string>>
-    //=====================================
+    markerTerms(term: string): DatasetMarkerResult[]
+    //==============================================
     {
-        return this.#markerTerms
+        const terms = [...(this.#markerTerms.get(term) || []).values()]
+        return terms.map(term => {
+            return {
+                term,
+                kind: this.#kindByTerm.get(term) || 'dataset'
+            }
+        })
     }
 
     #showPoints()
@@ -247,6 +254,9 @@ export class ClusteredAnatomicalMarkerLayer
                     }
                     for (const descendent of descendents.values()) {
                         this.#markerTerms.get(term)!.add(descendent)
+                        if (this.#kindByTerm.get(descendent) !== 'multiscale') {
+                            this.#kindByTerm.set(descendent, dataset.kind || 'dataset')
+                        }
                     }
                 }
             }

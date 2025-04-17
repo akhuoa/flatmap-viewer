@@ -1098,8 +1098,7 @@ export class UserInteractions
             if (inAnatomicalClusterLayer(feature)) {
                 const markerProperties: object = Object.assign({}, feature.properties, values)
                 const markerTerm = markerProperties['models']
-                const markerTerms = this.#layerManager.markerTerms().get(markerTerm) || []
-                markerProperties['marker-terms'] = [...markerTerms.values()]
+                markerProperties['marker-terms'] = this.#layerManager.markerTerms(markerTerm)
                 return this.#flatmap.markerEvent(type, +feature.id!, markerProperties as FlatMapFeatureAnnotation)
             } else if ('properties' in feature) {
                 properties = Object.assign({}, feature.properties, values) as FlatMapFeatureAnnotation
