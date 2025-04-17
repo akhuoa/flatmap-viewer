@@ -152,8 +152,17 @@ export class ClusteredAnatomicalMarkerLayer
     {
         const terms = [...(this.#markerTerms.get(term) || []).values()]
         return terms.map(term => {
+            let label: string = term
+            const termFeatures = this.#flatmap.modelFeatureIds(term)
+            if (termFeatures.length) {
+                const annotation = this.#flatmap.annotation(termFeatures[0])
+                if (annotation && 'label' in annotation) {
+                    label = annotation.label!
+                }
+            }
             return {
                 term,
+                label,
                 kind: this.#kindByTerm.get(term) || 'dataset'
             }
         })

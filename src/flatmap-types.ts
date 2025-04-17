@@ -400,6 +400,7 @@ export type DatasetFeatures = {
 
 export type DatasetMarkerResult = {
     term: string
+    label: string
     kind: DatasetMarkerKind
 }
 
