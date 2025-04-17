@@ -33,7 +33,7 @@ import * as utils from './utils'
 //==============================================================================
 
 // The released version of the viewer
-export const VIEWER_VERSION = '4.1.1'
+export const VIEWER_VERSION = '4.1.0'
 
 //==============================================================================
 
@@ -99,6 +99,8 @@ export class MapViewer
     #images: PreloadedImage[]
     #sparcTermGraph = new SparcTermGraph()
 
+    readonly mapServerUrl: string
+
     // also have a callback for viewer events...
     // -- as an option in MapViewerOptions?
     //
@@ -107,6 +109,7 @@ export class MapViewer
 
     constructor(mapServerUrl: string, options: MapViewerOptions)
     {
+        this.mapServerUrl = mapServerUrl
         this.#mapServer = new FlatMapServer(mapServerUrl)
         this.#images = options.images || []
     }
