@@ -100,8 +100,8 @@ export class PaneManager
     }
 
     async loadMap(viewer: MapViewer, mapId: MapIdentifier, callback: FlatMapCallback,
-                  options: FlatMapOptions={}, newPane: boolean=false): Promise<FlatMap|SvgMap>
-    //========================================================================================
+                  options: FlatMapOptions={}, newPane: boolean=false): Promise<FlatMap|SvgMap|null>
+    //=============================================================================================
     {
         // Don't load an already open map
         const map = await viewer.findMap(mapId)
@@ -171,20 +171,21 @@ export class PaneManager
  *      }
  */
         const flatmap = await viewer.loadMap(mapId, callback, options)
-        this.#mapsByPane.set(mapPaneId, flatmap)
+        if (flatmap) {
+            this.#mapsByPane.set(mapPaneId, flatmap)
 
-        // We get a control change event when the BG colour is changed
-        flatmap.addCallback(async (eventType, data) => {
-            if (eventType === 'change'
-             && data.type === 'control'
-             && data.control === 'background') {
-                localStorage.setItem(`${map.id}-background`, data.value)
-                return true
-            }
-        })
+            // We get a control change event when the BG colour is changed
+            flatmap.addCallback(async (eventType, data) => {
+                if (eventType === 'change'
+                 && data.type === 'control'
+                 && data.control === 'background') {
+                    localStorage.setItem(`${map.id}-background`, data.value)
+                    return true
+                }
+            })
 
-        flatmap.addCallback(this.#closePaneCallback.bind(this))
-
+            flatmap.addCallback(this.#closePaneCallback.bind(this))
+        }
         return flatmap
     }
 }
