@@ -1,6 +1,6 @@
 {
   "name": "@abi-software/flatmap-viewer",
-  "version": "4.0.4",
+  "version": "4.1.1",
   "description": "Flatmap viewer using Maplibre GL",
   "repository": {
     "type": "git",
@@ -22,6 +22,7 @@
     "prepare": "tsc --p ./tsconfig-build.json && vite build",
     "preview": "vite preview",
     "build": "vite build app --base /viewer/",
+    "docs": "npx typedoc",
     "lint": "eslint ./src/",
     "typecheck": "tsc --noEmit -p tsconfig-build.json --composite false",
     "tsdoc": "typedoc"
