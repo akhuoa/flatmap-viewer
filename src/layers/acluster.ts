@@ -196,7 +196,6 @@ export class ClusteredAnatomicalMarkerLayer
                 }
                 markerPoints.push(markerPoint)
                 this.#featureToTerm.set(+featureId, term)
-
             }
         })
         this.#points.features = (markerPoints as GeoJSON.Feature<GeoJSON.Point, GeoJSON.GeoJsonProperties>[])
