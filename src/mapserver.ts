@@ -93,6 +93,23 @@ export class FlatMapServer
         }
     }
 
+    async #loadImageBytes(relativePath: string): Promise<Uint8Array>
+    //==============================================================
+    {
+        const url = this.url(relativePath)
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                "Accept": "application/json; charset=utf-8",
+                "Cache-Control": "no-store"
+            }
+        })
+        if (!response.ok) {
+            throw new Error(`Cannot access ${url}`)
+        }
+        return await response.bytes()
+    }
+
     async #loadJSON<T>(relativePath: string, missingOK: boolean=false): Promise<T|null>
     //=================================================================================
     {
@@ -117,6 +134,12 @@ export class FlatMapServer
     //==================================================
     {
         return this.#loadJSON<FlatMapServerIndex[]>('')
+    }
+
+    async mapImage(mapId: string, image: string): Promise<Uint8Array>
+    //===============================================================
+    {
+        return this.#loadImageBytes(`flatmap/${mapId}/images/${image}`)
     }
 
     async mapIndex(mapId: string): Promise<FlatMapIndex|null>
