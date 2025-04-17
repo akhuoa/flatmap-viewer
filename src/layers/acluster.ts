@@ -92,14 +92,15 @@ interface MarkerPoint
 export class ClusteredAnatomicalMarkerLayer
 {
     #datasetFeatureIds: Map<string, Set<number>> = new Map()
+    #datasetsByZoomTerm: Map<string, Set<string>[]> = new Map()
     #featureToMarkerPoint: Map<number, MarkerPoint> = new Map()
     #featureToTerm: Map<number, string> = new Map()
     #flatmap: FlatMap
+    #kindByDataset: Map<string, DatasetMarkerKind> = new Map()
     #map: MapLibreMap
     #mapTermGraph: MapTermGraph
-    #datasetsByZoomTerm: Map<string, Set<string>[]> = new Map()
+    #markerTerms: Map<string, Set<string>> = new Map()
     #multiScaleByZoomTerm: Map<string, boolean[]> = new Map()
-    #kindByDataset: Map<string, DatasetMarkerKind> = new Map()
     #maxZoom: number
     #points: GeoJSON.FeatureCollection = {
        type: 'FeatureCollection',
@@ -145,25 +146,10 @@ export class ClusteredAnatomicalMarkerLayer
         })
     }
 
-    datasetFeatureIds(): Map<string, Set<number>>
-    //===========================================
+    markerTerms(): Map<string, Set<string>>
+    //=====================================
     {
-        return this.#datasetFeatureIds
-    }
-
-    datasets(term: string, zoomLevel: number): DatasetResult[]
-    //========================================================
-    {
-        const zoomDatasets = this.#datasetsByZoomTerm.get(term)
-        if (zoomDatasets) {
-            return [...zoomDatasets[Math.floor(zoomLevel)]].map(id => {
-                return {
-                    id,
-                    kind: this.#kindByDataset.get(id) || 'dataset'
-                }
-            })
-        }
-        return []
+        return this.#markerTerms
     }
 
     #showPoints()
@@ -254,6 +240,14 @@ export class ClusteredAnatomicalMarkerLayer
                         for (const featureId of this.#flatmap.modelFeatureIds(cluster.term)) {
                             datasetFeatureIds.add(+featureId)
                         }
+                    }
+                }
+                for (const [term, descendents] of clusteredSet.descendents.entries()) {
+                    if (!this.#markerTerms.has(term)) {
+                        this.#markerTerms.set(term, new Set())
+                    }
+                    for (const descendent of descendents.values()) {
+                        this.#markerTerms.get(term)!.add(descendent)
                     }
                 }
             }

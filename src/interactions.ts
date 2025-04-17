@@ -1095,21 +1095,9 @@ export class UserInteractions
         } else {
             if (inAnatomicalClusterLayer(feature)) {
                 const markerProperties: object = Object.assign({}, feature.properties, values)
-                const datasets = this.#layerManager.datasets(markerProperties['models'], this.#map.getZoom())
-                const datasetFeatureIds = this.#layerManager.datasetFeatureIds()
-                const datasetFeatureList: DatasetFeatures[] = []
-                for (const dataset of datasets) {
-                    const featureProperties: ExportedFeatureProperties[] = []
-                    for (const featureId of datasetFeatureIds.get(dataset.id)!) {
-                        featureProperties.push(this.#flatmap.exportedFeatureProperties(this.#flatmap.annotation(featureId)!))
-                    }
-                    datasetFeatureList.push({
-                        dataset: dataset.id,
-                        kind: dataset.kind,
-                        features: featureProperties
-                    })
-                }
-                markerProperties['dataset-features'] = datasetFeatureList
+                const markerTerm = markerProperties['models']
+                const markerTerms = this.#layerManager.markerTerms().get(markerTerm) || []
+                markerProperties['marker-terms'] = [...markerTerms.values()]
                 return this.#flatmap.markerEvent(type, +feature.id!, markerProperties as FlatMapFeatureAnnotation)
             } else if ('properties' in feature) {
                 properties = Object.assign({}, feature.properties, values) as FlatMapFeatureAnnotation

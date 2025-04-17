@@ -356,7 +356,7 @@ export type ExportedFeatureProperties = {
     container?: string
     control?: string
     dataset?: string
-    'dataset-ids'?: string[]
+    'marker-terms'?: string[]
     feature?: AnnotatedFeature
     kind?: string
     label?: string
