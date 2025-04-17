@@ -385,7 +385,7 @@ export class UserInteractions
     getState(): FlatMapState
     //======================
     {
-        // Return the map's centre, zoom, and active layers
+        // Return the map's centre, zoom, bearing and pitch
         // Can only be called when the map is fully loaded
         return {
             center: this.#map.getCenter().toArray(),

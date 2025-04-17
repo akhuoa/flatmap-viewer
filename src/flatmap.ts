@@ -197,7 +197,7 @@ type FeatureIdMap = Map<string, GeoJSONId[]>
 
 /**
 * Maps are not created directly but instead are created and loaded by
-* :meth:`LoadMap` of :class:`MapViewer`.
+* `LoadMap` of {@link MapViewer}.
 */
 export class FlatMap
 {
