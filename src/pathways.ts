@@ -343,34 +343,6 @@ export class PathManager
         return featureIds
     }
 
-    pathProperties(feature: MapRenderedFeature): PropertiesType
-    //=========================================================
-    {
-        const properties: PropertiesType = Object.assign({}, feature.properties)
-        if (this.#pathsByLine.has(+feature.id)) {
-            for (const pathId of this.#pathsByLine.get(+feature.id)) {
-                // There should only be a single path for a line
-                if (pathId in this.#pathToConnectivityModel) {
-                    properties['connectivity'] = this.#pathToConnectivityModel[pathId]
-                }
-                if (pathId in this.#pathToPathModel) {
-                    properties['models'] = this.#pathToPathModel[pathId]
-                }
-            }
-/*
-            if (!('connectivity' in properties)) {
-                for (const pathId of this.#pathsByNerve.get(feature.id)) {
-                    if (pathId in this.#pathToConnectivityModel) {
-                        properties['connectivity'] = this.#pathToConnectivityModel[pathId]
-                        break
-                    }
-                }
-            }
-*/
-        }
-        return properties
-    }
-
     connectivityModelFeatureIds(modelId: string): Set<GeoJSONId>
     //==========================================================
     {
