@@ -51,7 +51,7 @@ export class ClusteredMarkerLayer
     constructor(flatmap: FlatMap, ui: UserInteractions)
     {
         this.#ui = ui
-        this.#map = flatmap.map
+        this.#map = flatmap.map!
 
         this.#map.addSource('markers', {
             type: 'geojson',
@@ -127,7 +127,7 @@ export class ClusteredMarkerLayer
         for (const feature of features) {
             const properties = feature.properties
             const position = properties.markerPosition.slice(1, -1).split(',').map(p => +p)
-            this.#ui.markerEvent(event, +feature.id, position, properties)
+            this.#ui.markerEvent(event, +feature.id!, position, properties)
         }
         event.originalEvent.stopPropagation()
     }

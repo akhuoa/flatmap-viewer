@@ -134,7 +134,7 @@ export class FlightPathLayer
                                     .filter(ann => ann['tile-layer'] === 'pathways'
                                                 && ('geometry' in ann && ann['geometry'] === 'LineString'
                                                  || 'geom-type' in ann && ann['geom-type'] === 'LineString')
-                                                && 'type' in ann && ann['type'].startsWith('line')
+                                                && 'type' in ann && ann['type']!.startsWith('line')
                                                 && 'kind' in ann
                                                 && 'pathStartPosition' in ann
                                                 && 'pathEndPosition' in ann)
@@ -189,7 +189,7 @@ export class FlightPathLayer
         if (this.#enabled) {
             return this.#deckOverlay
                        .queryFeaturesAtPoint(point)
-                       .filter(o => o.layer.id.startsWith(ARC_ID_PREFIX))
+                       .filter(o => o.layer!.id.startsWith(ARC_ID_PREFIX))
                        .map(o => this.#makeMapFeature(o.object))
         }
         return []

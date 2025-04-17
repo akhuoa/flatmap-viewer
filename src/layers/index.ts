@@ -53,7 +53,7 @@ const REVERT_DETAIL_ZOOM_OFFSET = 0.5
 export function inAnatomicalClusterLayer(feature: MapFeature|MapRenderedFeature): boolean
 {
     return ('layer' in feature
-         && feature.layer.id === ANATOMICAL_MARKERS_LAYER)
+         && feature.layer!.id === ANATOMICAL_MARKERS_LAYER)
 }
 
 //==============================================================================
@@ -66,7 +66,7 @@ class FlatMapStylingLayer
     #layer: FlatMapLayer
     #layerOptions: StylingOptions
     #map: MapLibreMap
-    #minimapStylingLayers = []
+    #minimapStylingLayers: maplibregl.LayerSpecification[] = []
     #pathStyleLayers: VectorStyleLayer[] = []
     #rasterStyleLayers: RasterStyleLayer[] = []
     #separateLayers: boolean
@@ -76,8 +76,8 @@ class FlatMapStylingLayer
     {
         this.#id = layer.id
         this.#layer = layer
-        this.#map = flatmap.map
-        this.#description = layer.description
+        this.#map = flatmap.map!
+        this.#description = layer.description || ''
         this.#layerOptions = options
         this.#separateLayers = flatmap.options.separateLayers
 
@@ -98,7 +98,7 @@ class FlatMapStylingLayer
         const layerId = `${layer.id}_${FEATURES_LAYER}`
         const source = flatmap.options.separateLayers ? layerId : FEATURES_LAYER
 
-        if (this.#map.getSource(style.VECTOR_TILES_SOURCE).vectorLayerIds.indexOf(source) >= 0) {
+        if (this.#map.getSource(style.VECTOR_TILES_SOURCE)!.vectorLayerIds!.indexOf(source) >= 0) {
             const bodyLayer = new BodyStyleLayer(layerId, source)
             this.#addStylingLayer(bodyLayer.style(layer, this.#layerOptions), true)
             this.#vectorStyleLayers.push(bodyLayer)
@@ -139,7 +139,7 @@ class FlatMapStylingLayer
         // if no image layers then make feature borders (and lines?) more visible...??
         if (haveVectorLayers) {
             const featuresVectorSource = this.#vectorSourceId(FEATURES_LAYER)
-            const vectorFeatures = vectorTileSource.vectorLayerIds.includes(featuresVectorSource)
+            const vectorFeatures = vectorTileSource.vectorLayerIds!.includes(featuresVectorSource)
             if (vectorFeatures) {
                 this.#addVectorStyleLayer(style.FeatureFillLayer, FEATURES_LAYER, false, true)
                 this.#addVectorStyleLayer(style.FeatureDashLineLayer, FEATURES_LAYER, false, true)
@@ -179,7 +179,7 @@ class FlatMapStylingLayer
     get centre(): [number, number]
     //============================
     {
-        const extent = this.#layer.extent
+        const extent = this.#layer.extent!
         return [(extent[0] + extent[2])/2, (extent[1] + extent[3])/2]
     }
 
@@ -192,7 +192,7 @@ class FlatMapStylingLayer
     get extent(): MapExtent
     //=====================
     {
-        return this.#layer.extent
+        return this.#layer.extent!
     }
 
     get id()
@@ -210,7 +210,7 @@ class FlatMapStylingLayer
     get minZoom(): number
     //===================
     {
-        return this.#layer['min-zoom']
+        return this.#layer['min-zoom']!
     }
 
     activate(enable=true)
@@ -392,7 +392,7 @@ export class LayerManager
     constructor(flatmap: FlatMap, ui: UserInteractions)
     {
         this.#flatmap = flatmap
-        this.#map = flatmap.map
+        this.#map = flatmap.map!
         this.#layerOptions = utils.setDefaults(flatmap.options.layerOptions, {
             coloured: true,
             flatmapStyle: flatmap.options.style,
@@ -433,7 +433,7 @@ export class LayerManager
     get layers(): FlatMapLayer[]
     //==========================
     {
-        const layers = []
+        const layers: FlatMapLayer[] = []
         for (const mapLayer of this.#mapStyleLayers.values()) {
             layers.push({
                 id: mapLayer.id,
@@ -506,7 +506,7 @@ export class LayerManager
     featuresAtPoint(point): MapRenderedFeature[]
     //==========================================
     {
-        let features = []
+        let features: MapRenderedFeature[] = []
         features = this.#flightPathLayer.queryFeaturesAtPoint(point)
         if (features.length === 0) {
             features = this.#map.queryRenderedFeatures(point, {layers: [ANATOMICAL_MARKERS_LAYER]})
@@ -621,7 +621,9 @@ export class LayerManager
                 this.removeFilteredFacet(this.#detailsFilter.id)
                 this.#detailsFilter = null
             }
-            this.#baseLayer.dimRasterLayers(false)
+             if (this.#baseLayer) {
+                this.#baseLayer.dimRasterLayers(false)
+            }
             this.#currentDetailLayer = null
             this.#revertDetailZoom = -1
         }
