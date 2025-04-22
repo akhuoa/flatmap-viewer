@@ -152,6 +152,7 @@ class Resizer
 class PaneSet
 {
     #container: HTMLElement
+    #defaultSizes: number[] = []
     #direction: Direction
     #hiddenPanes: Map<string, [string, number]> = new Map()
     #id: string
@@ -211,6 +212,7 @@ class PaneSet
         const scale = this.#paneIds.length/(Math.max(options.scale || 1.0, 0.01) + this.#paneIds.length)
         this.#paneSizes = this.#paneSizes.map(size => scale*size)
         this.#paneSizes.push(1.0 - scale)
+        this.#defaultSizes = [...this.#paneSizes]
         this.#paneElements.push(pane)
         this.#paneIds.push(pane.id)
         this.#setSizes()
@@ -240,13 +242,18 @@ class PaneSet
                 const displaySize = this.#hiddenPanes.get(paneId)!
                 this.#hiddenPanes.delete(paneId)
                 pane.style.display = displaySize[0]
-                const scale = (1.0 - displaySize[1])
-                this.#paneSizes = this.#paneSizes.map(size => scale*size)
-                this.#paneSizes[paneIndex] = displaySize[1]
-                // Other panes might have been hidden since our size was saved
-                const totalSize = this.#paneSizes.reduce((sum, size) => sum + size, 0)
-                if (totalSize != 1.0) {
-                    this.#paneSizes = this.#paneSizes.map(size => size/totalSize)
+                if (displaySize[1] == 0.0) {
+                    // Reset sizes if we were properly hidden
+                    this.#paneSizes = [...this.#defaultSizes]
+                } else {
+                    const scale = (1.0 - displaySize[1])
+                    this.#paneSizes = this.#paneSizes.map(size => scale*size)
+                    this.#paneSizes[paneIndex] = displaySize[1]
+                    // Other panes might have been hidden since our size was saved
+                    const totalSize = this.#paneSizes.reduce((sum, size) => sum + size, 0)
+                    if (totalSize != 1.0) {
+                        this.#paneSizes = this.#paneSizes.map(size => size/totalSize)
+                    }
                 }
                 this.#setSizes()
                 if (this.#paneSizes.filter(size => (size > 0)).length > 1) {
