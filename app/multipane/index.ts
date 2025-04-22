@@ -137,8 +137,6 @@ export class PaneManager
             this.#verticalPanes.showPane(this.#mapsContainer.id, true)
             this.#verticalPanes.showPane(this.#bottomPane.id, this.#activeBottom)
             // We want to reuse panes if possible...
-            console.log(newPane, this.#mapPanes.size)
-
             if (newPane && this.#activeMaps) {
                 mapPaneId = this.#mapPanes.addPane().id
             } else {
