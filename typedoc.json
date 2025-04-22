@@ -1,17 +1,29 @@
 {
     "$schema": "https://typedoc.org/schema.json",
+
+    "readme": "./README.md",
+    "plugin": [
+        "typedoc-plugin-missing-exports",
+        "typedoc-github-theme"
+    ],
     "includeVersion": true,
-    "entryPoints": ["./src/*"],
+    "entryPoints": ["./lib/index.ts"],
     "entryPointStrategy": "expand",
+    "excludeExternals": true,
     "excludeNotDocumented": false,
     "excludePrivate": true,
-    "out": "./tsdocs",
+    "out": "./docs",
+    "customCss": "./static/docs/custom.css",
     "navigation": {
         "includeCategories": true,
-        "includeGroups": false,
-        "includeFolders": false
+        "includeGroups": true,
+        "includeFolders": true
     },
-    "sort": ["visibility", "static-first"],
+    "sort": [
+        "visibility",
+        "static-first",
+        "alphabetical"
+    ],
     "categorizeByGroup": false,
     "searchGroupBoosts": {
         "Classes": 1.5

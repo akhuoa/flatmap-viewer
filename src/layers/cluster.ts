@@ -24,7 +24,7 @@ import maplibregl from 'maplibre-gl';
 
 import {FlatMap} from '../flatmap'
 import {UserInteractions} from '../interactions'
-import {CLUSTERED_MARKER_ID, UNCLUSTERED_MARKER_ID} from '../markers'
+import {DATASET_MARKER_ID, UNCLUSTERED_MARKER_ID} from '../markers'
 
 //==============================================================================
 
@@ -51,7 +51,7 @@ export class ClusteredMarkerLayer
     constructor(flatmap: FlatMap, ui: UserInteractions)
     {
         this.#ui = ui
-        this.#map = flatmap.map
+        this.#map = flatmap.map!
 
         this.#map.addSource('markers', {
             type: 'geojson',
@@ -67,7 +67,7 @@ export class ClusteredMarkerLayer
             source: 'markers',
             filter: ['has', 'point_count'],
             layout: {
-                'icon-image': CLUSTERED_MARKER_ID,
+                'icon-image': DATASET_MARKER_ID,
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true,
                 'icon-offset': [0, -17],
@@ -127,7 +127,7 @@ export class ClusteredMarkerLayer
         for (const feature of features) {
             const properties = feature.properties
             const position = properties.markerPosition.slice(1, -1).split(',').map(p => +p)
-            this.#ui.markerEvent(event, +feature.id, position, properties)
+            this.#ui.markerEvent(event, +feature.id!, position, properties)
         }
         event.originalEvent.stopPropagation()
     }

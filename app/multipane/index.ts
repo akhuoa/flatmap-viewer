@@ -158,7 +158,7 @@ export class PaneManager
             }
         }
         // Don't clutter the screen with controls if a multipane viewer
-        options.allControls = (this.#maxPanes <= 1)
+        options.allControls = (mapIndex.style === 'anatomical') || (this.#maxPanes <= 1)
 
         // Use a pane's saved BG colour
         const background = localStorage.getItem(`${map.id}-background`)

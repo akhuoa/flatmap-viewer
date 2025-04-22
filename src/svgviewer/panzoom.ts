@@ -25,13 +25,13 @@ import {Point, PointLike} from './points'
 /**
  * [left, top, width, height]
  */
-type Extent = [number, number, number, number]
+type Bounds = [number, number, number, number]
 
 
-function getViewbox(svgElement: SVGGraphicsElement): Extent
+function getViewbox(svgElement: SVGGraphicsElement): Bounds
 //=========================================================
 {
-    return svgElement.getAttribute('viewBox')?.split(' ').map(n => +n) as Extent
+    return svgElement.getAttribute('viewBox')?.split(' ').map(n => +n) as Bounds
 }
 
 //==============================================================================
@@ -79,13 +79,13 @@ export class PanZoom
         return this.#scale
     }
 
-    #currentViewbox(): Extent
+    #currentViewbox(): Bounds
     //=======================
     {
         return getViewbox(this.#svgDiagram!)
     }
 
-    #setViewbox(viewbox: Extent)
+    #setViewbox(viewbox: Bounds)
     //==========================
     {
         this.#svgDiagram!.setAttribute('viewBox', viewbox.map(n => String(n)).join(' '))

@@ -32,26 +32,34 @@ export type MapFeatureIdentifier = maplibregl.FeatureIdentifier & {
     layer?: {
         id: string
     }
+    properties: {
+        [name: string]: unknown
+    }
 }
 
 export type MapFeature = MapFeatureIdentifier & {
     children?: GeoJSONId[]
-    properties?: {
+    properties: {
         featureId?: GeoJSONId
         kind?: string
     }
 }
 
 export type MapRenderedFeature = maplibregl.MapGeoJSONFeature & {
-    properties?: {
+    properties: {
         featureId?: GeoJSONId
     }
 }
+
+export type MapPointFeature = MapFeatureIdentifier | MapRenderedFeature
 
 //==============================================================================
 
 // Lng, Lat coordinates
 export type MapExtent = [number, number, number, number]
+
+// [minX,   minY,   maxX,   maxY]
+export type BoundingBox = [number, number, number, number]
 
 //==============================================================================
 
@@ -223,15 +231,16 @@ export interface FlatMapMetadata
 
 export interface FlatMapFeatureAnnotation
 {
+    id?: string
     alert?: string
     'anatomical-nodes'?: string[]
-    bounds?: string
+    bounds?: BoundingBox
     centreline?: boolean
     centroid?: Point2D
     children?: GeoJSONId[]
     colour?: string
     coordinates?: Point2D[]
-    featureId?: GeoJSONId
+    featureId: GeoJSONId
     geometry?: string
     hyperlink?: string
     hyperlinks?: {
@@ -239,7 +248,6 @@ export interface FlatMapFeatureAnnotation
         flatmap?: string
         pmr?: string
     }
-    id?: string
     kind?: string
     label?: string
     lineLength?: number
@@ -259,8 +267,19 @@ export type FlatMapAnnotations = Record<number, FlatMapFeatureAnnotation>
 //==============================================================================
 
 export type Point2D = [number, number]
+export type Size2D = [number, number]
 
 export type FlatMapFeatureGeometry = GeoJSON.LineString | GeoJSON.Point | GeoJSON.Polygon
+
+//==============================================================================
+//==============================================================================
+
+export type FlatMapState = {
+    center: [number, number]
+    zoom: number
+    bearing: number
+    pitch: number
+}
 
 //==============================================================================
 //==============================================================================
@@ -323,7 +342,7 @@ export type FlatMapMarkerOptions = maplibregl.MarkerOptions & {
 //==============================================================================
 
 export type FlatMapPopUpOptions = maplibregl.PopupOptions & {
-    annotationFeatureGeometry?: boolean
+    annotationFeatureGeometry?: Point2D
     positionAtLastClick?: boolean
     preserveSelection?: boolean
 }
@@ -331,10 +350,54 @@ export type FlatMapPopUpOptions = maplibregl.PopupOptions & {
 //==============================================================================
 //==============================================================================
 
+export type ExportedFeatureProperties = {
+    id?: string
+    featureId?: number
+    'connectivity'?: object,
+    container?: string
+    control?: string
+    dataset?: string
+    'marker-terms'?: string[]
+    feature?: AnnotatedFeature
+    kind?: string
+    label?: string
+    models?: string
+    origin?: Point2D
+    size?: Size2D
+    source?: string
+    taxons?: string[]
+    hyperlinks?: string
+    'completeness'?: boolean,
+    'missing-nodes'?: string[],
+    alert?: string
+    'biological-sex'?: string
+    location?: number
+    type?: string
+    value?: string
+}
+
+//==============================================================================
+//==============================================================================
+
+export type DatasetMarkerKind = 'dataset' | 'multiscale'
+
 export interface DatasetTerms
 {
     id: string
+    kind?: DatasetMarkerKind
     terms: string[]
+}
+
+export type DatasetFeatures = {
+    dataset: string
+    kind?: DatasetMarkerKind
+    features: ExportedFeatureProperties[]
+}
+
+export type DatasetMarkerResult = {
+    term: string
+    label: string
+    kind: DatasetMarkerKind
 }
 
 //==============================================================================

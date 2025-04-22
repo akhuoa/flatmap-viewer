@@ -28,7 +28,8 @@ export const MARKER_DEFAULT_COLOUR = '#005974'
 
 //==============================================================================
 
-export const CLUSTERED_MARKER_ID = 'clustered-marker'
+export const DATASET_MARKER_ID = 'dataset-marker'
+export const MULTISCALE_MARKER_ID = 'multiscale-marker'
 export const UNCLUSTERED_MARKER_ID = 'unclustered-marker'
 export const ZOOM_MARKER_ID = 'zoom-marker'
 
@@ -85,10 +86,18 @@ type MarkerIconDefinition = {
 
 const markerIconDefinitions: MarkerIconDefinition[] = [
     {
-        id: CLUSTERED_MARKER_ID,
+        id: DATASET_MARKER_ID,
         svg: CLUSTERED_MARKER_SVG,
         options: {
             color: '#EE5900',
+            secondaryColor: '#fff'
+        }
+    },
+    {
+        id: MULTISCALE_MARKER_ID,
+        svg: CLUSTERED_MARKER_SVG,
+        options: {
+            color: '#11a6ff',
             secondaryColor: '#fff'
         }
     },

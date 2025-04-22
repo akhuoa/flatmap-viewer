@@ -43,6 +43,7 @@ export class DatasetClusterSet
     #connectedTermGraph: DiGraph
     #datasetId: string
     #mapTermGraph: MapTermGraph
+    #descendents: Map<string, Set<string>> = new Map()
     #clustersByTerm: Map<string, DatasetCluster>
     #maxDepth: number
 
@@ -68,9 +69,9 @@ export class DatasetClusterSet
         for (const terminal of this.#connectedTermGraph.nodes()
                                                        .filter(term => term !== ANATOMICAL_ROOT
                                                             && this.#connectedTermGraph.degree(term) == 1)) {
-            const cluster = this.#clustersByTerm.get(terminal)
+            const cluster = this.#clustersByTerm.get(terminal)!
             cluster.maxZoom = MAX_MARKER_ZOOM
-            this.#setZoomFromParents(cluster)
+            this.#setZoomFromParents(cluster, terminal)
         }
     }
 
@@ -86,6 +87,12 @@ export class DatasetClusterSet
         return [...this.#clustersByTerm.values()]
     }
 
+    get descendents(): Map<string, Set<string>>
+    //=========================================
+    {
+        return this.#descendents
+    }
+
     #depthToZoomRange(depth: number): [number, number]
     //================================================
     {
@@ -96,19 +103,23 @@ export class DatasetClusterSet
              :                      [zoom, zoom+1]
     }
 
-    #setZoomFromParents(cluster: DatasetCluster)
-    //==========================================
+    #setZoomFromParents(cluster: DatasetCluster, terminal: string)
+    //============================================================
     {
+        if (!this.#descendents.has(cluster.term)) {
+            this.#descendents.set(cluster.term, new Set())
+        }
+        this.#descendents.get(cluster.term)!.add(terminal)
         if (cluster.term === ANATOMICAL_ROOT) {
             cluster.minZoom = 0
             return
         }
         for (const parent of this.#connectedTermGraph.parents(cluster.term)) {
-            const parentCluster = this.#clustersByTerm.get(parent)
+            const parentCluster = this.#clustersByTerm.get(parent)!
             if (parentCluster.maxZoom < cluster.minZoom) {
                 parentCluster.maxZoom = cluster.minZoom
             }
-            this.#setZoomFromParents(parentCluster)
+            this.#setZoomFromParents(parentCluster, terminal)
         }
     }
 
@@ -121,7 +132,7 @@ export class DatasetClusterSet
             return null
         }
         const maxDepth = -1
-        let furthestParent = null
+        let furthestParent: string|null = null
         for (const parent of parents) {
             const depth = this.#mapTermGraph.depth(parent)
             if (depth > maxDepth) {
@@ -136,7 +147,7 @@ export class DatasetClusterSet
     #validatedTerms(terms: string[]): string[]
     //========================================
     {
-        const mapTerms = []
+        const mapTerms: string[] = []
         for (let term of terms) {
             term = term.trim()
             if (term === '') {

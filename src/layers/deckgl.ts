@@ -38,7 +38,7 @@ export class DeckGlOverlay
 
     constructor(flatmap: FlatMap)
     {
-        this.#map = flatmap.map
+        this.#map = flatmap.map!
 
         this.#map.addControl(this.#overlay as IControl)
     }

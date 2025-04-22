@@ -1,8 +1,7 @@
 .cache/
 dist/
-docs/_build/
+docs/
 node_modules
 out/
 .DS_Store
 map-viewer.sublime-workspace
-tsdocs/
