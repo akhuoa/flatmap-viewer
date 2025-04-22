@@ -236,27 +236,37 @@ class PaneSet
         const paneIndex = this.#paneIds.indexOf(paneId)
         if (paneIndex >= 0) {
             const pane = this.#paneElements[paneIndex]
-            if (show && pane.style.display === 'none') {
-                const displaySize = this.#hiddenPanes.get(paneId)
-                if (displaySize !== undefined) {
-                    pane.style.display = displaySize[0]
-                    const scale = (1.0 - displaySize[1])
-                    this.#paneSizes = this.#paneSizes.map(size => scale*size)
-                    this.#paneSizes[paneIndex] = displaySize[1]
-                    this.#setSizes()
+            if (show && this.#hiddenPanes.has(paneId)) {
+                const displaySize = this.#hiddenPanes.get(paneId)!
+                this.#hiddenPanes.delete(paneId)
+                pane.style.display = displaySize[0]
+                const scale = (1.0 - displaySize[1])
+                this.#paneSizes = this.#paneSizes.map(size => scale*size)
+                this.#paneSizes[paneIndex] = displaySize[1]
+                // Other panes might have been hidden since our size was saved
+                const totalSize = this.#paneSizes.reduce((sum, size) => sum + size, 0)
+                if (totalSize != 1.0) {
+                    this.#paneSizes = this.#paneSizes.map(size => size/totalSize)
+                }
+                this.#setSizes()
+                if (this.#paneSizes.filter(size => (size > 0)).length > 1) {
                     if (paneIndex == 0) {
                         this.#addResizeBar(this.#paneElements[paneIndex+1])
                     } else {
                         this.#addResizeBar(pane)
                     }
                 }
-            } else if (!show && pane.style.display !== 'none') {
+            } else if (!show && !this.#hiddenPanes.has(paneId)) {
                 const paneSize = this.#paneSizes[paneIndex]
                 this.#hiddenPanes.set(paneId, [pane.style.display, paneSize])
-                const scale = 1.0/(1.0 - paneSize)
                 // Set hidden pane's size to 0 and redistribute its size
                 this.#paneSizes[paneIndex] = 0
-                this.#paneSizes = this.#paneSizes.map(size => scale*size)
+                if (paneSize < 1) {
+                    const scale = 1.0/(1.0 - paneSize)
+                    this.#paneSizes = this.#paneSizes.map(size => scale*size)
+                } else {
+                    this.#paneSizes[0] = 1
+                }
                 this.#setSizes()
                 pane.style.display = 'none'
                 if (paneIndex == 0) {

@@ -369,7 +369,6 @@ class StandaloneViewer
     async loadMap(viewer: MapViewer, id: string, taxon: string|null=null, sex: string|null=null)
     //==========================================================================================
     {
-        this.#paneManager.closeMaps()
         this.#mapProvenance!.innerHTML = ''
         if (id !== null) {
             this.#requestUrl.searchParams.set('id', id)
