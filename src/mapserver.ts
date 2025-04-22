@@ -100,8 +100,13 @@ export class FlatMapServer
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                "Accept": "application/json; charset=utf-8",
-                "Cache-Control": "no-store"
+                "Accept": "application/json",
+// Accept-Charset is forbidden in a request...
+// See https://developer.mozilla.org/en-US/docs/Glossary/Forbidden_request_header
+//              "Accept-Charset": "utf-8",
+
+// Gets HeaderDisallowedInPreflightResponse from CORS...
+//              "Cache-Control": "no-store"
             }
         })
         if (!response.ok) {
@@ -170,9 +175,7 @@ export class FlatMapServer
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                "Accept": "application/json; charset=utf-8",
-                "Cache-Control": "no-store",
-                "Content-Type": "application/json"
+                "Accept": "application/json"
             },
             body: JSON.stringify(query)
         })
