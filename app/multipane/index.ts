@@ -20,7 +20,7 @@ limitations under the License.
 
 import { FlatMap, FlatMapOptions, MapViewer } from '../../lib'
 
-import { FlatMapCallback } from '../../src/flatmap-types'
+import { ControlEventData, FlatMapCallback } from '../../src/flatmap-types'
 //import { SvgMap, SvgViewer } from '../../src/svgviewer'
 import { MapIdentifier } from '../../src/viewer'
 
@@ -182,9 +182,10 @@ export class PaneManager
                 // We get a control change event when the BG colour is changed
                 flatmap.addCallback(async (eventType, data) => {
                     if (eventType === 'change'
-                     && data.type === 'control'
-                     && data.control === 'background') {
-                        localStorage.setItem(`${map.id}-background`, data.value)
+                     && (<ControlEventData>data).type === 'control'
+                     && (<ControlEventData>data).control === 'background') {
+                        localStorage.setItem(`${map.id}-background`,
+                                             (<ControlEventData>data).value)
                         return true
                     }
                 })

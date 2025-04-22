@@ -171,7 +171,47 @@ export interface FlatMapLayer
 
 //==============================================================================
 
-export type FlatMapCallback = (type: string, data: Record<string, any>, ...args: unknown[]) => Promise<undefined|boolean>
+export type AnnotationEventData = {
+    type: 'created' | 'updated' | 'deleted'
+    feature: AnnotatedFeature
+}
+
+export type ClosePaneEventData = {
+    container: string
+}
+
+export type ControlEventData = {
+    type: 'control'
+    control: string
+    value: string
+}
+
+export type FeatureEventData = ExportedFeatureProperties
+                             | ExportedFeatureProperties[]
+
+export type MarkerEventData = {
+    type: 'marker'
+    id: number
+}
+
+export type PanZoomEventData = {
+    type: 'pan' | 'zoom'
+    origin: Point2D
+    size: Size2D
+}
+
+//==============================================================================
+
+export type FlatMapCallback = (
+    type: string,
+    data: AnnotationEventData
+        | ClosePaneEventData
+        | ControlEventData
+        | FeatureEventData
+        | MarkerEventData
+        | PanZoomEventData,
+    ...args: unknown[]
+) => Promise<undefined|boolean>
 
 export interface FlatMapLayerOptions
 {
