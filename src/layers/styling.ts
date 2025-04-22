@@ -1172,7 +1172,6 @@ export class FeatureZoomPointLayer extends VectorStyleLayer
                 'visibility': 'visible',
                 'icon-allow-overlap': true,
                 'icon-image': 'zoom-marker',
-//                'icon-image': ['get', 'marker-icon'],
                 'icon-size': ['interpolate', ['linear'], ['zoom'], 0, 0.1, 3, 0.01, 9, 2],
             }
         }
