@@ -21,7 +21,7 @@ limitations under the License.
 import { FlatMap, FlatMapOptions, MapViewer } from '../../lib'
 
 import { FlatMapCallback } from '../../src/flatmap-types'
-import { SvgMap, SvgViewer } from '../../src/svgviewer'
+//import { SvgMap, SvgViewer } from '../../src/svgviewer'
 import { MapIdentifier } from '../../src/viewer'
 
 //==============================================================================
@@ -100,8 +100,8 @@ export class PaneManager
     }
 
     async loadMap(viewer: MapViewer, mapId: MapIdentifier, callback: FlatMapCallback,
-                  options: FlatMapOptions={}, newPane: boolean=false): Promise<FlatMap|SvgMap>
-    //========================================================================================
+                  options: FlatMapOptions={}, newPane: boolean=false): Promise<FlatMap|null>
+    //======================================================================================
     {
         // Don't load an already open map
         const map = await viewer.findMap(mapId)
