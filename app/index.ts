@@ -388,7 +388,16 @@ class StandaloneViewer
         window.history.pushState('data', document.title, this.#requestUrl)
 
         await this.#paneManager.loadMap(viewer, id, this.mapCallback.bind(this), this.#mapOptions)
-        .then(this.mapLoaded.bind(this))
+        .then(map => {
+            if (map) {
+                this.#currentMap = map
+                if (this.#mapProvenance && PROVENANCE_DISPLAY) {
+                    this.#mapProvenance.style.display = 'block'
+                    this.#mapProvenance.innerHTML = provenanceAsHtml(Object.assign({server: this.#mapEndpoints[this.#currentServer!]},
+                                                                     map.mapMetadata))
+                }
+            }
+        })
         .catch(error => {
             console.log(error)
             alert(error)
@@ -410,24 +419,16 @@ class StandaloneViewer
             console.log(eventType, data, ...args)
             if ('hyperlinks' in data) {
                 if ('flatmap' in data.hyperlinks) {
-                    await this.#paneManager.loadMap(this.#currentViewer!, data.hyperlinks.flatmap, this.mapCallback.bind(this), this.#mapOptions, true)
+                    await this.#paneManager.loadMap(this.#currentViewer!, data.hyperlinks.flatmap,
+                                                    this.mapCallback.bind(this), this.#mapOptions,
+                                                    true
+                                                    )
                 }
             }
             return true
         } else if (data.type === 'marker') {
             console.log(eventType, ...args)
             return true
-        }
-    }
-
-    async mapLoaded(map: FlatMap)
-    //===========================
-    {
-        this.#currentMap = map
-        if (this.#mapProvenance && PROVENANCE_DISPLAY) {
-            this.#mapProvenance.style.display = 'block'
-            this.#mapProvenance.innerHTML = provenanceAsHtml(Object.assign({server: this.#mapEndpoints[this.#currentServer!]},
-                                                             map.mapMetadata))
         }
     }
 }
