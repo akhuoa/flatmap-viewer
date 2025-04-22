@@ -55,7 +55,7 @@ const DEFAULT_OPTIONS = {
     showLngLat: false,
     standalone: true,
     flightPaths: false,
-    maxZoom: 10
+    maxZoom: 12.99
 }
 
 window.onload = () => {
