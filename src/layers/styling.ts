@@ -1158,6 +1158,7 @@ export class FeatureZoomPointLayer extends VectorStyleLayer
             'all',
             ['==', ['geometry-type'], 'Point'],
             ['==', ['get', 'kind'], 'zoom-point'],
+            ['has', 'details-layer']
         ]
     }
 
@@ -1175,6 +1176,18 @@ export class FeatureZoomPointLayer extends VectorStyleLayer
                 'icon-size': ['interpolate', ['linear'], ['zoom'], 0, 0.1, 3, 0.01, 9, 2],
             }
         }
+    }
+}
+
+export class MultipaneZoomPointLayer extends FeatureZoomPointLayer
+{
+    defaultFilter(): ExpressionFilterSpecification
+    {
+        return [
+            'all',
+            ['==', ['geometry-type'], 'Point'],
+            ['==', ['get', 'kind'], 'zoom-point']
+        ]
     }
 }
 
