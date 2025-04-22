@@ -115,7 +115,11 @@ export class FlatMapServer
             }
             throw new Error(`Cannot access ${url}`)
         }
-        return await response.json()
+        const contentType = response.headers.get('Content-Type')
+        if (contentType === 'application/json') {
+            return await response.json()
+        }
+        throw new Error(`Expected JSON from ${url} but got ${contentType}`)
     }
 
     async flatMaps(): Promise<FlatMapServerIndex[]|null>
