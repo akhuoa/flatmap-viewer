@@ -1583,9 +1583,11 @@ export class UserInteractions
         const featureIds = this.#flatmap.modelFeatureIds(anatomicalId)
         for (const featureId of featureIds) {
             const annotation = this.#flatmap.annotation(featureId)!
-            const markerId = this.#layerManager.addLayeredMarker(annotation, options)
-            if (markerId !== null) {
-                markerIds.push(markerId)
+            if (annotation.kind !== 'zoom-point') {
+                const markerId = this.#layerManager.addLayeredMarker(annotation, options)
+                if (markerId !== null) {
+                    markerIds.push(markerId)
+                }
             }
         }
         return markerIds

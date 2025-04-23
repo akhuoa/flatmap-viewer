@@ -27,15 +27,18 @@ import {FlatMap} from '../flatmap'
 import {FlatMapFeatureAnnotation, FlatMapMarkerOptions} from '../flatmap-types'
 import type {GeoJSONId} from '../flatmap-types'
 import {UserInteractions} from '../interactions'
-import {UNCLUSTERED_MARKER, MULTISCALE_MARKER} from '../markers'
+import {DATASET_CLUSTERED_MARKER, UNCLUSTERED_MARKER,
+        MULTISCALE_CLUSTERED_MARKER, MULTISCALE_MARKER} from '../markers'
 import {PropertiesType} from '../types'
 
 //==============================================================================
 
 type MarkerProperties = {
+    cluster: boolean
+    count: number
     featureId: GeoJSONId
     hidden?: boolean
-    'icon-image': string
+    'icon-image': [string, string]
     label?: string
     models: string
     hyperlinks?: object
@@ -80,11 +83,25 @@ export class MarkerLayer
             type: 'symbol',
             source: this.#source,
             layout: {
-                'icon-image': ['get','icon-image'],
+                'icon-image': [
+                    'let', 'index',  ['case',
+                                        ['get', 'cluster'], 1,
+                                        ['>', ['get', 'count'], 1], 1,
+                                    0],
+                    ['to-string', ['at', ['var', 'index'], ['get', 'icon-image']]]
+                ],
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true,
                 'icon-offset': [0, -17],
                 'icon-size': 0.8,
+                'text-field': ['case',
+                                    ['get', 'cluster'], ['get', 'count'],
+                                    ['>', ['get', 'count'], 1], ['get', 'count'],
+                                ''],
+                'text-size': 10,
+                'text-offset': [0, -1.93],
+                'text-allow-overlap': true,
+                'text-ignore-placement': true,
             },
             paint: {
                 'icon-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 1],
@@ -106,15 +123,13 @@ export class MarkerLayer
         source.setData(this.#points)
     }
 
-    addMarker(annotation: FlatMapFeatureAnnotation, options: FlatMapMarkerOptions): GeoJSONId|null
-    //============================================================================================
+    addMarker(annotation: FlatMapFeatureAnnotation, options: FlatMapMarkerOptions, cluster: boolean=false): GeoJSONId|null
+    //====================================================================================================================
     {
         const markerPosition = this.#ui.markerPosition(annotation)
-        if (markerPosition === null
-         || annotation.centreline
-         || annotation.kind === 'zoom-point') {
-                return null
-            }
+        if (markerPosition === null || annotation.centreline) {
+            return null
+        }
         const featureId = +annotation.featureId
         const markerId = this.#ui.nextMarkerId()
         const markerPoint: MarkerPoint = {
@@ -122,7 +137,11 @@ export class MarkerLayer
             id: markerId,
             properties: {
                 featureId,
-                'icon-image': (options.kind === 'multiscale') ? MULTISCALE_MARKER : UNCLUSTERED_MARKER,
+                'icon-image': (options.kind === 'multiscale')
+                              ? [MULTISCALE_MARKER, MULTISCALE_CLUSTERED_MARKER]
+                              : [UNCLUSTERED_MARKER, DATASET_CLUSTERED_MARKER],
+                count: 1,
+                cluster,
                 label: annotation.label,
                 models: annotation.models,
                 hyperlinks: annotation.hyperlinks
@@ -138,10 +157,20 @@ export class MarkerLayer
             markerPoint.properties['hidden'] = markerState.hidden
         }
         this.#featureToMarkerPoint.set(featureId, markerPoint)
-        this.#featureIndexById.set(featureId, this.#points.features.length)
+        this.#featureIndexById.set(markerId, this.#points.features.length)
         this.#points.features.push(markerPoint as GeoJSON.Feature<GeoJSON.Point, GeoJSON.GeoJsonProperties>)
         this.#showPoints()
         return markerId
+    }
+
+    updateMarkerCount(markerId: number)
+    //=================================
+    {
+        if (this.#featureIndexById.has(markerId)) {
+            const featureIndex = this.#featureIndexById.get(markerId)
+            this.#points.features[featureIndex].properties.count += 1
+            this.#showPoints()
+        }
     }
 
     clearMarkers()

@@ -70,6 +70,7 @@ class FlatMapStylingLayer
     #layerOptions: StylingOptions
     #map: MapLibreMap
     #markerLayer: MarkerLayer
+    #markersByFeature: Map<number, number> = new Map()
     #minimapStylingLayers: maplibregl.LayerSpecification[] = []
     #pathStyleLayers: VectorStyleLayer[] = []
     #rasterStyleLayers: RasterStyleLayer[] = []
@@ -212,6 +213,12 @@ class FlatMapStylingLayer
         return this.#id
     }
 
+    get layer()
+    //=========
+    {
+        return this.#layer
+    }
+
     get minimapStylingLayers()
     //========================
     {
@@ -238,10 +245,25 @@ class FlatMapStylingLayer
         this.#setPaintRasterLayers(this.#layerOptions)
     }
 
-    addLayeredMarker(annotation: FlatMapFeatureAnnotation, options: FlatMapMarkerOptions): GeoJSONId|null
-    //===================================================================================================
+    addLayeredMarker(annotation: FlatMapFeatureAnnotation, options: FlatMapMarkerOptions, cluster: boolean=false): GeoJSONId|null
+    //===========================================================================================================================
     {
-        return this.#markerLayer.addMarker(annotation, options)
+        const markerId = this.#markerLayer.addMarker(annotation, options, cluster)
+        if (markerId !== null) {
+            this.#markersByFeature.set(annotation.featureId, markerId)
+        }
+        return markerId
+    }
+
+    updateBaseMarker(baseFeature: FlatMapFeatureAnnotation, options: FlatMapMarkerOptions)
+    //===================================================================================
+    {
+        const baseMarkerId = this.#markersByFeature.get(baseFeature.featureId)
+        if (baseMarkerId) {
+            this.#markerLayer.updateMarkerCount(baseMarkerId)
+        } else {
+            this.addLayeredMarker(baseFeature, options, true)
+        }
     }
 
     #addPathwayStyleLayers()
@@ -508,6 +530,11 @@ export class LayerManager
     {
         const stylingLayer = this.#mapStyleLayers.get(annotation.layer)
         if (stylingLayer) {
+            const parentLayer = this.#mapStyleLayers.get(stylingLayer.layer['parent-layer'])
+            const baseFeature = this.#flatmap.annotation(stylingLayer.layer['zoom-point'])
+            if (parentLayer && baseFeature) {
+                parentLayer.updateBaseMarker(baseFeature, options)
+            }
             return stylingLayer.addLayeredMarker(annotation, options)
         }
         return null

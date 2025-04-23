@@ -167,6 +167,8 @@ export interface FlatMapLayer
     'image-layers'?: FlatMapImageLayer[]
     'max-zoom'?: number
     'min-zoom'?: number
+    'parent-layer'?: string
+    'zoom-point'?: number
 }
 
 //==============================================================================
