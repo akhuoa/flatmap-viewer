@@ -1678,7 +1678,7 @@ export class UserInteractions
     //=========================================
     {
         if (this.#layerManager) {
-            return this.#layerManager.addDatasetMarkers(datasets)
+            this.#layerManager.addDatasetMarkers(datasets)
         }
     }
 

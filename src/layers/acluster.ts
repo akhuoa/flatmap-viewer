@@ -187,7 +187,7 @@ export class ClusteredAnatomicalMarkerLayer
                 if (!annotation
                  || annotation.centreline
                  || !('markerPosition' in annotation) && !annotation.geometry!.includes('Polygon')) {
-                    continue;
+                    continue
                 }
                 const markerId = this.#ui.nextMarkerId()
                 const markerPosition = this.#ui.markerPosition(annotation)
