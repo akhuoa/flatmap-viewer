@@ -1288,19 +1288,19 @@ export class FlatMap
     /**
      * Add a marker to the map.
      *
-     * @param {string}  anatomicalId  The anatomical identifier of the feature on which
-     *                                to place the marker.
-     * @param {FlatMapMarkerOptions} options          Configurable options for the marker.
-     * @return     {integer}          The identifier for the resulting marker. -1 is returned if the
-     *                                map doesn't contain a feature with the given anatomical identifier
+     * @param anatomicalId  The anatomical identifier of the feature on which
+     *                      to place the marker.
+     * @param options       Configurable options for the marker.
+     * @return              The identifiers for the resulting markers. An empty array is returned if the
+     *                      map doesn't contain a feature with the given anatomical identifier
      */
-    addMarker(anatomicalId: string,  options: FlatMapMarkerOptions={}): number
-    //========================================================================
+    addMarker(anatomicalId: string,  options: FlatMapMarkerOptions={}): GeoJSONId[]
+    //=============================================================================
     {
         if (this.#userInteractions !== null) {
-            return this.#userInteractions.addMarker(anatomicalId, options)
+            return this.#userInteractions.addLayeredMarker(anatomicalId, options)
         }
-        return -1
+        return []
     }
 
     /**
@@ -1309,19 +1309,19 @@ export class FlatMap
      * @param {Array.<string>}  anatomicalIds  Anatomical identifiers of features on which
      *                                to place markers.
      * @param {FlatMapMarkerOptions} options          Configurable options for the markers.
-     * @return     {array.<integer>}  The identifiers of the resulting markers. -1 is returned if the
-     *                                map doesn't contain a feature with the given anatomical identifier
+     * @return     {array.<integer>}  The identifiers of the resulting markers. An empty array
+     *                                is returned if the map doesn't contain a feature with
+     *                                the given anatomical identifier
      */
-    addMarkers(anatomicalIds: string[],  options: FlatMapMarkerOptions={}): number[]
-    //==============================================================================
+    addMarkers(anatomicalIds: string[],  options: FlatMapMarkerOptions={}): GeoJSONId[]
+    //=================================================================================
     {
         options = Object.assign({cluster: true}, options)
-        const markerIds: number[] = []
+        const markerIds: GeoJSONId[] = []
         for (const anatomicalId of anatomicalIds) {
             if (this.#userInteractions !== null) {
-                markerIds.push(this.#userInteractions.addMarker(anatomicalId, options))
-            } else {
-                markerIds.push(-1)
+                const markerIds = this.#userInteractions.addLayeredMarker(anatomicalId, options)
+                markerIds.push(...markerIds)
             }
         }
         return markerIds

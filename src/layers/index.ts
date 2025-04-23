@@ -26,6 +26,7 @@ import {PropertiesFilter, StyleFilterType} from '../filters'
 import {DetailsFilter} from '../filters/facets/details'
 import {FilteredFacet} from '../filters/facets'
 import {DatasetTerms, DatasetMarkerResult, FlatMapImageLayer, FlatMapLayer} from '../flatmap-types'
+import {FlatMapFeatureAnnotation, FlatMapMarkerOptions} from '../flatmap-types'
 import type {GeoJSONId, MapExtent, MapFeature, MapRenderedFeature, MapPointFeature} from '../flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from '../flatmap'
 import {PATHWAYS_LAYER} from '../pathways'
@@ -40,6 +41,7 @@ import {VectorStyleLayer, VECTOR_TILES_SOURCE} from './styling'
 
 import {DeckGlOverlay} from './deckgl'
 import {FlightPathLayer} from './flightpaths'
+import {MarkerLayer} from './markers'
 //import {SvgLayer} from './svglayer'
 
 //==============================================================================
@@ -66,13 +68,14 @@ class FlatMapStylingLayer
     #layer: FlatMapLayer
     #layerOptions: StylingOptions
     #map: MapLibreMap
+    #markerLayer: MarkerLayer
     #minimapStylingLayers: maplibregl.LayerSpecification[] = []
     #pathStyleLayers: VectorStyleLayer[] = []
     #rasterStyleLayers: RasterStyleLayer[] = []
     #separateLayers: boolean
     #vectorStyleLayers: VectorStyleLayer[] = []
 
-    constructor(flatmap: FlatMap, layer: FlatMapLayer, options: StylingOptions)
+    constructor(flatmap: FlatMap, ui: UserInteractions, layer: FlatMapLayer, options: StylingOptions)
     {
         this.#id = layer.id
         this.#layer = layer
@@ -165,6 +168,9 @@ class FlatMapStylingLayer
             }
         }
 
+        // The marker layer sits in front of all other layers
+        this.#markerLayer = new MarkerLayer(flatmap, ui, layer.id)
+
         // Make sure our paint options are set properly, in particular raster layer visibility
         this.setPaint(this.#layerOptions)
 
@@ -226,8 +232,15 @@ class FlatMapStylingLayer
         for (const styleLayer of this.#rasterStyleLayers) {
             this.#showStyleLayer(styleLayer.id, enable)
         }
+        this.#showStyleLayer(this.#markerLayer.id, enable)
         this.#active = enable
         this.#setPaintRasterLayers(this.#layerOptions)
+    }
+
+    addLayeredMarker(annotation: FlatMapFeatureAnnotation, options: FlatMapMarkerOptions): GeoJSONId|null
+    //===================================================================================================
+    {
+        return this.#markerLayer.addMarker(annotation, options)
     }
 
     #addPathwayStyleLayers()
@@ -414,7 +427,7 @@ export class LayerManager
 
         // Add the map's layers
         for (const layer of flatmap.layers) {
-            const flatmapStylingLayer = new FlatMapStylingLayer(this.#flatmap,
+            const flatmapStylingLayer = new FlatMapStylingLayer(this.#flatmap, ui,
                                                                 layer,
                                                                 this.#layerOptions)
             this.#mapStyleLayers.set(layer.id, flatmapStylingLayer)
@@ -487,6 +500,16 @@ export class LayerManager
     //=========================================
     {
         this.#markerLayer.addDatasetMarkers(datasets)
+    }
+
+    addLayeredMarker(annotation: FlatMapFeatureAnnotation, options: FlatMapMarkerOptions): GeoJSONId|null
+    //===================================================================================================
+    {
+        const stylingLayer = this.#mapStyleLayers.get(annotation.layer)
+        if (stylingLayer) {
+            return stylingLayer.addLayeredMarker(annotation, options)
+        }
+        return null
     }
 
     clearDatasetMarkers()

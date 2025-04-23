@@ -1575,6 +1575,22 @@ export class UserInteractions
         return this.#lastMarkerId
     }
 
+
+    addLayeredMarker(anatomicalId: string, options: FlatMapMarkerOptions={}): GeoJSONId[]
+    //===================================================================================
+    {
+        const markerIds: GeoJSONId[] = []
+        const featureIds = this.#flatmap.modelFeatureIds(anatomicalId)
+        for (const featureId of featureIds) {
+            const annotation = this.#flatmap.annotation(featureId)!
+            const markerId = this.#layerManager.addLayeredMarker(annotation, options)
+            if (markerId !== null) {
+                markerIds.push(markerId)
+            }
+        }
+        return markerIds
+    }
+
     addMarker(anatomicalId: string, options: FlatMapMarkerOptions={}): number
     //=======================================================================
     {

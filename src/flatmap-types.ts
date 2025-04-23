@@ -290,6 +290,7 @@ export interface FlatMapFeatureAnnotation
     }
     kind?: string
     label?: string
+    layer?: string
     lineLength?: number
     lineString?:  GeoJSON.Feature<GeoJSON.LineString>
     markerPosition?: Point2D
@@ -378,6 +379,7 @@ export type FlatMapMarkerOptions = maplibregl.MarkerOptions & {
     className?: string
     colour?: string
     element?: string
+    kind?: MarkerKind
     location?: number
 }
 
