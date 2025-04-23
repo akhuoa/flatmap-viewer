@@ -372,6 +372,8 @@ export interface FlatMapFeature
 //==============================================================================
 //==============================================================================
 
+export type MarkerKind = 'dataset' | 'multiscale'
+
 export type FlatMapMarkerOptions = maplibregl.MarkerOptions & {
     className?: string
     colour?: string
@@ -419,25 +421,23 @@ export type ExportedFeatureProperties = {
 //==============================================================================
 //==============================================================================
 
-export type DatasetMarkerKind = 'dataset' | 'multiscale'
-
 export interface DatasetTerms
 {
     id: string
-    kind?: DatasetMarkerKind
+    kind?: MarkerKind
     terms: string[]
 }
 
 export type DatasetFeatures = {
     dataset: string
-    kind?: DatasetMarkerKind
+    kind?: MarkerKind
     features: ExportedFeatureProperties[]
 }
 
 export type DatasetMarkerResult = {
     term: string
     label: string
-    kind: DatasetMarkerKind
+    kind: MarkerKind
 }
 
 //==============================================================================

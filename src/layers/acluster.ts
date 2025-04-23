@@ -24,11 +24,11 @@ import {DataDrivenPropertyValueSpecification, GeoJSONSource} from 'maplibre-gl'
 //==============================================================================
 
 import {FlatMap} from '../flatmap'
-import {DatasetMarkerKind, DatasetMarkerResult, DatasetTerms} from '../flatmap-types'
+import {DatasetMarkerResult, DatasetTerms, MarkerKind} from '../flatmap-types'
 import type {GeoJSONId} from '../flatmap-types'
 import {UserInteractions} from '../interactions'
 import {MapTermGraph} from '../knowledge'
-import {DATASET_MARKER_ID, MULTISCALE_MARKER_ID} from '../markers'
+import {DATASET_CLUSTERED_MARKER, MULTISCALE_CLUSTERED_MARKER} from '../markers'
 import {PropertiesType} from '../types'
 
 import {DatasetClusterSet, MAX_MARKER_ZOOM} from './datasetcluster'
@@ -96,8 +96,8 @@ export class ClusteredAnatomicalMarkerLayer
     #featureToMarkerPoint: Map<number, MarkerPoint> = new Map()
     #featureToTerm: Map<number, string> = new Map()
     #flatmap: FlatMap
-    #kindByDataset: Map<string, DatasetMarkerKind> = new Map()
-    #kindByTerm: Map<string, DatasetMarkerKind> = new Map()
+    #kindByDataset: Map<string, MarkerKind> = new Map()
+    #kindByTerm: Map<string, MarkerKind> = new Map()
     #map: MapLibreMap
     #mapTermGraph: MapTermGraph
     #markerTerms: Map<string, Set<string>> = new Map()
@@ -196,7 +196,7 @@ export class ClusteredAnatomicalMarkerLayer
                     id: markerId,
                     properties: {
                         featureId,
-                        'icon-zoom': this.#multiScaleByZoomTerm.get(term)!.map(ms => ms ? MULTISCALE_MARKER_ID : DATASET_MARKER_ID),
+                        'icon-zoom': this.#multiScaleByZoomTerm.get(term)!.map(ms => ms ? MULTISCALE_CLUSTERED_MARKER : DATASET_CLUSTERED_MARKER),
                         label: annotation.label,
                         models: term,
                         'zoom-count': countByZoom
