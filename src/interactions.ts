@@ -1707,10 +1707,12 @@ export class UserInteractions
             return
         }
 
+        // Remove any tooltips
+        this.#removeTooltip()
         if (['mouseenter', 'mousemove', 'click'].includes(event.type)) {
             this.#activeMarker = marker
 
-            // Remove any tooltip
+            // Remove any marker popup
             marker.setPopup(null)
 
             // Reset cursor
@@ -1719,6 +1721,10 @@ export class UserInteractions
             const markerId = this.#markerIdByMarker.get(marker)
             if (markerId) {
                 const annotation = this.#annotationByMarkerId.get(markerId)
+                // Show tooltip
+                const html = this.#tooltipHtml(annotation, true)
+                this.#showToolTip(html, marker.getLngLat())
+                // Send event to app
                 this.markerEvent(event, markerId, marker.getLngLat().toArray(), annotation)
             }
             event.stopPropagation()
