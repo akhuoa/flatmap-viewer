@@ -49,6 +49,7 @@ import {MarkerLayer} from './markers'
 const FEATURES_LAYER = 'features'
 
 const REVERT_DETAIL_ZOOM_OFFSET = 0.5
+// const REVERT_DETAIL_ZOOM_RATIO = 0.95
 
 //==============================================================================
 

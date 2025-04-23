@@ -57,7 +57,6 @@ export class MarkerLayer
     #featureToMarkerPoint: Map<number, MarkerPoint> = new Map()
     #id: string
     #map: MapLibreMap
-    #maxZoom: number
     #points: GeoJSON.FeatureCollection = {
        type: 'FeatureCollection',
        features: []
@@ -69,7 +68,6 @@ export class MarkerLayer
     {
         this.#map = flatmap.map!
         this.#ui = ui
-        this.#maxZoom = Math.ceil(this.#map.getMaxZoom())
         this.#id = `${layerId}-markers-layer`
         this.#source = `${layerId}-markers-source`
 
