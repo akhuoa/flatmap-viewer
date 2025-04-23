@@ -1599,7 +1599,8 @@ export class UserInteractions
         for (const featureId of featureIds) {
             const annotation = this.#flatmap.annotation(featureId)!
             const markerPosition = this.markerPosition(annotation, options)
-            if (markerPosition === null) {
+            if (markerPosition === null
+             || annotation.kind === 'zoom-point') {
                 continue
             }
             // Only create a marker if there's not already one for the feature
