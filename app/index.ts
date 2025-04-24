@@ -440,7 +440,9 @@ class StandaloneViewer
             }
             return true
         } else if (data.type === 'marker') {
-            console.log(eventType, ...args)
+            if (eventType === 'click') {
+                console.log(eventType, ...args)
+            }
             return true
         }
     }
