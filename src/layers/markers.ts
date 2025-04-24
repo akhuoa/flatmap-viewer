@@ -86,6 +86,10 @@ export class MarkerLayer
             id: this.#id,
             type: 'symbol',
             source: this.#source,
+            filter: ['any',
+                ['!', ['get', 'cluster']],
+                ['>=', ['zoom'], 4]
+            ],
             layout: {
                 'icon-image': [
                     'let', 'index',  ['case',
