@@ -53,10 +53,10 @@ const REVERT_DETAIL_ZOOM_OFFSET = 0.5
 
 //==============================================================================
 
-export function inAnatomicalClusterLayer(feature: MapFeature|MapRenderedFeature): boolean
+export function isMarker(feature: MapFeature|MapRenderedFeature): boolean
 {
-    return ('layer' in feature
-         && feature.layer!.id === ANATOMICAL_MARKERS_LAYER)
+    return (feature.properties.marker
+         || 'layer' in feature && feature.layer!.id === ANATOMICAL_MARKERS_LAYER)
 }
 
 //==============================================================================

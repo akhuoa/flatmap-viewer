@@ -44,7 +44,7 @@ import {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent,
 import type {BoundingBox, DatasetTerms, FeatureZoomOptions, GeoJSONId} from './flatmap-types'
 import type {Point2D} from './flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
-import {inAnatomicalClusterLayer, LayerManager} from './layers'
+import {isMarker, LayerManager} from './layers'
 import {VECTOR_TILES_SOURCE} from './layers/styling'
 import {MARKER_DEFAULT_COLOUR} from './markers'
 import {latex2Svg} from './mathjax'
@@ -583,7 +583,7 @@ export class UserInteractions
     #markerToFeature(feature: MapFeature|MapRenderedFeature): MapFeature|null
     //=======================================================================
     {
-        if (inAnatomicalClusterLayer(feature)) {
+        if (isMarker(feature)) {
             return this.mapFeature(feature.properties!.featureId || -1)
         }
         return feature
@@ -1095,7 +1095,7 @@ export class UserInteractions
             }
             properties = properties_array
         } else {
-            if (inAnatomicalClusterLayer(feature)) {
+            if (isMarker(feature)) {
                 const markerProperties: object = Object.assign({}, feature.properties, values)
                 const markerTerm = markerProperties['models']
                 markerProperties['marker-terms'] = this.#layerManager.markerTerms(markerTerm)
@@ -1166,7 +1166,7 @@ export class UserInteractions
         // Simulate `mouseenter` events on features
 
         const feature = features[0]
-        const featureId: number = inAnatomicalClusterLayer(feature) ? +feature.id!
+        const featureId: number = isMarker(feature) ? +feature.id!
                                                                     : +feature.properties.featureId!
         const featureModels = ('properties' in feature && 'models' in feature.properties)
                             ? feature.properties.models

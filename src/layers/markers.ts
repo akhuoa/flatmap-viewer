@@ -43,6 +43,7 @@ type MarkerProperties = {
     kind?: string
     label?: string
     layer?: string
+    marker: boolean
     models: string
     hyperlinks?: object
 }
@@ -146,6 +147,7 @@ export class MarkerLayer
                 count: 1,
                 cluster,
                 label: annotation.label,
+                marker: true,
                 models: annotation.models,
                 hyperlinks: annotation.hyperlinks
             },

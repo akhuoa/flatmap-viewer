@@ -296,6 +296,7 @@ export interface FlatMapFeatureAnnotation
     layer?: string
     lineLength?: number
     lineString?:  GeoJSON.Feature<GeoJSON.LineString>
+    marker?: boolean
     markerPosition?: Point2D
     models?: string
     name?: string
