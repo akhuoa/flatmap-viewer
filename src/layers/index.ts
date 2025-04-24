@@ -73,6 +73,7 @@ class FlatMapStylingLayer
     #markersByFeature: Map<number, number> = new Map()
     #minimapStylingLayers: maplibregl.LayerSpecification[] = []
     #pathStyleLayers: VectorStyleLayer[] = []
+    #parentLayer: FlatMapStylingLayer|null = null
     #rasterStyleLayers: RasterStyleLayer[] = []
     #separateLayers: boolean
     #vectorStyleLayers: VectorStyleLayer[] = []
@@ -231,6 +232,18 @@ class FlatMapStylingLayer
         return this.#layer['min-zoom']!
     }
 
+    get parentLayer()
+    //===============
+    {
+        return this.#parentLayer
+    }
+
+    setParent(parentLayer: FlatMapStylingLayer)
+    //=========================================
+    {
+        this.#parentLayer = parentLayer
+    }
+
     activate(enable=true)
     //===================
     {
@@ -241,6 +254,11 @@ class FlatMapStylingLayer
             this.#showStyleLayer(styleLayer.id, enable)
         }
         this.#showStyleLayer(this.#markerLayer.id, enable)
+        // Deactivate/activate markers in our parent layer...
+        if (this.parentLayer) {
+            this.#showStyleLayer(this.parentLayer.#markerLayer.id, !enable)
+        }
+
         this.#active = enable
         this.#setPaintRasterLayers(this.#layerOptions)
     }
@@ -456,6 +474,12 @@ export class LayerManager
             this.#mapStyleLayers.set(layer.id, flatmapStylingLayer)
             this.#minimapStyleSpecification.layers.push(...flatmapStylingLayer.minimapStylingLayers)
         }
+        for (const layer of this.#mapStyleLayers.values()) {
+            const parentLayer = this.#mapStyleLayers.get(layer.layer['parent-layer'])
+            if (parentLayer) {
+                layer.setParent(parentLayer)
+            }
+        }
 
         // Show anatomical clustered markers in a layer
         this.#markerLayer = new ClusteredAnatomicalMarkerLayer(flatmap, ui)
@@ -530,10 +554,9 @@ export class LayerManager
     {
         const stylingLayer = this.#mapStyleLayers.get(annotation.layer)
         if (stylingLayer) {
-            const parentLayer = this.#mapStyleLayers.get(stylingLayer.layer['parent-layer'])
             const baseFeature = this.#flatmap.annotation(stylingLayer.layer['zoom-point'])
-            if (parentLayer && baseFeature) {
-                parentLayer.updateBaseMarker(baseFeature, options)
+            if (stylingLayer.parentLayer && baseFeature) {
+                stylingLayer.parentLayer.updateBaseMarker(baseFeature, options)
             }
             return stylingLayer.addLayeredMarker(annotation, options)
         }
