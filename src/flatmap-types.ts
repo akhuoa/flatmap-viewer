@@ -282,6 +282,7 @@ export interface FlatMapFeatureAnnotation
     children?: GeoJSONId[]
     colour?: string
     coordinates?: Point2D[]
+    'details-layer'?: string
     featureId: GeoJSONId
     geometry?: string
     hyperlink?: string

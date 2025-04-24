@@ -36,10 +36,13 @@ import {PropertiesType} from '../types'
 type MarkerProperties = {
     cluster: boolean
     count: number
+    'details-layer'?: string
     featureId: GeoJSONId
     hidden?: boolean
     'icon-image': [string, string]
+    kind?: string
     label?: string
+    layer?: string
     models: string
     hyperlinks?: object
 }
@@ -155,6 +158,15 @@ export class MarkerLayer
         const markerState = this.#ui.getFeatureState(featureId)
         if (markerState && 'hidden' in markerState) {
             markerPoint.properties['hidden'] = markerState.hidden
+        }
+        if ('details-layer' in annotation) {
+            markerPoint.properties['details-layer'] = annotation['details-layer']
+        }
+        if (annotation.kind) {
+            markerPoint.properties.kind = annotation.kind
+        }
+        if (annotation.layer) {
+            markerPoint.properties.layer = annotation.layer
         }
         this.#featureToMarkerPoint.set(featureId, markerPoint)
         this.#featureIndexById.set(markerId, this.#points.features.length)
