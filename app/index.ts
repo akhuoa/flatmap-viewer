@@ -396,6 +396,11 @@ class StandaloneViewer
                     this.#mapProvenance.innerHTML = provenanceAsHtml(Object.assign({server: this.#mapEndpoints[this.#currentServer!]},
                                                                      map.mapMetadata))
                 }
+                map.addMarkers([
+                    'cvs:functional.whole-body',
+                    'cvs:functional.tissue',
+                    'cvs:functional.cell'
+                ], {kind: 'multiscale'})
             }
         })
         .catch(error => {
@@ -421,8 +426,16 @@ class StandaloneViewer
                 if ('flatmap' in data.hyperlinks) {
                     await this.#paneManager.loadMap(this.#currentViewer!, data.hyperlinks.flatmap,
                                                     this.mapCallback.bind(this), this.#mapOptions,
-                                                    true
-                                                    )
+                                                    true)
+                                            .then(map => {
+                                                if (map) {
+                                                    map.addMarkers([
+                                                        'cvs:functional.whole-body',
+                                                        'cvs:functional.tissue',
+                                                        'cvs:functional.cell'
+                                                    ], {kind: 'multiscale'})
+                                                }
+                                            })
                 }
             }
             return true

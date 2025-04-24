@@ -162,11 +162,7 @@ class FlatMapStylingLayer
                     this.#addVectorStyleLayer(style.FeatureSmallSymbolLayer, FEATURES_LAYER)
                 }
                 if (options.flatmapStyle === FLATMAP_STYLE.FUNCTIONAL) {
-                    if (flatmap.options.standalone) {
-                        this.#addVectorStyleLayer(style.MultipaneZoomPointLayer, FEATURES_LAYER)
-                    } else {
-                        this.#addVectorStyleLayer(style.FeatureZoomPointLayer, FEATURES_LAYER)
-                    }
+                    this.#addVectorStyleLayer(style.FeatureZoomPointLayer, FEATURES_LAYER)
                 }
             }
         }
