@@ -1390,7 +1390,7 @@ export class UserInteractions
                                                                 && feature.properties.type.startsWith('line')) ))
                 if (lineFeatures.length > 0) {
                     this.#featureEvent('click', lineFeatures)
-                } else {
+                } else if (!('details-layer' in clickedFeature.properties)) {
                     this.#featureEvent('click', clickedFeature)
                 }
             } else {        // A ``centreline`` map -- we send the click's location along a centreline
