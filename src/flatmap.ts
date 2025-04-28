@@ -1298,7 +1298,14 @@ export class FlatMap
     //=============================================================================
     {
         if (this.#userInteractions !== null) {
-            return this.#userInteractions.addLayeredMarker(anatomicalId, options)
+            if (options.kind === 'multiscale') {
+                return this.#userInteractions.addLayeredMarker(anatomicalId, options)
+            } else {
+                const markerId = this.#userInteractions.addMarker(anatomicalId, options)
+                if (markerId > 0) {
+                    return [markerId]
+                }
+            }
         }
         return []
     }
@@ -1320,8 +1327,15 @@ export class FlatMap
         const markerIds: GeoJSONId[] = []
         for (const anatomicalId of anatomicalIds) {
             if (this.#userInteractions !== null) {
-                const markerIds = this.#userInteractions.addLayeredMarker(anatomicalId, options)
-                markerIds.push(...markerIds)
+                if (options.kind === 'multiscale') {
+                    const markerIds = this.#userInteractions.addLayeredMarker(anatomicalId, options)
+                    markerIds.push(...markerIds)
+                } else {
+                    const markerId = this.#userInteractions.addMarker(anatomicalId, options)
+                    if (markerId > 0) {
+                        markerIds.push(markerId)
+                    }
+                }
             }
         }
         return markerIds
