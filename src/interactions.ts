@@ -1575,7 +1575,6 @@ export class UserInteractions
         return this.#lastMarkerId
     }
 
-
     addLayeredMarker(anatomicalId: string, options: FlatMapMarkerOptions={}): GeoJSONId[]
     //===================================================================================
     {
