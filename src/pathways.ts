@@ -43,13 +43,17 @@ export type PathStyle = {
     dashed?: boolean
 }
 
-export type PathType = PathStyle & {
+export type PathTypeDefn = PathStyle & {
     enabled?: boolean
+}
+
+export type PathType = PathStyle & {
+    enabled: boolean
 }
 
 //==============================================================================
 
-const PATH_TYPES: PathType[] = [
+const PATH_TYPES: PathTypeDefn[] = [
     { type: "cns", label: "CNS", colour: "#9B1FC1"},
     { type: "intracardiac", label: "Local circuit neuron", colour: "#F19E38"},
     { type: "para-pre", label: "Parasympathetic pre-ganglionic", colour: "#3F8F4A"},
@@ -66,7 +70,7 @@ const PATH_TYPES: PathType[] = [
     { type: "error", label: "Paths with errors or warnings", colour: "#FF0", enabled: false}
 ]
 
-const PathTypeMap: Map<string, PathType> = new Map(PATH_TYPES.map(t => [t.type, t]))
+const PathTypeMap: Map<string, PathTypeDefn> = new Map(PATH_TYPES.map(t => [t.type, t]))
 
 export const PATH_STYLE_RULES =
     PATH_TYPES.flatMap(pathType => [['==', ['get', 'kind'], pathType.type], pathType.colour])
@@ -200,19 +204,19 @@ export class PathManager
         // Set path types, mapping unknown path types to ``other``
         this.#pathsByType = {}
         this.#pathsByType['other'] = []
-        for (const [pathType, paths] of Object.entries(flatmap.pathways['type-paths'])) {
+        for (const [pathType, pathIds] of Object.entries(flatmap.pathways['type-paths'])) {
             if (pathType in pathTypes) {
-                this.#pathsByType[pathType] = paths
+                this.#pathsByType[pathType] = pathIds
             } else {
-                this.#pathsByType['other'].push(...paths)
+                this.#pathsByType['other'].push(...pathIds)
                 this.#pathtypeEnabled[pathType] = false
             }
             if (pathType === 'centreline') {
                 // Set details of centrelines
-                for (const id of paths) {
-                    const annotation = flatmap.annotationById(id)
+                for (const centrelineId of pathIds) {
+                    const annotation = flatmap.annotationById(centrelineId)
                     if (flatmap.options.style === FLATMAP_STYLE.CENTRELINE
-                     || this.#pathsByCentreline.has(id)) {
+                     || this.#pathsByCentreline.has(centrelineId)) {
                         if (annotation && 'models' in annotation) {
                             this.#nerveCentrelineDetails.set(annotation.models!, annotation.label || annotation.models!)
                         }
