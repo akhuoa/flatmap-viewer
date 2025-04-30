@@ -26,6 +26,8 @@ import {Facet, FilteredFacet} from '.'
 
 export class NerveCentreFacet extends FilteredFacet
 {
+    #allCentrelinesEnabled: boolean = false
+
     constructor(nerveDetails: NerveCentrelineDetails[])
     {
         super(new Facet('nerves', nerveDetails.map(n => {
@@ -34,6 +36,12 @@ export class NerveCentreFacet extends FilteredFacet
                 label: n.label
             }
         })))
+    }
+
+    enableAllCentrelines(enable=true)
+    //============================
+    {
+        this.#allCentrelinesEnabled = enable
     }
 
     makeFilter(): PropertiesFilter
@@ -51,17 +59,20 @@ export class NerveCentreFacet extends FilteredFacet
         if (nerveCondition.length === 0) {
             nerveCondition.push(this.facet.size === 0)
         }
-        const centrelineCondition: PropertiesFilterExpression[] =
-            [{'models': nerveModelsIds}]
-        if (nerveModelsIds.includes('NO-NERVES')) {
-            centrelineCondition.push({'NOT': {'HAS': 'models'}})
+        if (!this.#allCentrelinesEnabled) {
+            return new PropertiesFilter({
+                OR: [
+                    { AND: [{'kind': 'centreline'}, {'models': nerveModelsIds}] },
+                    { AND: [{NOT: {'kind': 'centreline'}},
+                            {OR: [{NOT: {'HAS': 'nerves'}}, ...nerveCondition]}]
+                    }
+                ]
+            })
+        } else {
+            return new PropertiesFilter({
+                OR: [{NOT: {'HAS': 'nerves'}}, ...nerveCondition]
+            })
         }
-        return new PropertiesFilter({
-            AND: [
-                { OR: [{'NOT': {'kind': 'centreline'}}, ...centrelineCondition] },
-                { OR: [{'NOT': {'HAS': 'nerves'}}, ...nerveCondition] }
-            ]
-        })
     }
 }
 

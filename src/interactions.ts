@@ -1473,10 +1473,13 @@ export class UserInteractions
         this.#pathManager.enablePathsBySystem(system, enable, force)
     }
 
-    enablePathsByType(pathType, enable=true)
-    //======================================
+    enablePathsByType(pathType: string, enable=true)
+    //==============================================
     {
         this.#pathTypeFacet.enable(Array.isArray(pathType) ? pathType : [pathType], enable)
+        if (pathType === 'centreline') {
+            this.#nerveCentrelineFacet.enableAllCentrelines(enable)
+        }
         this.#layerManager.refresh()
     }
 

@@ -34,7 +34,7 @@ export class PathTypeFacet extends FilteredFacet
             return {
                 id: pt.type,
                 label: pt.label,
-                enabled: 'enabled' in pt ? pt.enabled : true,
+                enabled: pt.enabled,
                 properties: {
                     colour: pt.colour,
                     dashed: pt.dashed || false
@@ -60,9 +60,9 @@ export class PathTypeFacet extends FilteredFacet
             (enabledPathTypes.length === 0) ? (this.facet.size === 0)
                                             : {'kind': enabledPathTypes}
         return new PropertiesFilter({
-            OR: [
-                {AND: [{NOT: {'tile-layer': PATHWAYS_LAYER}}, {NOT: {'kind': 'centreline'}}]},
-                {NOT: {HAS: 'kind'}}, pathCondition
+            AND: [
+                {'tile-layer': PATHWAYS_LAYER},
+                {HAS: 'kind'}, pathCondition
             ]
         })
     }

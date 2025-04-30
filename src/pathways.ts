@@ -215,10 +215,12 @@ export class PathManager
                 // Set details of centrelines
                 for (const centrelineId of pathIds) {
                     const annotation = flatmap.annotationById(centrelineId)
-                    if (flatmap.options.style === FLATMAP_STYLE.CENTRELINE
-                     || this.#pathsByCentreline.has(centrelineId)) {
-                        if (annotation && 'models' in annotation) {
-                            this.#nerveCentrelineDetails.set(annotation.models!, annotation.label || annotation.models!)
+                    if (annotation) {
+                        if (flatmap.options.style === FLATMAP_STYLE.CENTRELINE
+                         || this.#pathsByCentreline.has(centrelineId)) {
+                            if (annotation.models) {
+                                this.#nerveCentrelineDetails.set(annotation.models, annotation.label || annotation.models)
+                            }
                         }
                     }
                 }
@@ -296,6 +298,10 @@ export class PathManager
                     if (this.#flatmap.options.style !== FLATMAP_STYLE.CENTRELINE) {
                         this.#haveCentrelines = true
                         this.#enabledCentrelines = this.#pathtypeEnabled[pathTypeDefn.type]
+                        pathTypes.push({
+                            ...pathTypeDefn,
+                            enabled: this.#pathtypeEnabled[pathTypeDefn.type]
+                        })
                     }
                 } else {
                     pathTypes.push({
