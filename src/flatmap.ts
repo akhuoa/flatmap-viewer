@@ -196,8 +196,13 @@ type FeatureIdMap = Map<string, GeoJSONId[]>
 
 
 /**
-* Maps are not created directly but instead are created and loaded by
-* `LoadMap` of {@link MapViewer}.
+ * Maps are not created directly but instead are created and loaded by
+ * `LoadMap` of {@link MapViewer}.
+ *
+ * @groupDescription Markers
+ * API calls to place amd remove different types of markers on a flatmap
+ *
+ * @showCategories
 */
 export class FlatMap
 {
@@ -422,6 +427,8 @@ export class FlatMap
 
     /**
      * The flatmap's bounds.
+     *
+     * @group Properties
      */
     get bounds(): maplibregl.LngLatBoundsLike
     //=======================================
@@ -433,6 +440,8 @@ export class FlatMap
      * Does the flatmap contain flightpath information?
      *
      * @return boolean
+     *
+     * @group Properties
      */
     get has_flightpaths()
     //===================
@@ -441,6 +450,9 @@ export class FlatMap
             && this.#details.version >= MAP_MAKER_FLIGHTPATHS_VERSION
     }
 
+    /**
+     * @group Properties
+     */
     get mapTermGraph()
     //================
     {
@@ -630,6 +642,8 @@ export class FlatMap
      * The taxon identifier of the species described by the map.
      *
      * @type string
+     *
+     * @group Properties
      */
     get taxon()
     //=========
@@ -639,6 +653,8 @@ export class FlatMap
 
     /**
      * The biological sex identifier of the species described by the map.
+     *
+     * @group Properties
      */
     get biologicalSex(): string|null
     //==============================
@@ -650,6 +666,8 @@ export class FlatMap
      * The map's creation time.
      *
      * @type string
+     *
+     * @group Properties
      */
     get created()
     //===========
@@ -661,6 +679,8 @@ export class FlatMap
      * The map's id as specified at generation time.
      *
      * @type string
+     *
+     * @group Properties
      */
     get id()
     //======
@@ -675,6 +695,8 @@ export class FlatMap
      * it might be the same as ``id`` for unpublished maps.
      *
      * @type string
+     *
+     * @group Properties
      */
     get uuid()
     //========
@@ -686,6 +708,8 @@ export class FlatMap
      * The map's URL on the map server.
      *
      * @type string
+     *
+     * @group Properties
      */
     get url()
     //========
@@ -701,6 +725,8 @@ export class FlatMap
      * The map's ``index.json`` as returned from the map server.
      *
      * @type Object
+     *
+     * @group Properties
      */
     get details()
     //===========
@@ -710,6 +736,8 @@ export class FlatMap
 
     /**
      * @deprecated Replaced by ``FlatMap.mapMetadata`` since version 4.1.0
+     *
+     * @group Properties
      */
     get provenance()
     //==============
@@ -721,6 +749,8 @@ export class FlatMap
      * The map's mapMetadata as returned from the map server.
      *
      * @type Object
+     *
+     * @group Properties
      */
     get mapMetadata()
     //===============
@@ -732,6 +762,8 @@ export class FlatMap
      * A unique identifier for the map within the viewer.
      *
      * @type string
+     *
+     * @group Properties
      */
     get uniqueId()
     //============
@@ -739,6 +771,9 @@ export class FlatMap
         return `${this.#uuid}-${this.#container}`
     }
 
+    /**
+     * @group Properties
+     */
     get annotations(): Map<GeoJSONId, FlatMapFeatureAnnotation>
     //=========================================================
     {
@@ -965,12 +1000,18 @@ export class FlatMap
         }
     }
 
+    /**
+     * @group Properties
+     */
     get layers()
     //==========
     {
         return this.#layers
     }
 
+    /**
+     * @group Properties
+     */
     get map(): maplibregl.Map|null
     //============================
     {
@@ -981,6 +1022,8 @@ export class FlatMap
      * The anatomical identifiers of features in the map.
      *
      * @type {Array.<string>}
+     *
+     * @group Properties
      */
     get anatomicalIdentifiers(): string[]
     //===================================
@@ -992,6 +1035,8 @@ export class FlatMap
      * The taxon identifiers of species which the map's connectivity has been observed in.
      *
      * @type {Array.<string>}
+     *
+     * @group Properties
      */
     get taxonIdentifiers(): string[]
     //==============================
@@ -1003,6 +1048,8 @@ export class FlatMap
      * Datasets associated with the map.
      *
      * @type {Array.<string>}
+     *
+     * @group Properties
      */
     get datasets(): string[]
     //======================
@@ -1010,12 +1057,18 @@ export class FlatMap
         return [...this.#datasetToFeatureIds.keys()]
     }
 
+    /**
+     * @group Properties
+     */
     get options()
     //===========
     {
         return this.#options
     }
 
+    /**
+     * @group Properties
+     */
     get pathways(): FlatMapPathways
     //=============================
     {
@@ -1284,6 +1337,7 @@ export class FlatMap
     }
 
     //==========================================================================
+    //==========================================================================
 
     /**
      * Add a marker to the map.
@@ -1293,6 +1347,8 @@ export class FlatMap
      * @param options       Configurable options for the marker.
      * @return              The identifiers for the resulting markers. An empty array is returned if the
      *                      map doesn't contain a feature with the given anatomical identifier
+     *
+     * @group Markers
      */
     addMarker(anatomicalId: string,  options: FlatMapMarkerOptions={}): GeoJSONId[]
     //=============================================================================
@@ -1319,6 +1375,8 @@ export class FlatMap
      * @return     {array.<integer>}  The identifiers of the resulting markers. An empty array
      *                                is returned if the map doesn't contain a feature with
      *                                the given anatomical identifier
+     *
+     * @group Markers
      */
     addMarkers(anatomicalIds: string[],  options: FlatMapMarkerOptions={}): GeoJSONId[]
     //=================================================================================
@@ -1346,6 +1404,8 @@ export class FlatMap
      *
      * @param      {integer}  markerId  The identifier of the marker, as returned
      *                                  by ``addMarker()``
+     *
+     * @group Markers
      */
     removeMarker(markerId: number)
     //============================
@@ -1357,6 +1417,8 @@ export class FlatMap
 
     /**
      * Remove all markers from the map.
+     *
+     * @group Markers
      */
     clearMarkers()
     //============
@@ -1367,52 +1429,15 @@ export class FlatMap
     }
 
     /**
-     * Add dataset markers to the map.
-     *
-     * @param {Array.<{id: string, terms: string[]}>} datasets  An array with an object for each dataset,
-     *                                                          specifying its identifier and an array of
-     *                                                          associated anatomical terms
-     */
-    addDatasetMarkers(datasets: DatasetTerms[])
-    //=========================================
-    {
-        if (this.#userInteractions !== null) {
-            this.#userInteractions.addDatasetMarkers(datasets)
-        }
-    }
-
-    /**
-     * Remove all dataset markers from the map.
-     */
-    clearDatasetMarkers()
-    //===================
-    {
-        if (this.#userInteractions !== null) {
-            this.#userInteractions.clearDatasetMarkers()
-        }
-    }
-
-    /**
-     * Remove markers for a dataset from the map.
-     *
-     * @param datasetId  A dataset marker identifier as passed
-     *                   to ``addDatasetMarkers()``
-     */
-    removeDatasetMarker(datasetId: string)
-    //====================================
-    {
-        if (this.#userInteractions !== null) {
-            this.#userInteractions.removeDatasetMarker(datasetId)
-        }
-    }
-
-    /**
-     * Return the set of anatomical identifiers visible in the current map view.
+     * Return the set of anatomical identifiers of the markers visible
+     * in the current map view.
      *
      * @return {Array.<string>} A list of identifiers
+     *
+     * @group Markers
      */
-    visibleMarkerAnatomicalIds()
-    //==========================
+    visibleMarkerAnatomicalIds(): string[]
+    //====================================
     {
         if (this.#userInteractions !== null) {
             return this.#userInteractions.visibleMarkerAnatomicalIds()
@@ -1431,15 +1456,68 @@ export class FlatMap
      * @returns    {boolean} Return true if the popup is shown
      *
      * The resulting popup is given a class name of ``flatmap-tooltip-popup``.
+     *
+     * @group Markers
      */
-    showMarkerPopup(markerId, content, options={})
-    //============================================
+    showMarkerPopup(markerId, content, options={}): boolean
+    //=====================================================
     {
         if (this.#userInteractions !== null) {
             return this.#userInteractions.showMarkerPopup(markerId, content, options)
         }
         return false
     }
+
+    //==========================================================================
+
+    /**
+     * Add dataset markers to the map.
+     *
+     * @param {Array.<{id: string, terms: string[]}>} datasets  An array with an object for each dataset,
+     *                                                          specifying its identifier and an array of
+     *                                                          associated anatomical terms
+     *
+     * @group Markers
+     */
+    addDatasetMarkers(datasets: DatasetTerms[])
+    //=========================================
+    {
+        if (this.#userInteractions !== null) {
+            this.#userInteractions.addDatasetMarkers(datasets)
+        }
+    }
+
+    /**
+     * Remove all dataset markers from the map.
+     *
+     * @group Markers
+     */
+    clearDatasetMarkers()
+    //===================
+    {
+        if (this.#userInteractions !== null) {
+            this.#userInteractions.clearDatasetMarkers()
+        }
+    }
+
+    /**
+     * Remove markers for a dataset from the map.
+     *
+     * @param datasetId  A dataset marker identifier as passed
+     *                   to ``addDatasetMarkers()``
+     *
+     * @group Markers
+     */
+    removeDatasetMarker(datasetId: string)
+    //====================================
+    {
+        if (this.#userInteractions !== null) {
+            this.#userInteractions.removeDatasetMarker(datasetId)
+        }
+    }
+
+    //==========================================================================
+    //==========================================================================
 
     exportedFeatureProperties(properties: FlatMapFeatureAnnotation): ExportedFeatureProperties
     //========================================================================================
@@ -1918,6 +1996,9 @@ export class FlatMap
 
     //==========================================================================
 
+    /**
+     * @group Properties
+     */
     get knowledgeSource()
     //===================
     {
