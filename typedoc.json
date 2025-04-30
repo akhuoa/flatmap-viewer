@@ -1,7 +1,7 @@
 {
     "$schema": "https://typedoc.org/schema.json",
-
     "readme": "./README.md",
+    "projectDocuments": ["documentation/howto.md"],
     "plugin": [
         "typedoc-plugin-missing-exports",
         "typedoc-github-theme"

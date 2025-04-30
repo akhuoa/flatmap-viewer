@@ -23,6 +23,7 @@
     "preview": "vite preview",
     "build": "vite build app --base /viewer/",
     "docs": "npx typedoc",
+    "preview-docs": "live-server docs",
     "lint": "eslint ./src/",
     "typecheck": "tsc --noEmit -p tsconfig-build.json --composite false",
     "tsdoc": "typedoc"
@@ -57,6 +58,7 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@compodoc/live-server": "^1.2.3",
     "@eslint/js": "^9.19.0",
     "@math.gl/core": "^4.1.0",
     "@types/core-js": "^2.5.8",
