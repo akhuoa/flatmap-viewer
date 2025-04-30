@@ -45,7 +45,7 @@ class InternalState
     {
         this.#id = state.id
         this.#label = state.label || state.id
-        this.#enabled = ('enabled' in state && state.enabled) || true
+        this.#enabled = ('enabled' in state) ? state.enabled : true
         this.#properties = ('properties' in state && state.properties) || {}
     }
 
