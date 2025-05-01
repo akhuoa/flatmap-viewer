@@ -22,7 +22,7 @@ jobs:
         uses: pnpm/action-setup@v4.1.0
       - name: Generate documentation
         run: pnpm run docs
-      - Upload generated documentation to Pages
+      - name: Upload generated documentation to Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs
