@@ -33,4 +33,4 @@ The map server endpoint is specified as `MAP_ENDPOINT` in `src/main.js`. It defa
 
 ## Documentation
 
-The API is documented at `Read the Docs <https://flatmap-viewer.readthedocs.io/en/mapmaker-v2/>`.
+[Documentation](https://anatomicmaps.github.io/flatmap-viewer/)
