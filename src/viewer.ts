@@ -73,7 +73,7 @@ export interface PreloadedImage
 
 export interface MapViewerOptions extends FlatMapOptions
 {
-    container: string
+    container?: string
     panes?: number
     images?: PreloadedImage[]
 }
@@ -108,11 +108,11 @@ export class MapViewer
     // Do we just have a viewer callback? With map events having a map number field??
     //
 
-    constructor(mapServerUrl: string, options: MapViewerOptions)
+    constructor(mapServerUrl: string, options: MapViewerOptions|null=null)
     {
         this.mapServerUrl = mapServerUrl
         this.#mapServer = new FlatMapServer(mapServerUrl)
-        this.#images = options.images || []
+        this.#images = options ? (options.images || []) : []
     }
 
     get mapServer()
