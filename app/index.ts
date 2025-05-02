@@ -409,8 +409,8 @@ class StandaloneViewer
         })
     }
 
-    async mapCallback(eventType: string, data: Record<string, any>, ...args: unknown[])
-    //=================================================================================
+    async mapCallback(eventType: string, data: Record<string, any>)
+    //=============================================================
     {
         if (data.type === 'control' && data.control === 'background') {
             this.#mapOptions.background = data.value

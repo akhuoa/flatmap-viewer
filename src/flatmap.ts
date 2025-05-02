@@ -1097,12 +1097,12 @@ export class FlatMap
         this.#callbacks.unshift(callback)
     }
 
-    async callback(type: string, properties: ExportedFeatureProperties|ExportedFeatureProperties[], ...args: unknown[])
-    //=================================================================================================================
+    async callback(type: string, properties: ExportedFeatureProperties|ExportedFeatureProperties[])
+    //=============================================================================================
     {
         const data = {...properties, mapUUID: this.#uuid}
         for (const callback of this.#callbacks) {
-            const handled = await callback(type, data, ...args)
+            const handled = await callback(type, data)
             if (handled) {
                 break
             }

@@ -211,8 +211,7 @@ export type FlatMapCallback = (
         | ControlEventData
         | FeatureEventData
         | MarkerEventData
-        | PanZoomEventData,
-    ...args: unknown[]
+        | PanZoomEventData
 ) => Promise<undefined|boolean>
 
 export interface FlatMapLayerOptions
