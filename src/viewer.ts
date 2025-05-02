@@ -28,6 +28,7 @@ import {
 } from './flatmap-types'
 import {SparcTermGraph} from './knowledge'
 import {FlatMapServer} from './mapserver'
+import {noFlatMapPathways} from './pathways'
 import * as utils from './utils'
 
 //==============================================================================
@@ -310,8 +311,9 @@ export class MapViewer
         }
 
         // Get the map's pathways
-
-        const pathways = (await this.#mapServer.mapPathways(mapId))!
+        const pathways = !options.pathsDisabled
+                       ? (await this.#mapServer.mapPathways(mapId))
+                       : noFlatMapPathways
 
         // Get the map's annotations
 

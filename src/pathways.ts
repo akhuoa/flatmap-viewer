@@ -93,6 +93,15 @@ const NO_NERVES = ['NO-NERVES', 'No associated nerves']
 
 //==============================================================================
 
+export const noFlatMapPathways: FlatMapPathways = {
+    models: [],
+    'node-paths': {},
+    paths: {},
+    'type-paths': {}
+}
+
+//==============================================================================
+
 /* To go into systems.ts */
 
 export interface SystemComponent

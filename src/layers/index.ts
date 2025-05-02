@@ -72,6 +72,7 @@ class FlatMapStylingLayer
     #markerLayer: MarkerLayer
     #markersByFeature: Map<number, number> = new Map()
     #minimapStylingLayers: maplibregl.LayerSpecification[] = []
+    #pathsEnabled: boolean
     #pathStyleLayers: VectorStyleLayer[] = []
     #parentLayer: FlatMapStylingLayer|null = null
     #rasterStyleLayers: RasterStyleLayer[] = []
@@ -86,6 +87,7 @@ class FlatMapStylingLayer
         this.#description = layer.description || ''
         this.#layerOptions = options
         this.#separateLayers = flatmap.options.separateLayers
+        this.#pathsEnabled = !flatmap.options.pathsDisabled
 
         // Make sure image layer information is in its expected format
         const imageLayers = flatmap.details['image-layers'] && (layer['image-layers'] || false)
@@ -284,7 +286,8 @@ class FlatMapStylingLayer
     //======================
     {
         const pathwaysVectorSource = this.#vectorSourceId(PATHWAYS_LAYER)
-        if (this.#map.getSource('vector-tiles')
+        if (this.#pathsEnabled
+         && this.#map.getSource('vector-tiles')
                 .vectorLayerIds
                 .includes(pathwaysVectorSource)) {
             this.#addVectorStyleLayer(style.AnnotatedPathLayer, PATHWAYS_LAYER, true, true)

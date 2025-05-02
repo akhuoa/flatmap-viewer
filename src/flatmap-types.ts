@@ -240,6 +240,7 @@ export interface FlatMapOptions
     maxZoom?: number
     minZoom?: number
     navigationControl?: boolean
+    pathsDisabled?: boolean
     showId?: boolean
     showLngLat?: boolean
     showPosition?: boolean
