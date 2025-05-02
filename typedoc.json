@@ -19,6 +19,7 @@
     "excludePrivate": true,
     "out": "./docs",
     "customCss": "./static/docs/custom.css",
+    "hideGenerator": true,
     "navigation": {
         "includeCategories": true,
         "includeGroups": true,
