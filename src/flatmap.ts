@@ -58,7 +58,7 @@ import {UserInteractions} from './interactions'
 import {MapTermGraph, SparcTermGraph} from './knowledge'
 import {KNOWLEDGE_SOURCE_SCHEMA, FlatMapServer} from './mapserver'
 import {loadMarkerIcons} from './markers'
-import {APINATOMY_PATH_PREFIX} from './pathways'
+import {APINATOMY_PATH_PREFIX, PathType} from './pathways'
 import {SearchIndex} from './search'
 
 import * as images from './images'
@@ -534,11 +534,11 @@ export class FlatMap
     }
 
     /**
-     * @returns {Array.<{type: string, label: string, colour: string}>} an array of objects giving the path types
-     *                                                                  present in the map along with their
-     *                                                                  descriptions and colours
+     * @returns A array of objects giving the path types
+     *          present in the map along with their
+     *          descriptions and colours
      */
-    pathTypes()
+    pathTypes(): PathType[]
     //=========
     {
         if (this.#userInteractions !== null) {
@@ -553,8 +553,8 @@ export class FlatMap
      * @param {boolean}          enable   Show or hide paths of that type. Defaults to
      *                                    ``true`` (show)
      */
-    enablePath(pathType, enable=true)
-    //===============================
+    enablePath(pathType: string|string[], enable=true)
+    //================================================
     {
         if (this.#userInteractions !== null) {
             this.#userInteractions.enablePathsByType(pathType, enable)
