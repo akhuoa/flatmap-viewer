@@ -539,7 +539,7 @@ export class FlatMap
      *          descriptions and colours
      */
     pathTypes(): PathType[]
-    //=========
+    //=====================
     {
         if (this.#userInteractions !== null) {
             return this.#userInteractions.pathManager.pathTypes()
