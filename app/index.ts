@@ -421,7 +421,7 @@ class StandaloneViewer
             }
             return true
         } else if (eventType === 'click') {
-            console.log(eventType, data, ...args)
+            console.log(eventType, data)
             if ('hyperlinks' in data) {
                 if ('flatmap' in data.hyperlinks) {
                     await this.#paneManager.loadMap(this.#currentViewer!, data.hyperlinks.flatmap,
@@ -441,7 +441,7 @@ class StandaloneViewer
             return true
         } else if (data.type === 'marker') {
             if (eventType === 'click') {
-                console.log(eventType, ...args)
+                console.log(eventType)
             }
             return true
         }
