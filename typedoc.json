@@ -2,6 +2,10 @@
     "$schema": "https://typedoc.org/schema.json",
     "readme": "./README.md",
     "projectDocuments": ["documentation/howto.md"],
+    "navigationLinks": {
+        "API": "https://anatomicmaps.github.io/flatmap-viewer/modules/index.html",
+        "GitHub": "https://github.com/AnatomicMaps/flatmap-viewer"
+    },
     "plugin": [
         "typedoc-plugin-missing-exports",
         "typedoc-github-theme"
