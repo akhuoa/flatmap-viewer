@@ -23,7 +23,7 @@ import {colord} from 'colord'
 //==============================================================================
 
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
-import type {GeoJSONId, PathDetailsType} from './flatmap-types'
+import type {FlatMapPathways, GeoJSONId, PathDetailsType} from './flatmap-types'
 import {UserInteractions} from './interactions'
 import {Callback} from './types'
 import {reverseMap} from './utils'
