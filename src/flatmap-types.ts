@@ -246,7 +246,7 @@ export interface FlatMapOptions
     showPosition?: boolean
     standalone?: boolean
     tooltipDelay?: number
-    tooltips?: boolean
+    hideTooltips?: boolean
 }
 
 //==============================================================================

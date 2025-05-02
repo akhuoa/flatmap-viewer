@@ -160,7 +160,7 @@ class FlatMapStylingLayer
             }
             if (vectorFeatures) {
                 this.#addVectorStyleLayer(style.FeatureLargeSymbolLayer, FEATURES_LAYER)
-                if (!flatmap.options.tooltips) {
+                if (flatmap.options.hideTooltips) {
                     this.#addVectorStyleLayer(style.FeatureSmallSymbolLayer, FEATURES_LAYER)
                 }
                 if (options.flatmapStyle === FLATMAP_STYLE.FUNCTIONAL) {

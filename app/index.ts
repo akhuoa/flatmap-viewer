@@ -47,7 +47,6 @@ const MAP_ENDPOINTS = {
 }
 
 const DEFAULT_OPTIONS = {
-    tooltips: true,
     debug: false,
     minimap: false,
     showId: true,
