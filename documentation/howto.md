@@ -3,41 +3,60 @@ title: HowTo Guide
 group: Documents
 category: Guides
 ---
-# HowTo
+## A simple application
 
-## Using the viewer in a simple application:
+This example will display the most recent human female map from the SPARC
+map server into a HTML `<div>` element. The `pathsDisabled` option is set
+at load time to hide all neuron paths that are usually displayed.
 
-```html
-<div id="map-container"></div>
-```
+1.  Include the `flatmap-viewer` NPM package in a web application.
 
-```css
-#map-container {
-    height: 100%;
-    width: 100%;
-}
-```
+2.  Declare a `<div>` element as part of a web page:
 
-```typescript
-import {MapViewer} from '@abi-software/flatmap-viewer'
+    ```html
+    <div id="map-container"></div>
+    ```
 
-// Use production SPARC maps
-const MAP_SERVER = 'https://mapcore-demo.org/current/flatmap/v3/'
+3.  Give the element a size and border:
 
-// Create a viewer for the map server
-const viewer = new MapViewer(MAP_SERVER)
+    ```css
+    #map-container {
+        border: 3px solid green;
+        height: 100%;
+        width: 100%;
+    }
+    ```
 
-// Get a list of all maps on the server
-const mapList = await viewer.allMaps()
+4.  Use code such as this to load and display a map
+    into the `<div>` element:
 
-// Load and view the most recent human female map and log all events from the viewer
-const map = await viewer.loadMap({
-    taxon: 'NCBITaxon:9606',
-    biologicalSex: 'PATO:0000383'
-}, (type, data) => {
-    console.log(type, data)
-})
+    ```typescript
+    import {MapViewer} from '@abi-software/flatmap-viewer'
 
-// Disable (hide) all paths on the map
-map.enablePaths(map.pathTypes().map(pathType => pathType.type), false)
-```
+    // Use production SPARC maps
+
+    const MAP_SERVER = 'https://mapcore-demo.org/current/flatmap/v3/'
+
+    // Create a viewer for the map server
+
+    const viewer = new MapViewer(MAP_SERVER)
+
+    // Optionally get a list of all maps on the server
+
+    const mapList = await viewer.allMaps()
+    console.log(mapList)
+
+    // Load the most recent human female map into the `map-container`
+    // with all paths hidden. The provided callbacke will log all events
+    // from the viewer to the console.
+
+    const map = await viewer.loadMap({
+        taxon: 'NCBITaxon:9606',
+        biologicalSex: 'PATO:0000383'
+    }, (type, data) => {
+        console.log(type, data)
+    }, {
+      container: 'map-container',
+      pathsDisabled: true
+    })
+    ```
