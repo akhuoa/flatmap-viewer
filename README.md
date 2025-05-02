@@ -34,3 +34,7 @@ $ pnpm start
 Maps can then be viewed at http://localhost:3000.
 
 ---
+
+## Example usage
+
+See [here](https://anatomicmaps.github.io/flatmap-viewer/documents/HowTo_Guide.html)
