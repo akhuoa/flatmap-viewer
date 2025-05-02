@@ -26,7 +26,7 @@ jobs:
       - name: Install packages
         run: pnpm install
       - name: Generate documentation
-        run: pnpm run docs
+        run: pnpm build-docs
       - name: Upload generated documentation to Pages
         uses: actions/upload-pages-artifact@v3
         with:
