@@ -35,6 +35,9 @@ importers:
       '@turf/bbox':
         specifier: ^6.5.0
         version: 6.5.0
+      '@turf/clean-coords':
+        specifier: ^7.2.0
+        version: 7.2.0
       '@turf/helpers':
         specifier: ^6.5.0
         version: 6.5.0
@@ -921,6 +924,9 @@ packages:
 
   '@turf/boolean-clockwise@5.1.5':
     resolution: {integrity: sha512-FqbmEEOJ4rU4/2t7FKx0HUWmjFEVqR+NJrFP7ymGSjja2SQ7Q91nnBihGuT+yuHHl6ElMjQ3ttsB/eTmyCycxA==}
+
+  '@turf/clean-coords@7.2.0':
+    resolution: {integrity: sha512-+5+J1+D7wW7O/RDXn46IfCHuX1gIV1pIAQNSA7lcDbr3HQITZj334C4mOGZLEcGbsiXtlHWZiBtm785Vg8i+QQ==}
 
   '@turf/clone@5.1.5':
     resolution: {integrity: sha512-//pITsQ8xUdcQ9pVb4JqXiSqG4dos5Q9N4sYFoWghX21tfOV2dhc5TGqYOhnHrQS7RiKQL1vQ48kIK34gQ5oRg==}
@@ -4093,6 +4099,13 @@ snapshots:
     dependencies:
       '@turf/helpers': 5.1.5
       '@turf/invariant': 5.2.0
+
+  '@turf/clean-coords@7.2.0':
+    dependencies:
+      '@turf/helpers': 7.2.0
+      '@turf/invariant': 7.2.0
+      '@types/geojson': 7946.0.16
+      tslib: 2.8.1
 
   '@turf/clone@5.1.5':
     dependencies:

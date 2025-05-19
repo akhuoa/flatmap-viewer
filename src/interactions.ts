@@ -25,6 +25,7 @@ import maplibregl from 'maplibre-gl'
 import {default as turfAlong} from '@turf/along'
 import {default as turfBBox} from '@turf/bbox'
 import * as turf from '@turf/helpers'
+import * as turfCleanCoords from "@turf/clean-coords"
 import * as turfNearestPointOnLine from "@turf/nearest-point-on-line"
 import * as turfProjection from '@turf/projection'
 
@@ -1427,7 +1428,7 @@ export class UserInteractions
             if (annotation && annotation.centreline && 'lineString' in annotation) {
                 const line = annotation.lineString!
                 const clickedPoint = turf.point([lngLat.lng, lngLat.lat])
-                const linePoint = turfNearestPointOnLine.nearestPointOnLine(line, clickedPoint)
+                const linePoint = turfNearestPointOnLine.nearestPointOnLine(turfCleanCoords.cleanCoords(line), clickedPoint)
                 return {
                     location: linePoint.properties.location/annotation.lineLength!
                 }
