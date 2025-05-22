@@ -33,6 +33,7 @@ export type MapFeatureIdentifier = maplibregl.FeatureIdentifier & {
         id: string
     }
     properties: {
+        featureId?: GeoJSONId
         [name: string]: unknown
     }
 }
@@ -283,7 +284,7 @@ export interface FlatMapFeatureAnnotation
     colour?: string
     coordinates?: Point2D[]
     'details-layer'?: string
-    featureId: GeoJSONId
+    featureId?: GeoJSONId
     geometry?: string
     hyperlink?: string
     hyperlinks?: {

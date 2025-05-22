@@ -1081,36 +1081,26 @@ export class UserInteractions
                                       : `<div class='flatmap-feature-label'>${tooltip.join('<hr/>')}</div>`
     }
 
-    #featureEvent(type: string, feature: MapPointFeature|MapPointFeature[], values={})
-    //================================================================================
+    #featureEvent(type: string, feature: MapPointFeature, values={})
+    //==============================================================
     {
-        let properties: FlatMapFeatureAnnotation|FlatMapFeatureAnnotation[]|null
-        if (Array.isArray(feature)) {
-            const properties_array: FlatMapFeatureAnnotation[] = []
-            const seenModels: string[] = []
-            for (const f of feature) {
-                if (f.properties.models && !seenModels.includes(f.properties.models)) {
-                    properties_array.push(Object.assign({}, f.properties, values) as FlatMapFeatureAnnotation)
-                    seenModels.push(f.properties.models)
-                }
-            }
-            properties = properties_array
-        } else {
-            if (isMarker(feature)) {
-                const markerProperties: object = Object.assign({}, feature.properties, values)
-                const markerTerm = markerProperties['models']
-                markerProperties['marker-terms'] = this.#layerManager.markerTerms(markerTerm)
-                return this.#flatmap.markerEvent(type, +feature.id!, markerProperties as FlatMapFeatureAnnotation)
-            } else if ('properties' in feature) {
-                properties = Object.assign({}, feature.properties, values) as FlatMapFeatureAnnotation
-            } else {
-                properties = null
-            }
-        }
-        if (properties) {
+        let properties: FlatMapFeatureAnnotation
+        if (isMarker(feature)) {
+            const markerProperties: object = Object.assign({}, feature.properties, values)
+            const markerTerm = markerProperties['models']
+            markerProperties['marker-terms'] = this.#layerManager.markerTerms(markerTerm)
+            return this.#flatmap.markerEvent(type, +feature.id!, markerProperties as FlatMapFeatureAnnotation)
+        } else if ('properties' in feature) {
+            properties = Object.assign({}, feature.properties, values) as FlatMapFeatureAnnotation
             return this.#flatmap.featureEvent(type, properties)
         }
         return false
+    }
+
+    #multiFeatureEvent(type: string, featureProperties: FlatMapFeatureAnnotation[])
+    //=============================================================================
+    {
+        return this.#flatmap.featureEvent(type, featureProperties)
     }
 
     #resetFeatureDisplay()
@@ -1390,22 +1380,26 @@ export class UserInteractions
                                                               || ('type' in feature.properties
                                                                 && feature.properties.type.startsWith('line')) ))
                 if (lineFeatures.length > 0) {
-                    this.#featureEvent('click', lineFeatures)
+                    this.#multiFeatureEvent('click', lineFeatures.map(f => f.properties))
                 } else if (!('details-layer' in clickedFeature.properties)) {
                     this.#featureEvent('click', clickedFeature)
                 }
-            } else {        // A ``centreline`` map -- we send the click's location along a centreline
-                const seenFeatures = new Set()
+            } else {        // A ``centreline`` map -- we send the click's location along centrelines
                 this.#selectActiveFeatures(event.originalEvent)
                 const centreline_click = (clickedFeature.properties.kind === 'centreline')
-                for (const feature of clickedFeatures) {
-                    if (!seenFeatures.has(feature.properties.id)) {
-                        seenFeatures.add(feature.properties.id)
-                        if (!centreline_click || centreline_click && (feature.properties.kind === 'centreline')) {
-                            this.#featureEvent('click', feature,
-                                                this.#locationOnLine(+feature.id!, event.lngLat))
+                if (!centreline_click) {
+                    this.#featureEvent('click', clickedFeature)
+                } else {
+                    const seenModels = new Set()
+                    const featureProperties: FlatMapFeatureAnnotation[] = []
+                    for (const feature of clickedFeatures) {
+                        if (feature.properties.models && !seenModels.has(feature.properties.models)) {
+                            const location = this.#locationOnLine(+feature.id!, event.lngLat)
+                            featureProperties.push(Object.assign({}, feature.properties, location) as FlatMapFeatureAnnotation)
+                            seenModels.add(feature.properties.models)
                         }
                     }
+                    this.#multiFeatureEvent('click', featureProperties)
                 }
             }
             if (this.#flatmap.options.style === FLATMAP_STYLE.FUNCTIONAL
