@@ -193,6 +193,7 @@ export class UserInteractions
     #systemsManager: SystemsManager
     #taxonFacet: TaxonFacet
     #tooltip: maplibregl.Popup|null = null
+    #resetOnClickEnabled: boolean = true
 
     constructor(flatmap: FlatMap)
     {
@@ -1351,17 +1352,21 @@ export class UserInteractions
 
         let clickedFeatures = this.#renderedFeatures(event.point)
         if (clickedFeatures.length == 0) {
-            this.unselectFeatures()
+            if (this.#resetOnClickEnabled) {
+                this.unselectFeatures()
+            }
             return
         }
         const clickedDrawnFeatures = clickedFeatures.filter((f) => !f.id)
         clickedFeatures = clickedFeatures.filter((f) => f.id)
         const clickedFeature = clickedFeatures[0]
         if (this.#modal) {
-            // Remove tooltip, reset active features, etc
-            this.#resetFeatureDisplay()
-            this.unselectFeatures()
-            this.#clearModal()
+            if (this.#resetOnClickEnabled) {
+                // Remove tooltip, reset active features, etc
+                this.#resetFeatureDisplay()
+                this.unselectFeatures()
+                this.#clearModal()
+            }
         } else if (clickedDrawnFeatures.length > 0) {
             // Layer of existing drawn features
             const clickedOnColdLayer = clickedDrawnFeatures.filter((f) => f.source === 'mapbox-gl-draw-cold')[0]
@@ -1513,6 +1518,12 @@ export class UserInteractions
     {
         this.#taxonFacet.enable(Array.isArray(taxonIds) ? taxonIds : [taxonIds], enable)
         this.#layerManager.refresh()
+    }
+
+    enableResetOnClick(enable=true)
+    //=============================
+    {
+        this.#resetOnClickEnabled = enable
     }
 
     excludeAnnotated(exclude=false)

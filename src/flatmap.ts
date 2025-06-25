@@ -592,6 +592,21 @@ export class FlatMap
     }
 
     /**
+     * Enables or disables resetting the paths and features when clicking on an empty area.
+     *
+     * @param {boolean} enable Whether to enable the reset behavior.
+     *                         When enabled, clicking on empty space will reset the view.
+     *                         Defaults to ``true`` (enable)
+     */
+    enableResetOnClick(enable=true)
+    //==================================================================
+    {
+        if (this.#userInteractions !== null) {
+            this.#userInteractions.enableResetOnClick(enable)
+        }
+    }
+
+    /**
      * Load images and patterns/textures referenced in style rules.
      *
      * @private
