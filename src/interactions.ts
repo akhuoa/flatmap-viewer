@@ -1520,7 +1520,7 @@ export class UserInteractions
         this.#layerManager.refresh()
     }
 
-    enableResetOnClick(enable=true)
+    enableFeatureResetOnClick(enable=true)
     //=============================
     {
         this.#resetOnClickEnabled = enable
