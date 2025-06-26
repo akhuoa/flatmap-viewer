@@ -1521,7 +1521,7 @@ export class UserInteractions
     }
 
     enableFeatureResetOnClick(enable=true)
-    //=============================
+    //====================================
     {
         this.#resetOnClickEnabled = enable
     }
