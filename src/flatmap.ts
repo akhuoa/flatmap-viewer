@@ -592,6 +592,21 @@ export class FlatMap
     }
 
     /**
+     * Enable or disable reset selected features when click on an empty area.
+     *
+     * @param {boolean} enable Whether to enable the reset behavior.
+     *                         When enabled, click on empty space will reset the view.
+     *                         Defaults to ``true`` (enable)
+     */
+    enableFeatureResetOnClick(enable=true)
+    //====================================
+    {
+        if (this.#userInteractions !== null) {
+            this.#userInteractions.enableFeatureResetOnClick(enable)
+        }
+    }
+
+    /**
      * Load images and patterns/textures referenced in style rules.
      *
      * @private
