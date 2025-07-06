@@ -331,12 +331,18 @@ export class FeatureFillLayer extends VectorStyleLayer
     paintStyle(options: StylingOptions, changes=false)
     {
         const coloured = !('coloured' in options) || options.coloured
+        const outlined = !('outlined' in options) || options.outlined
         const dimmed = options.dimmed || false
         const functional = (options.flatmapStyle === FLATMAP_STYLE.FUNCTIONAL)
+
+        // @ts-ignore
+        const noOutlineActive: [ExpressionSpecification] = outlined ? []
+                                         : [['boolean', ['feature-state', 'active'], false], '#444']
         const paintStyle: PaintSpecification = {
             'fill-color': [
                 'case',
                 ['boolean', ['feature-state', 'selected'], false], functional ? '#CCC' : COLOUR_SELECTED,
+                ...noOutlineActive,
                 ['boolean', ['feature-state', 'hidden'], false], COLOUR_HIDDEN,
                 ['has', 'colour'], ['get', 'colour'],
                 ['==', ['get', 'kind'], 'proxy'], '#F88',
@@ -344,7 +350,7 @@ export class FeatureFillLayer extends VectorStyleLayer
                     ['==', ['case', ['has', 'shape-type'], ['get', 'shape-type'], 'component'], 'component'],
                     ['boolean', ['feature-state', 'active'], false]
                 ], (coloured && !functional) ? '#D88' : '#DDD',
-                'white'    // background colour? body colour ??
+                (coloured ? 'white' : '#CCC')
             ],
             'fill-opacity': [
                 'case',
@@ -357,7 +363,7 @@ export class FeatureFillLayer extends VectorStyleLayer
                     ['==', ['case', ['has', 'shape-type'], ['get', 'shape-type'], 'component'], 'component'],
                     ['boolean', ['feature-state', 'active'], false]
                 ], functional ? 0.1 : 0.7,
-                (coloured && !dimmed) ? 0.01 : 0.1
+                (coloured ? (!dimmed ? 0.01 : 0.1) : 0.4)
             ]
         }
         return super.changedPaintStyle(paintStyle, changes)
@@ -397,7 +403,6 @@ export class FeatureBorderLayer extends VectorStyleLayer
 
     paintStyle(options: StylingOptions, changes=false)
     {
-        const coloured = !('coloured' in options) || options.coloured
         const outlined = !('outlined' in options) || options.outlined
         const dimmed = options.dimmed || false
         const activeRasterLayer = options.activeRasterLayer || false
@@ -406,7 +411,7 @@ export class FeatureBorderLayer extends VectorStyleLayer
         const lineColour: CaseSpecification = ['case']
         lineColour.push(['boolean', ['feature-state', 'hidden'], false], COLOUR_HIDDEN)
         lineColour.push(['boolean', ['feature-state', 'selected'], false], functional ? '#F80' : FEATURE_SELECTED_BORDER)
-        if (coloured && outlined) {
+        if (outlined) {
             lineColour.push(['boolean', ['feature-state', 'active'], false], COLOUR_ACTIVE)
         }
         lineColour.push(['boolean', ['feature-state', 'annotated'], false], COLOUR_ANNOTATED)
@@ -416,7 +421,7 @@ export class FeatureBorderLayer extends VectorStyleLayer
 
         const lineOpacity: CaseSpecification = ['case']
         lineOpacity.push(['boolean', ['feature-state', 'hidden'], false], 0.05)
-        if (coloured && outlined) {
+        if (outlined) {
             lineOpacity.push(['boolean', ['feature-state', 'active'], false], 0.9)
         }
         lineOpacity.push(['boolean', ['feature-state', 'selected'], false], 0.9)
@@ -430,12 +435,12 @@ export class FeatureBorderLayer extends VectorStyleLayer
         const width: CaseSpecification = ['case']
         width.push(['boolean', ['get', 'invisible'], false], 0.2)
         width.push(['boolean', ['feature-state', 'selected'], false], functional ? 3 : 1.5)
-        if (coloured && outlined) {
+        if (outlined) {
             width.push(['boolean', ['feature-state', 'active'], false], functional ? 2.5 : 1.5)
         }
         width.push(['boolean', ['feature-state', 'annotated'], false], 3.5)
         width.push(['has', 'colour'], 0.7)
-        width.push(functional ? 1 : (coloured && outlined) ? 0.5 : 0.1)
+        width.push(functional ? 1 : outlined ? 0.5 : 0.1)
         const lineWidth = [
             '*',
             ['case',
