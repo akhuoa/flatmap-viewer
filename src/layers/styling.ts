@@ -410,10 +410,8 @@ export class FeatureBorderLayer extends VectorStyleLayer
 
         const lineColour: CaseSpecification = ['case']
         lineColour.push(['boolean', ['feature-state', 'hidden'], false], COLOUR_HIDDEN)
+        lineColour.push(['boolean', ['feature-state', 'active'], false], COLOUR_ACTIVE)
         lineColour.push(['boolean', ['feature-state', 'selected'], false], functional ? '#F80' : FEATURE_SELECTED_BORDER)
-        if (outlined) {
-            lineColour.push(['boolean', ['feature-state', 'active'], false], COLOUR_ACTIVE)
-        }
         lineColour.push(['boolean', ['feature-state', 'annotated'], false], COLOUR_ANNOTATED)
         lineColour.push(['has', 'stroke'], ['get', 'stroke'])
         lineColour.push(['has', 'colour'], ['get', 'colour'])
