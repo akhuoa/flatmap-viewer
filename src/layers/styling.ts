@@ -336,7 +336,7 @@ export class FeatureFillLayer extends VectorStyleLayer
         const functional = (options.flatmapStyle === FLATMAP_STYLE.FUNCTIONAL)
 
         // @ts-ignore
-        const noOutlineActive: [ExpressionSpecification] = outlined ? []
+        const noOutlineActive: [ExpressionSpecification] = (coloured || outlined) ? []
                                          : [['boolean', ['feature-state', 'active'], false], '#444']
         const paintStyle: PaintSpecification = {
             'fill-color': [
