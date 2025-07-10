@@ -115,8 +115,8 @@ export class MapViewer
         this.#images = options ? (options.images || []) : []
     }
 
-    get mapServer()
-    //=============
+    get mapServer(): FlatMapServer
+    //============================
     {
         return this.#mapServer
     }
