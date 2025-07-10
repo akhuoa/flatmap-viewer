@@ -26,8 +26,6 @@ import {
     FlatMapCallback, FlatMapIndex, FlatMapLayer,
     FlatMapMetadata, FlatMapOptions, FlatMapServerIndex
 } from './flatmap-types'
-import type {FlatmapLegendEntry} from './legend'
-import {FLATMAP_LEGEND} from './legend'
 import {SparcTermGraph} from './knowledge'
 import {FlatMapServer} from './mapserver'
 import {noFlatMapPathways} from './pathways'
@@ -115,12 +113,6 @@ export class MapViewer
         this.mapServerUrl = mapServerUrl
         this.#mapServer = new FlatMapServer(mapServerUrl)
         this.#images = options ? (options.images || []) : []
-    }
-
-    get flatmapLegend(): FlatmapLegendEntry[]
-    //=======================================
-    {
-        return FLATMAP_LEGEND
     }
 
     get mapServer(): FlatMapServer

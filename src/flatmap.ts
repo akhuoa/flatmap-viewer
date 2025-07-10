@@ -54,6 +54,8 @@ import {
     FlatMapState
 } from './flatmap-types'
 import type {GeoJSONId, Point2D, Size2D} from './flatmap-types'
+import {FLATMAP_LEGEND} from './legend'
+import type {FlatmapLegendEntry} from './legend'
 import {UserInteractions} from './interactions'
 import {MapTermGraph, SparcTermGraph} from './knowledge'
 import {KNOWLEDGE_SOURCE_SCHEMA, FlatMapServer} from './mapserver'
@@ -446,6 +448,17 @@ export class FlatMap
     {
         return 'version' in this.#details
             && this.#details.version >= MAP_MAKER_FLIGHTPATHS_VERSION
+    }
+
+    /**
+     * @group Properties
+     */
+    get flatmapLegend(): FlatmapLegendEntry[]
+    //=======================================
+    {
+        return (this.options.style == FLATMAP_STYLE.ANATOMICAL)
+            ? FLATMAP_LEGEND
+            : []
     }
 
     /**
