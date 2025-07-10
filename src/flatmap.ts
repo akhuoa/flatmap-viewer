@@ -157,7 +157,7 @@ export type FlatMapSourceSpecification = maplibregl.VectorSourceSpecification
 
 export type FlatMapStyleSpecification = maplibregl.StyleSpecification & {
     "sources": {
-        [_: string]: FlatMapSourceSpecification;
+        [_: string]: FlatMapSourceSpecification
     }
 }
 
@@ -439,11 +439,9 @@ export class FlatMap
     /**
      * Does the flatmap contain flightpath information?
      *
-     * @return boolean
-     *
      * @group Properties
      */
-    get has_flightpaths()
+    get has_flightpaths(): boolean
     //===================
     {
         return 'version' in this.#details
@@ -453,8 +451,8 @@ export class FlatMap
     /**
      * @group Properties
      */
-    get mapTermGraph()
-    //================
+    get mapTermGraph(): MapTermGraph
+    //==============================
     {
         return this.#mapTermGraph
     }
