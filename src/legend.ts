@@ -21,7 +21,7 @@ limitations under the License.
 export type FlatmapLegendEntry = {
     prompt: string
     colour: string
-    style: 'circle' | 'star'
+    style: 'circle' | 'exoid' | 'hexagon' |'rounded-square' | 'square' | 'star'
     border?: string
 }
 
@@ -44,7 +44,7 @@ export const FLATMAP_LEGEND: FlatmapLegendEntry[] = [
     {
         prompt: 'Gaglionated nerve plexus',
         colour: '#EAED59',
-        style: 'star'
+        style: 'exoid'
     },
     {
         prompt: 'Featured dataset marker',
