@@ -100,6 +100,7 @@ class FlatMapStylingLayer
                     }
                 })
             : []
+        this.#layerOptions.hasImageLayers = (imageLayers.length > 0)
 
         // Originally only for body layer on AC maps but now also used
         // for detail background (FC and AC)
@@ -144,7 +145,6 @@ class FlatMapStylingLayer
         const vectorTileSource = this.#map.getSource(VECTOR_TILES_SOURCE)
         const haveVectorLayers = !!vectorTileSource
 
-        // if no image layers then make feature borders (and lines?) more visible...??
         if (haveVectorLayers) {
             const featuresVectorSource = this.#vectorSourceId(FEATURES_LAYER)
             const vectorFeatures = vectorTileSource.vectorLayerIds!.includes(featuresVectorSource)

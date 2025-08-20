@@ -61,6 +61,7 @@ export interface StylingOptions extends StyleLayerOptions
     excludeAnnotated?: boolean
     colour?: string
     dimmed?: boolean
+    hasImageLayers?: boolean
     opacity?: number
     showNerveCentrelines?: boolean
 }
@@ -424,6 +425,9 @@ export class FeatureBorderLayer extends VectorStyleLayer
         }
         lineOpacity.push(['boolean', ['feature-state', 'selected'], false], 0.9)
         lineOpacity.push(['boolean', ['feature-state', 'annotated'], false], 0.9)
+        if (options.hasImageLayers) {
+            lineOpacity.push(['has', 'shape-type'], 0)
+        }
         if (activeRasterLayer) {
             lineOpacity.push((outlined && !dimmed) ? 0.3 : 0.1)
         } else {
