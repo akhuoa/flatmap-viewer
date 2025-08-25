@@ -22,6 +22,10 @@ import maplibregl from 'maplibre-gl'
 
 //==============================================================================
 
+import type {FlatmapLegendEntry} from './legend'
+
+//==============================================================================
+
 // The type of the ``id`` field in our GeoJSON features
 export type GeoJSONId = number
 
@@ -261,6 +265,7 @@ export interface FlatMapMetadata
     describes: string
     id: string
     'git-status'?: object
+    legend?: FlatmapLegendEntry[]
     name: string
     settings: object
     source: string

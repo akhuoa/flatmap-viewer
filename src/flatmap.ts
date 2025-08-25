@@ -456,9 +456,12 @@ export class FlatMap
     get flatmapLegend(): FlatmapLegendEntry[]
     //=======================================
     {
-        return (this.options.style == FLATMAP_STYLE.ANATOMICAL)
-            ? FLATMAP_LEGEND
-            : []
+        if (this.#mapMetadata.legend) {
+            return this.#mapMetadata.legend
+        } else if (this.options.style == FLATMAP_STYLE.ANATOMICAL) {
+            return FLATMAP_LEGEND
+        }
+        return []
     }
 
     /**
