@@ -768,9 +768,10 @@ export class FlatMap
      *
      * @group Properties
      */
-    get provenance()
-    //==============
+    get provenance(): FlatMapMetadata
+    //===============================
     {
+        console.warn('Deprecated FlatMap API method used: provenance()')
         return this.mapMetadata
     }
 
@@ -781,8 +782,8 @@ export class FlatMap
      *
      * @group Properties
      */
-    get mapMetadata()
-    //===============
+    get mapMetadata(): FlatMapMetadata
+    //================================
     {
         return this.#mapMetadata
     }
