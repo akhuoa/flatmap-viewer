@@ -919,8 +919,12 @@ export class FlatMap
 
         // Pre-compute LineStrings of centrelines in centreline maps
         if (this.options.style === FLATMAP_STYLE.CENTRELINE && ann.centreline) {
-            ann['lineString'] = turf.lineString(ann.coordinates!)
-            ann['lineLength'] = turfLength.length(ann.lineString)
+            try {
+                ann['lineString'] = turf.lineString(ann.coordinates!)
+                ann['lineLength'] = turfLength.length(ann.lineString)
+            } catch(error) {
+                console.log(`Bad centreline for ${ann.id}, coordinates: ${ann.coordinates}`)
+            }
         }
     }
 
