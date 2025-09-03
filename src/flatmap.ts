@@ -923,7 +923,7 @@ export class FlatMap
                 ann['lineString'] = turf.lineString(ann.coordinates!)
                 ann['lineLength'] = turfLength.length(ann.lineString)
             } catch(error) {
-                console.log(`Bad centreline for ${ann.id}, coordinates: ${ann.coordinates}`)
+                console.log(`Bad centreline for ${ann.id}, ${ann.models}, coordinates: ${ann.coordinates}`)
             }
         }
     }
