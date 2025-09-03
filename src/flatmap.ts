@@ -1574,6 +1574,9 @@ export class FlatMap
                 }
             }
         }
+        if ('models' in data) {
+            data['id'] = data.models
+        }
         if (Object.keys(data).length > 0) {
             data['type'] = 'feature'
         }
