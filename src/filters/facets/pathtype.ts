@@ -61,6 +61,7 @@ export class PathTypeFacet extends FilteredFacet
                                             : {'kind': enabledPathTypes}
         return new PropertiesFilter({
             OR: [ {NOT: {'tile-layer': PATHWAYS_LAYER}},
+                  {'type': 'nerve' },
                   {AND: [ {'tile-layer': PATHWAYS_LAYER},
                           {HAS: 'kind'}, pathCondition ]}
             ]
