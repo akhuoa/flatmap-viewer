@@ -79,5 +79,5 @@
     "vite-plugin-dts": "^4.5.0",
     "vite-plugin-lib-inject-css": "^2.0.1"
   },
-  "packageManager": "pnpm@10.10.0+sha256.fa0f513aa8191764d2b6b432420788c270f07b4f999099b65bb2010eec702a30"
+  "packageManager": "pnpm@10.15.1+sha256.8c53af02ae3ec1fb0ae75377f8d4d6217c2d7cbe6f03c16350cabf7493de6eff"
 }
