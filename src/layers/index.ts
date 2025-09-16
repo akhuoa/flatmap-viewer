@@ -324,8 +324,8 @@ class FlatMapStylingLayer
         }
     }
 
-    #addVectorStyleLayer(vectorStyleClass, sourceLayer, pathLayer=false, minimap=false): VectorStyleLayer
-    //===================================================================================================
+    #addVectorStyleLayer(vectorStyleClass, sourceLayer: string, pathLayer=false, minimap=false): VectorStyleLayer
+    //===========================================================================================================
     {
         const vectorStyleLayer = new vectorStyleClass(`${this.#id}_${sourceLayer}`,
                                                       this.#vectorSourceId(sourceLayer))
