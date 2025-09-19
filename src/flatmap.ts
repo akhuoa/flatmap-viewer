@@ -120,11 +120,13 @@ const EXPORTED_FEATURE_PROPERTIES = [
     'missing-nodes',
     'alert',
     'biological-sex',
-    'location'
+    'location',
+    'userdata',     // Arbitrary, user supplied feature property
 ]
 
 const ENCODED_FEATURE_PROPERTIES = [
     'hyperlinks',
+    'userdata',
 ]
 
 //==============================================================================
