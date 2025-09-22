@@ -176,6 +176,11 @@ export interface FlatMapLayer
     'zoom-point'?: number
 }
 
+export type MinimapOptions = {
+    postion?: string
+    width?: string|number
+}
+
 //==============================================================================
 
 export type AnnotationEventData = {

@@ -54,13 +54,13 @@ import {
     FlatMapState
 } from './flatmap-types'
 import type {GeoJSONId, Point2D, Size2D} from './flatmap-types'
+import type {MinimapOptions} from './flatmap-types'
 import {FLATMAP_LEGEND} from './legend'
 import type {FlatmapLegendEntry} from './legend'
 import {UserInteractions} from './interactions'
 import {MapTermGraph, SparcTermGraph} from './knowledge'
 import {KNOWLEDGE_SOURCE_SCHEMA, FlatMapServer} from './mapserver'
 import {loadMarkerIcons} from './markers'
-import {MINIMAP_OPTIONS} from './controls/minimap'
 import {APINATOMY_PATH_PREFIX, PathType} from './pathways'
 import {SearchIndex} from './search'
 
@@ -1318,8 +1318,8 @@ export class FlatMap
     /**
      * Create a minimap.
      */
-    createMinimap(options: MINIMAP_OPTIONS={})
-    //========================================
+    createMinimap(options: MinimapOptions={})
+    //=======================================
     {
         if (this.#userInteractions) {
             this.#userInteractions.createMinimap(options)

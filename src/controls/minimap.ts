@@ -50,6 +50,7 @@ import maplibregl from 'maplibre-gl'
 //==============================================================================
 
 import {FlatMap} from '../flatmap'
+import type { MinimapOptions } from '../flatmap-types'
 
 //==============================================================================
 
@@ -61,11 +62,6 @@ type OPTIONS_TYPE = {
     lineWidth: number
     position: maplibregl.ControlPosition
     width: string|number
-}
-
-export type MINIMAP_OPTIONS = {
-    postion?: string
-    width?: string|number
 }
 
 const DEFAULT_OPTIONS: OPTIONS_TYPE = {
@@ -115,7 +111,7 @@ export class MinimapControl
         = [[[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]]
     #updateHandler = null
 
-    constructor(flatmap: FlatMap, options: MINIMAP_OPTIONS, styleSpecification: maplibregl.StyleSpecification)
+    constructor(flatmap: FlatMap, options: MinimapOptions, styleSpecification: maplibregl.StyleSpecification)
     {
         this.#flatmap = flatmap
         this.#styleSpecification = styleSpecification

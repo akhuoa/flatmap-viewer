@@ -43,7 +43,7 @@ import {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent,
         FlatMapMarkerOptions, FlatMapPopUpOptions, FlatMapState, MapFeature,
         MapFeatureIdentifier, MapPointFeature, MapRenderedFeature} from './flatmap-types'
 import type {BoundingBox, DatasetTerms, FeatureZoomOptions, GeoJSONId} from './flatmap-types'
-import type {Point2D} from './flatmap-types'
+import type {MinimapOptions, Point2D} from './flatmap-types'
 import {FlatMap, FLATMAP_STYLE} from './flatmap'
 import {isMarker, LayerManager} from './layers'
 import {VECTOR_TILES_SOURCE} from './layers/styling'
@@ -60,7 +60,7 @@ import {NerveCentrelineControl} from './controls/nerves'
 import {PathControl} from './controls/paths'
 import {FlightPathControl} from './controls/flightpaths'
 import {SearchControl} from './controls/search'
-import {MinimapControl, MINIMAP_OPTIONS} from './controls/minimap'
+import {MinimapControl} from './controls/minimap'
 import {SystemsControl} from './controls/systems'
 import {TaxonsControl} from './controls/taxons'
 
@@ -243,7 +243,7 @@ export class UserInteractions
 
         // Add a minimap if option set
         if (flatmap.options.minimap) {
-            const options: MINIMAP_OPTIONS = (typeof flatmap.options.minimap === 'object')
+            const options: MinimapOptions = (typeof flatmap.options.minimap === 'object')
                                            ? flatmap.options.minimap
                                            : {}
             this.createMinimap(options)
@@ -369,8 +369,8 @@ export class UserInteractions
         }
     }
 
-    createMinimap(options: MINIMAP_OPTIONS={})
-    //========================================
+    createMinimap(options: MinimapOptions={})
+    //=======================================
     {
         if (this.#minimap == null) {
             this.#minimap = new MinimapControl(this.#flatmap, options,
