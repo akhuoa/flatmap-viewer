@@ -244,10 +244,9 @@ export class UserInteractions
         // Add a minimap if option set
         if (flatmap.options.minimap) {
             const options: MINIMAP_OPTIONS = (typeof flatmap.options.minimap === 'object')
-                                           ? flatmap.options.minimap : {}
-            this.#minimap = new MinimapControl(flatmap, options,
-                this.#layerManager.minimapStyleSpecification)
-            this.#map.addControl(this.#minimap)
+                                           ? flatmap.options.minimap
+                                           : {}
+            this.createMinimap(options)
         }
 
         // Do we want a fullscreen control?
@@ -359,6 +358,25 @@ export class UserInteractions
     //===========
     {
         return this.#minimap
+    }
+
+    closeMinimap()
+    //============
+    {
+        if (this.#minimap) {
+            this.#map.removeControl(this.#minimap)
+            this.#minimap = null
+        }
+    }
+
+    createMinimap(options: MINIMAP_OPTIONS={})
+    //========================================
+    {
+        if (this.#minimap == null) {
+            this.#minimap = new MinimapControl(this.#flatmap, options,
+                this.#layerManager.minimapStyleSpecification)
+            this.#map.addControl(this.#minimap)
+        }
     }
 
     get pathManager()

@@ -60,6 +60,7 @@ import {UserInteractions} from './interactions'
 import {MapTermGraph, SparcTermGraph} from './knowledge'
 import {KNOWLEDGE_SOURCE_SCHEMA, FlatMapServer} from './mapserver'
 import {loadMarkerIcons} from './markers'
+import {MINIMAP_OPTIONS} from './controls/minimap'
 import {APINATOMY_PATH_PREFIX, PathType} from './pathways'
 import {SearchIndex} from './search'
 
@@ -382,7 +383,7 @@ export class FlatMap
                 }
                 this.#initialState = this.getState()
                 if (this.#userInteractions!.minimap) {
-                    this.#userInteractions!.minimap.initialise()
+                    this.#userInteractions!.minimap.initialise(true)
                 }
                 this.#map!.setMaxBounds(this.#bounds)
                 this.#map!.fitBounds(this.#bounds, {animate: false})
@@ -1301,6 +1302,29 @@ export class FlatMap
             this.#userInteractions!.minimap.show(show)
         }
 
+    }
+
+    /**
+     * Close the minimap.
+     */
+    closeMinimap()
+    //============
+    {
+        if (this.#userInteractions) {
+            this.#userInteractions.closeMinimap()
+        }
+    }
+
+    /**
+     * Create a minimap.
+     */
+    createMinimap(options: MINIMAP_OPTIONS={})
+    //========================================
+    {
+        if (this.#userInteractions) {
+            this.#userInteractions.createMinimap(options)
+            this.#userInteractions.minimap.initialise()
+        }
     }
 
     //==========================================================================

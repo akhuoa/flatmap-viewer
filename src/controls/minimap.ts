@@ -113,6 +113,7 @@ export class MinimapControl
     #trackingRect: maplibregl.GeoJSONSource
     #trackingRectCoordinates: [[[number, number], [number, number], [number, number], [number, number], [number, number]]]
         = [[[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]]
+    #updateHandler = null
 
     constructor(flatmap: FlatMap, options: MINIMAP_OPTIONS, styleSpecification: maplibregl.StyleSpecification)
     {
@@ -167,6 +168,7 @@ export class MinimapControl
             style: this.#styleSpecification,
             bounds: map.getBounds()
         })
+        this.#container.hidden = true
         return this.#container
     }
 
@@ -174,16 +176,36 @@ export class MinimapControl
     //========
     {
         this.#container.parentNode.removeChild(this.#container)
+        this.#loaded = false
+        this.#map.off('move', this.#updateHandler)
         this.#map = null
+        this.#miniMap.remove()
+        this.#miniMap = null
         this.#container = null
     }
 
-    initialise()
-    //==========
+
+    initialise(immediate: boolean=false)
+    //==================================
+    {
+        if (immediate) {
+            this.#initialise()
+        } else {
+            // Wait until styles etc have loaded befor completing initialisation
+            const idleSubscription = this.#miniMap.on('idle', async() => {
+                this.#initialise()
+                idleSubscription.unsubscribe()
+            })
+        }
+    }
+
+    #initialise()
+    //===========
     {
         const opts = this.#options
         const parentMap = this.#map
         const miniMap = this.#miniMap
+        this.#container.hidden = false
 
         // Disable most user interactions with the minimap
 
@@ -251,8 +273,8 @@ export class MinimapControl
         this.#trackingRect = this.#miniMap.getSource('trackingRect')
 
         this.#update()
-
-        parentMap.on('move', this.#update.bind(this))
+        this.#updateHandler = this.#update.bind(this)
+        parentMap.on('move', this.#updateHandler)
 
         miniMap.on('mousemove', this.#mouseMove.bind(this))
         miniMap.on('mousedown', this.#mouseDown.bind(this))
