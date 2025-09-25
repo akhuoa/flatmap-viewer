@@ -58,7 +58,7 @@ import type {MinimapOptions} from './flatmap-types'
 import {FLATMAP_LEGEND} from './legend'
 import type {FlatmapLegendEntry} from './legend'
 import {UserInteractions} from './interactions'
-import {MapTermGraph, SparcTermGraph} from './knowledge'
+import {MapTermGraph} from './knowledge'
 import {KNOWLEDGE_SOURCE_SCHEMA, FlatMapServer} from './mapserver'
 import {loadMarkerIcons} from './markers'
 import {APINATOMY_PATH_PREFIX, PathType} from './pathways'
@@ -188,7 +188,6 @@ export type MapDescription = {
     style: FlatMapStyleSpecification
     options: MapDescriptionOptions
     layers: FlatMapLayer[]
-    sparcTermGraph: SparcTermGraph
     annotations: FlatMapAnnotations
     callback: FlatMapCallback
     pathways: FlatMapPathways
@@ -260,7 +259,7 @@ export class FlatMap
         this.#layers = mapDescription.layers
         this.#options = mapDescription.options
         this.#pathways = mapDescription.pathways
-        this.#mapTermGraph = new MapTermGraph(mapDescription.sparcTermGraph)
+        this.#mapTermGraph = new MapTermGraph()
 
         const sckanProvenance = mapDescription.details.connectivity
         if (!sckanProvenance) {

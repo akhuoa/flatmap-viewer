@@ -216,12 +216,6 @@ export class FlatMapServer
         return data.values
     }
 
-    async sparcTermGraph(): Promise<NodeLinkGraph|null>
-    //=================================================
-    {
-        return this.#loadJSON<NodeLinkGraph>('knowledge/sparcterms')
-    }
-
     url(relativePath: string=''): string
     //==================================
     {

@@ -26,7 +26,6 @@ import {
     FlatMapCallback, FlatMapIndex, FlatMapLayer,
     FlatMapMetadata, FlatMapOptions, FlatMapServerIndex
 } from './flatmap-types'
-import {SparcTermGraph} from './knowledge'
 import {FlatMapServer} from './mapserver'
 import {noFlatMapPathways} from './pathways'
 import * as utils from './utils'
@@ -98,7 +97,6 @@ export class MapViewer
     #mapList: MapListEntry[] = []
     #mapServer: FlatMapServer
     #images: PreloadedImage[]
-    #sparcTermGraph = new SparcTermGraph()
 
     readonly mapServerUrl: string
 
@@ -142,7 +140,6 @@ export class MapViewer
                     map.separateLayers = ('version' in map && map.version >= MAP_MAKER_SEPARATE_LAYERS_VERSION)
                     this.#mapList.push(map)
                 }
-                await this.#sparcTermGraph.load(this.#mapServer)
                 this.#initialised = true
             }
         })
@@ -372,7 +369,6 @@ export class MapViewer
                 style: mapStyle,
                 options: mapOptions,
                 layers: mapLayers,
-                sparcTermGraph: this.#sparcTermGraph,
                 annotations,
                 callback,
                 pathways,
