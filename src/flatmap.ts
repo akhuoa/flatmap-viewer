@@ -1069,6 +1069,17 @@ export class FlatMap
     }
 
     /**
+     * Does the map have a feature with a particular anatomical identifier?
+     *
+     * @group Properties
+     */
+    hasAnatomicalIdentifier(term: string): boolean
+    //============================================
+    {
+        return this.#modelToFeatureIds.has(term)
+    }
+
+    /**
      * The taxon identifiers of species which the map's connectivity has been observed in.
      *
      * @type {Array.<string>}

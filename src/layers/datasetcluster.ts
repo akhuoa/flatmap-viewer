@@ -18,6 +18,7 @@ limitations under the License.
 
 ==============================================================================*/
 
+import {FlatMap} from '../flatmap'
 import {DatasetTerms} from '../flatmap-types'
 import {ANATOMICAL_ROOT, MapTermGraph} from '../knowledge'
 import {DiGraph} from '../knowledge/graphs'
@@ -42,22 +43,24 @@ export class DatasetClusterSet
 {
     #connectedTermGraph: DiGraph
     #datasetId: string
+    #flatmap: FlatMap
     #mapTermGraph: MapTermGraph
     #descendents: Map<string, Set<string>> = new Map()
     #clustersByTerm: Map<string, DatasetCluster>
     #maxDepth: number
 
-    constructor(dataset: DatasetTerms, mapTermGraph: MapTermGraph)
+    constructor(dataset: DatasetTerms, flatmap: FlatMap)
     {
         this.#datasetId = dataset.id
-        this.#mapTermGraph = mapTermGraph
-        this.#maxDepth = mapTermGraph.maxDepth
+        this.#flatmap = flatmap
+        this.#mapTermGraph = flatmap.mapTermGraph
+        this.#maxDepth = this.#mapTermGraph.maxDepth
 
         const datasetTerms = new Array(...dataset.terms)
         const mapTerms = new Set(this.#validatedTerms(datasetTerms))
-        this.#connectedTermGraph = mapTermGraph.connectedTermGraph([...mapTerms.values()])
+        this.#connectedTermGraph = this.#mapTermGraph.connectedTermGraph([...mapTerms.values()])
         this.#clustersByTerm = new Map(this.#connectedTermGraph.nodes().map(term => {
-            const d = mapTermGraph.depth(term)
+            const d = this.#mapTermGraph.depth(term)
             const zoomRange = this.#depthToZoomRange(d)
             return [ term, {
                 datasetId: this.#datasetId,
@@ -126,7 +129,7 @@ export class DatasetClusterSet
     #substituteTerm(term: string): string|null
     //========================================
     {
-        const parents = this.#mapTermGraph.sparcTermGraph.parents(term)
+        const parents = this.#mapTermGraph.parents(term)
         if (parents.length == 0
          || parents[0] === ANATOMICAL_ROOT) {
             return null
@@ -134,9 +137,11 @@ export class DatasetClusterSet
         const maxDepth = -1
         let furthestParent: string|null = null
         for (const parent of parents) {
-            const depth = this.#mapTermGraph.depth(parent)
-            if (depth > maxDepth) {
-                furthestParent = parent
+            if (this.#flatmap.hasAnatomicalIdentifier(parent)) {
+                const depth = this.#mapTermGraph.depth(parent)
+                if (depth > maxDepth) {
+                    furthestParent = parent
+                }
             }
         }
         return furthestParent
@@ -152,7 +157,7 @@ export class DatasetClusterSet
             term = term.trim()
             if (term === '') {
                 continue
-            } else if (this.#mapTermGraph.hasTerm(term)) {
+            } else if (this.#flatmap.hasAnatomicalIdentifier(term)) {
                 mapTerms.push(term)
             } else {
                 const substitute = this.#substituteTerm(term)

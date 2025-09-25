@@ -78,6 +78,12 @@ export class MapTermGraph
     {
         return this.#hierarchy.hasNode(term)
     }
+
+    parents(term: string): string[]
+    //=============================
+    {
+        return this.#hierarchy.parents(term)
+    }
 }
 
 //==============================================================================

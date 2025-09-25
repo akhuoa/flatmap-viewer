@@ -27,7 +27,6 @@ import {FlatMap} from '../flatmap'
 import {DatasetMarkerResult, DatasetTerms, MarkerKind} from '../flatmap-types'
 import type {GeoJSONId} from '../flatmap-types'
 import {UserInteractions} from '../interactions'
-import {MapTermGraph} from '../knowledge'
 import {DATASET_CLUSTERED_MARKER, MULTISCALE_CLUSTERED_MARKER} from '../markers'
 import {PropertiesType} from '../types'
 
@@ -99,7 +98,6 @@ export class ClusteredAnatomicalMarkerLayer
     #kindByDataset: Map<string, MarkerKind> = new Map()
     #kindByTerm: Map<string, MarkerKind> = new Map()
     #map: MapLibreMap
-    #mapTermGraph: MapTermGraph
     #markerTerms: Map<string, Set<string>> = new Map()
     #markerTermsByZoomTerm: Map<string, Set<string>[]> = new Map()
     #multiScaleByZoomTerm: Map<string, boolean[]> = new Map()
@@ -116,7 +114,6 @@ export class ClusteredAnatomicalMarkerLayer
         this.#flatmap = flatmap
         this.#map = flatmap.map!
         this.#maxZoom = Math.ceil(this.#map.getMaxZoom())
-        this.#mapTermGraph = flatmap.mapTermGraph
 
         this.#map.addSource(ANATOMICAL_MARKERS_SOURCE, {
             type: 'geojson',
@@ -225,7 +222,7 @@ export class ClusteredAnatomicalMarkerLayer
     {
         for (const dataset of datasets) {
             if (dataset.terms.length) {
-                const clusteredSet = new DatasetClusterSet(dataset, this.#mapTermGraph)
+                const clusteredSet = new DatasetClusterSet(dataset, this.#flatmap)
                 if (dataset.kind) {
                     this.#kindByDataset.set(dataset.id, dataset.kind)
                 }
