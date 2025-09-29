@@ -76,6 +76,7 @@ export class DatasetClusterSet
             cluster.maxZoom = MAX_MARKER_ZOOM
             this.#setZoomFromParents(cluster, terminal)
         }
+        this.#setMinZoomFromRoot(ANATOMICAL_ROOT)
     }
 
     get id(): string
@@ -104,6 +105,20 @@ export class DatasetClusterSet
         return (zoom < 0)         ? [0, 1]
              : (zoom >= MAX_MARKER_ZOOM) ? [MAX_MARKER_ZOOM, MAX_MARKER_ZOOM]
              :                      [zoom, zoom+1]
+    }
+
+
+    #setMinZoomFromRoot(term: string)
+    //=================================
+    {
+        if (!this.#flatmap.hasAnatomicalIdentifier(term)) {
+            this.#clustersByTerm.delete(term)
+            for (const child of this.#connectedTermGraph.children(term)) {
+                const cluster = this.#clustersByTerm.get(child)
+                cluster.minZoom = 0
+                this.#setMinZoomFromRoot(child)
+           }
+        }
     }
 
     #setZoomFromParents(cluster: DatasetCluster, terminal: string)
