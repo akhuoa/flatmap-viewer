@@ -56,9 +56,13 @@ export class MapTermGraph
     depth(term: string): number
     //=========================
     {
-        return this.hasTerm(term)
-                ? +this.#hierarchy.getNodeAttribute(term, 'depth')
-                : -1
+        if (this.hasTerm(term)) {
+            const depth = this.#hierarchy.getNodeAttribute(term, 'depth')
+            if (depth !== undefined) {
+                return +depth
+            }
+        }
+        return -1
     }
 
     hasTerm(term: string): boolean
