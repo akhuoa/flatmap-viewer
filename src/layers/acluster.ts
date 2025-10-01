@@ -217,12 +217,18 @@ export class ClusteredAnatomicalMarkerLayer
         this.#showPoints()
     }
 
-    addDatasetMarkers(datasets: DatasetTerms[])
-    //=========================================
+    addDatasetMarkers(datasets: DatasetTerms[]): DatasetTerms[]
+    //=========================================================
     {
+        let mapDatasetMarkers: DatasetTerms[] = []
+
         for (const dataset of datasets) {
             if (dataset.terms.length) {
                 const clusteredSet = new DatasetClusterSet(dataset, this.#flatmap)
+                mapDatasetMarkers.push({
+                    id: dataset.id,
+                    terms: clusteredSet.markerTerms
+                })
                 if (dataset.kind) {
                     this.#kindByDataset.set(dataset.id, dataset.kind)
                 }
@@ -288,6 +294,7 @@ export class ClusteredAnatomicalMarkerLayer
             }
         }
         this.#update()
+        return mapDatasetMarkers
     }
 
     clearDatasetMarkers()

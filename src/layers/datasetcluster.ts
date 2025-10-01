@@ -45,6 +45,7 @@ export class DatasetClusterSet
     #datasetId: string
     #flatmap: FlatMap
     #mapTermGraph: MapTermGraph
+    #markerTerms: Set<string>
     #descendents: Map<string, Set<string>> = new Map()
     #clustersByTerm: Map<string, DatasetCluster> = new Map()
     #maxDepth: number
@@ -58,8 +59,8 @@ export class DatasetClusterSet
 
         const datasetTerms = new Array(...dataset.terms)
         const markerTermMap = this.#validatedMarkerTerms(datasetTerms)  // marker term ==> { dataset terms }
-        const markerTerms = new Set(markerTermMap.keys())
-        this.#connectedTermGraph = this.#mapTermGraph.connectedTermGraph([...markerTerms.values()])
+        this.#markerTerms = new Set(markerTermMap.keys())
+        this.#connectedTermGraph = this.#mapTermGraph.connectedTermGraph([...this.#markerTerms.values()])
         for (const markerTerm of this.#connectedTermGraph.nodes()) {
             if (markerTermMap.has(markerTerm)) {
                 this.#connectedTermGraph.setNodeAttribute(markerTerm, 'terms', markerTermMap.get(markerTerm))
@@ -97,6 +98,12 @@ export class DatasetClusterSet
     //==============================
     {
         return [...this.#clustersByTerm.values()]
+    }
+
+    get markerTerms(): string[]
+    //=========================
+    {
+        return [...this.#markerTerms.values()]
     }
 
     get descendents(): Map<string, Set<string>>
@@ -196,10 +203,7 @@ export class DatasetClusterSet
                 addMarkerTerm(term, term)
             } else {
                 const substitute = this.#substituteTerm(term)
-                if (substitute === null) {
-                    console.error(`No feature for ${term} on map; can't find substitute`)
-                } else {
-                    console.log(`No feature for ${term} on map; substituting ${substitute}`)
+                if (substitute) {
                     addMarkerTerm(substitute, term)
                 }
             }

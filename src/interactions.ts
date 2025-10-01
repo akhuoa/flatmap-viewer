@@ -1716,12 +1716,13 @@ export class UserInteractions
         }
     }
 
-    addDatasetMarkers(datasets: DatasetTerms[])
-    //=========================================
+    addDatasetMarkers(datasets: DatasetTerms[]): DatasetTerms[]
+    //=========================================================
     {
         if (this.#layerManager) {
-            this.#layerManager.addDatasetMarkers(datasets)
+            return this.#layerManager.addDatasetMarkers(datasets)
         }
+        return []
     }
 
     clearDatasetMarkers()

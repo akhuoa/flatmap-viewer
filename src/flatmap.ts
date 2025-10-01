@@ -1546,15 +1546,19 @@ export class FlatMap
      * @param {Array.<{id: string, terms: string[]}>} datasets  An array with an object for each dataset,
      *                                                          specifying its identifier and an array of
      *                                                          associated anatomical terms
-     *
+     * @returns {Array.<{id: string, terms: string[]}>}  An array with an object for each dataset,
+     *                                                   with the dataset's identifier and an array
+     *                                                   of anatomical terms of features on the map
+     *                                                   on which dataset markers have been placed.
      * @group Markers
      */
-    addDatasetMarkers(datasets: DatasetTerms[])
-    //=========================================
+    addDatasetMarkers(datasets: DatasetTerms[]): DatasetTerms[]
+    //=========================================================
     {
         if (this.#userInteractions !== null) {
-            this.#userInteractions.addDatasetMarkers(datasets)
+            return this.#userInteractions.addDatasetMarkers(datasets)
         }
+        return []
     }
 
     /**

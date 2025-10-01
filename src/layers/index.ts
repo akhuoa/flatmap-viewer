@@ -542,10 +542,10 @@ export class LayerManager
         //this.#markerLayer.clearMarkers()
     }
 
-    addDatasetMarkers(datasets: DatasetTerms[])
-    //=========================================
+    addDatasetMarkers(datasets: DatasetTerms[]): DatasetTerms[]
+    //=========================================================
     {
-        this.#markerLayer.addDatasetMarkers(datasets)
+        return this.#markerLayer.addDatasetMarkers(datasets)
     }
 
     addLayeredMarker(annotation: FlatMapFeatureAnnotation, options: FlatMapMarkerOptions): GeoJSONId|null
