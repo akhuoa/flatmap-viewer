@@ -568,10 +568,10 @@ export class LayerManager
         this.#markerLayer.clearDatasetMarkers()
     }
 
-    markerTerms(term: string): DatasetMarkerResult[]
-    //==============================================
+    datasetTerms(term: string): DatasetMarkerResult[]
+    //===============================================
     {
-        return this.#markerLayer.markerTerms(term)
+        return this.#markerLayer.datasetTerms(term)
     }
 
     removeDatasetMarker(datasetId: string)

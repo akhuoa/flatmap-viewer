@@ -112,7 +112,7 @@ const EXPORTED_FEATURE_PROPERTIES = [
     'dataset-ids',
     'kind',
     'label',
-    'marker-terms',
+    'dataset-terms',
     'models',
     'source',
     'taxons',

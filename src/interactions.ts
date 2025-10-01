@@ -1119,7 +1119,7 @@ export class UserInteractions
         if (isMarker(feature)) {
             const markerProperties: object = Object.assign({}, feature.properties, values)
             const markerTerm = markerProperties['models']
-            markerProperties['marker-terms'] = this.#layerManager.markerTerms(markerTerm)
+            markerProperties['dataset-terms'] = this.#layerManager.datasetTerms(markerTerm)
             return this.#flatmap.markerEvent(type, +feature.id!, markerProperties as FlatMapFeatureAnnotation)
         } else if ('properties' in feature) {
             properties = Object.assign({}, feature.properties, values) as FlatMapFeatureAnnotation

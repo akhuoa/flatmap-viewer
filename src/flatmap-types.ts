@@ -417,7 +417,7 @@ export type ExportedFeatureProperties = {
     container?: string
     control?: string
     dataset?: string
-    'marker-terms'?: string[]
+    'dataset-terms'?: string[]
     feature?: AnnotatedFeature
     kind?: string
     label?: string
