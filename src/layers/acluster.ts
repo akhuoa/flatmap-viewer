@@ -227,39 +227,41 @@ export class ClusteredAnatomicalMarkerLayer
                     this.#kindByDataset.set(dataset.id, dataset.kind)
                 }
                 for (const cluster of clusteredSet.clusters) {
-                    let zoomDatasets = this.#datasetsByZoomTerm.get(cluster.term)
-                    let zoomMultiscale = this.#multiScaleByZoomTerm.get(cluster.term)
-                    let zoomMarkerTerms = this.#markerTermsByZoomTerm.get(cluster.term)
+                    let zoomDatasets = this.#datasetsByZoomTerm.get(cluster.markerTerm)
+                    let zoomMultiscale = this.#multiScaleByZoomTerm.get(cluster.markerTerm)
+                    let zoomFeatureTerms = this.#markerTermsByZoomTerm.get(cluster.markerTerm)
                     if (!zoomDatasets) {
                         zoomDatasets = []
                         zoomMultiscale = []
-                        zoomMarkerTerms = []
+                        zoomFeatureTerms = []
                         for (let n = 0; n <= MAX_MARKER_ZOOM; n +=1) {
                             zoomDatasets.push(new Set<string>())
                             zoomMultiscale.push(false)
-                            zoomMarkerTerms.push(new Set<string>())
+                            zoomFeatureTerms.push(new Set<string>())
                         }
-                        this.#datasetsByZoomTerm.set(cluster.term, zoomDatasets)
-                        this.#multiScaleByZoomTerm.set(cluster.term, zoomMultiscale)
-                        this.#markerTermsByZoomTerm.set(cluster.term, zoomMarkerTerms)
+                        this.#datasetsByZoomTerm.set(cluster.markerTerm, zoomDatasets)
+                        this.#multiScaleByZoomTerm.set(cluster.markerTerm, zoomMultiscale)
+                        this.#markerTermsByZoomTerm.set(cluster.markerTerm, zoomFeatureTerms)
                     }
+
+
                     for (let zoom = cluster.minZoom; zoom < cluster.maxZoom; zoom += 1) {
                         zoomDatasets[zoom].add(cluster.datasetId)
                         zoomMultiscale![zoom] ||= (this.#kindByDataset.get(cluster.datasetId) === 'multiscale')
-                        const descendents = clusteredSet.descendents.get(cluster.term)
+                        const descendents = clusteredSet.descendents.get(cluster.markerTerm)
                         if (descendents) {                            
                             for (const descendent of descendents.values()) {
-                                zoomMarkerTerms[zoom].add(descendent)
+                                zoomFeatureTerms[zoom].add(descendent)
                             }
                         }
                     }
                     if (cluster.maxZoom === MAX_MARKER_ZOOM) {
                         zoomDatasets[MAX_MARKER_ZOOM].add(cluster.datasetId)
                         zoomMultiscale![MAX_MARKER_ZOOM] ||= (this.#kindByDataset.get(cluster.datasetId) === 'multiscale')
-                        const descendents = clusteredSet.descendents.get(cluster.term)
+                        const descendents = clusteredSet.descendents.get(cluster.markerTerm)
                         if (descendents) {                            
                             for (const descendent of descendents.values()) {
-                                zoomMarkerTerms[MAX_MARKER_ZOOM].add(descendent)
+                                zoomFeatureTerms[MAX_MARKER_ZOOM].add(descendent)
                             }
                         }
                         let datasetFeatureIds = this.#datasetFeatureIds.get(cluster.datasetId)
@@ -267,7 +269,7 @@ export class ClusteredAnatomicalMarkerLayer
                             datasetFeatureIds = new Set()
                             this.#datasetFeatureIds.set(cluster.datasetId, datasetFeatureIds)
                         }
-                        for (const featureId of this.#flatmap.modelFeatureIds(cluster.term)) {
+                        for (const featureId of this.#flatmap.modelFeatureIds(cluster.markerTerm)) {
                             datasetFeatureIds.add(+featureId)
                         }
                     }

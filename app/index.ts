@@ -24,9 +24,12 @@ import {DrawControl} from './annotator'
 import type {DrawEvent} from './annotator'
 import {PaneManager} from './multipane'
 
+
+import { DATASETS } from './datasets'
+
 //==============================================================================
 
-const MAX_VIEWER_PANES = 3
+const MAX_VIEWER_PANES = 1 // 3
 
 const VIEWER_CANVAS = 'flatmap-viewer-canvas'
 
@@ -48,7 +51,7 @@ const MAP_ENDPOINTS = {
 
 const DEFAULT_OPTIONS = {
     debug: false,
-    minimap: false,
+    minimap: true,
     showId: true,
     showPosition: false,
     showLngLat: false,
@@ -160,6 +163,8 @@ class StandaloneViewer
     #viewMapId: string|null = null
     #viewMapSex: string|null = null
     #viewMapTaxon: string|null = null
+
+    #mm: boolean = true
 
     constructor(mapEndpoints={}, options={})
     {
@@ -400,6 +405,39 @@ class StandaloneViewer
                     'cvs:functional.tissue',
                     'cvs:functional.cell'
                 ], {kind: 'multiscale'})
+//                map.setPaint({ coloured: false, outlined: false })
+
+//                console.log(map.flatmapLegend)
+
+                console.log(map.mapMetadata)
+
+//                map.addDatasetMarkers([{id: '6', terms: ['UBERON:0018683']}]) // lumbar splanchnic nerve
+
+//                console.log('Stomach marker:', map.addMarker('UBERON:0000945'))  // stomach
+
+//                map.addDatasetMarkers([{id: '1', terms: ['UBERON:0000945']}])   // stomach
+//                map.addDatasetMarkers([{id: '2', terms: ['UBERON:0002113']}])   // kidney
+//                map.addDatasetMarkers([{id: '6', terms: ['UBERON:0000948']}])   // heart
+                //map.addDatasetMarkers(DATASETS)
+
+                for (const dataset of DATASETS) {
+                    if (dataset.terms.length) {
+                        map.addDatasetMarkers([dataset])
+                    }
+                }
+
+/****************
+                //map.addDatasetMarkers([{id: '1', terms: ['UBERON:0001759']}])   // vagus
+                map.addDatasetMarkers([{id: '6', terms: ['UBERON:0000948']}])   // heart
+                map.addDatasetMarkers([{id: '2', terms: ['UBERON:0000044']}])   // DRG
+                //map.addDatasetMarkers([{id: '3', terms: ['UBERON:0000045']}])   // Ganglion
+                //map.addDatasetMarkers([{id: '4', kind: 'multiscale', terms: ['UBERON:0003943']}])   // L4 DRG
+                map.addDatasetMarkers([{id: '5', terms: ['UBERON:0018675']}])   // Pelvic splanchnic nerve
+
+                map.addDatasetMarkers([{id: '1', terms: ['UBERON:0001199']}])  // mucosa of stomach
+                map.addDatasetMarkers([{id: '2', terms: ['UBERON:0002113', 'UBERON:0002107']}]) // kidney, liver
+                map.addDatasetMarkers([{id: '2', kind: 'multiscale', terms: ['UBERON:0002113']}]) // kidney, liver
+***************/
             }
         })
         .catch(error => {
@@ -421,6 +459,13 @@ class StandaloneViewer
             return true
         } else if (eventType === 'click') {
             console.log(eventType, data)
+
+            this.#mm = !this.#mm
+            if (this.#mm) {
+//                this.#currentMap!.createMinimap()
+            } else {
+//                this.#currentMap!.closeMinimap()
+            }
             if ('hyperlinks' in data) {
                 if ('flatmap' in data.hyperlinks) {
                     await this.#paneManager.loadMap(this.#currentViewer!, data.hyperlinks.flatmap,

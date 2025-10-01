@@ -26,7 +26,7 @@ import {DiGraph} from '../knowledge/graphs'
 //==============================================================================
 
 export type DatasetCluster = {
-    term: string
+    markerTerm: string
     datasetId: string
     minZoom: number
     maxZoom: number
@@ -46,7 +46,7 @@ export class DatasetClusterSet
     #flatmap: FlatMap
     #mapTermGraph: MapTermGraph
     #descendents: Map<string, Set<string>> = new Map()
-    #clustersByTerm: Map<string, DatasetCluster>
+    #clustersByTerm: Map<string, DatasetCluster> = new Map()
     #maxDepth: number
 
     constructor(dataset: DatasetTerms, flatmap: FlatMap)
@@ -57,24 +57,32 @@ export class DatasetClusterSet
         this.#maxDepth = this.#mapTermGraph.maxDepth
 
         const datasetTerms = new Array(...dataset.terms)
-        const mapTerms = new Set(this.#validatedTerms(datasetTerms))
-        this.#connectedTermGraph = this.#mapTermGraph.connectedTermGraph([...mapTerms.values()])
-        this.#clustersByTerm = new Map(this.#connectedTermGraph.nodes().map(term => {
-            const d = this.#mapTermGraph.depth(term)
+        const markerTermMap = this.#validatedMarkerTerms(datasetTerms)  // marker term ==> { dataset terms }
+        const markerTerms = new Set(markerTermMap.keys())
+        this.#connectedTermGraph = this.#mapTermGraph.connectedTermGraph([...markerTerms.values()])
+        for (const markerTerm of this.#connectedTermGraph.nodes()) {
+            if (markerTermMap.has(markerTerm)) {
+                this.#connectedTermGraph.setNodeAttribute(markerTerm, 'terms', markerTermMap.get(markerTerm))
+            } else {
+                this.#connectedTermGraph.setNodeAttribute(markerTerm, 'terms', new Set([markerTerm]))
+            }
+        }
+        this.#clustersByTerm = new Map(this.#connectedTermGraph.nodes().map(markerTerm => {
+            const d = this.#mapTermGraph.depth(markerTerm)
             const zoomRange = this.#depthToZoomRange(d)
-            return [ term, {
+            return [ markerTerm, {
                 datasetId: this.#datasetId,
-                term,
+                markerTerm: markerTerm,
                 minZoom: zoomRange[0],
                 maxZoom: zoomRange[1]
             }]
         }))
-        for (const terminal of this.#connectedTermGraph.nodes()
+        for (const markerTerm of this.#connectedTermGraph.nodes()
                                                        .filter(term => term !== ANATOMICAL_ROOT
                                                             && this.#connectedTermGraph.degree(term) == 1)) {
-            const cluster = this.#clustersByTerm.get(terminal)!
+            const cluster = this.#clustersByTerm.get(markerTerm)!
             cluster.maxZoom = MAX_MARKER_ZOOM
-            this.#setZoomFromParents(cluster, terminal)
+            this.#setZoomFromParents(cluster, markerTerm)
         }
         this.#setMinZoomFromRoot(ANATOMICAL_ROOT)
     }
@@ -107,7 +115,6 @@ export class DatasetClusterSet
              :                      [zoom, zoom+1]
     }
 
-
     #setMinZoomFromRoot(term: string)
     //=================================
     {
@@ -121,23 +128,27 @@ export class DatasetClusterSet
         }
     }
 
-    #setZoomFromParents(cluster: DatasetCluster, terminal: string)
-    //============================================================
+    #setZoomFromParents(cluster: DatasetCluster, markerTerm: string)
+    //==============================================================
     {
-        if (!this.#descendents.has(cluster.term)) {
-            this.#descendents.set(cluster.term, new Set())
+        let datasetTerms: Set<string> = this.#descendents.get(cluster.markerTerm)
+        if (datasetTerms === undefined) {
+            datasetTerms = new Set()
         }
-        this.#descendents.get(cluster.term)!.add(terminal)
-        if (cluster.term === ANATOMICAL_ROOT) {
+        if (this.#connectedTermGraph.hasNodeAttribute(markerTerm, 'terms')) {
+            datasetTerms = datasetTerms.union(this.#connectedTermGraph.getNodeAttribute(markerTerm, 'terms'))
+            this.#descendents.set(cluster.markerTerm, datasetTerms)
+        }
+        if (cluster.markerTerm === ANATOMICAL_ROOT) {
             cluster.minZoom = 0
             return
         }
-        for (const parent of this.#connectedTermGraph.parents(cluster.term)) {
+        for (const parent of this.#connectedTermGraph.parents(cluster.markerTerm)) {
             const parentCluster = this.#clustersByTerm.get(parent)!
             if (parentCluster.maxZoom < cluster.minZoom) {
                 parentCluster.maxZoom = cluster.minZoom
             }
-            this.#setZoomFromParents(parentCluster, terminal)
+            this.#setZoomFromParents(parentCluster, markerTerm)
         }
     }
 
@@ -164,27 +175,36 @@ export class DatasetClusterSet
                 : this.#substituteTerm(parents[0])
     }
 
-    #validatedTerms(terms: string[]): string[]
-    //========================================
+    #validatedMarkerTerms(terms: string[]): Map<string, Set<string>>
+    //==============================================================
     {
-        const mapTerms: string[] = []
+        const markerTerms: Map<string, Set<string>> = new Map()
+        function addMarkerTerm(markerTerm: string, datasetTerm: string)
+        {
+            let datasetTerms = markerTerms.get(markerTerm)
+            if (datasetTerms === undefined) {
+                datasetTerms = new Set()
+                markerTerms.set(markerTerm, datasetTerms)
+            }
+            datasetTerms.add(datasetTerm)
+        }
         for (let term of terms) {
             term = term.trim()
             if (term === '') {
                 continue
             } else if (this.#flatmap.hasAnatomicalIdentifier(term)) {
-                mapTerms.push(term)
+                addMarkerTerm(term, term)
             } else {
                 const substitute = this.#substituteTerm(term)
                 if (substitute === null) {
                     console.error(`No feature for ${term} on map; can't find substitute`)
                 } else {
                     console.log(`No feature for ${term} on map; substituting ${substitute}`)
-                    mapTerms.push(substitute)
+                    addMarkerTerm(substitute, term)
                 }
             }
         }
-        return mapTerms
+        return markerTerms
     }
 }
 
