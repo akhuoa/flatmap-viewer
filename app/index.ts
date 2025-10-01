@@ -24,9 +24,6 @@ import {DrawControl} from './annotator'
 import type {DrawEvent} from './annotator'
 import {PaneManager} from './multipane'
 
-
-import { DATASETS } from './datasets'
-
 //==============================================================================
 
 const MAX_VIEWER_PANES = 1 // 3
