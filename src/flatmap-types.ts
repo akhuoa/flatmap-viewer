@@ -454,7 +454,7 @@ export type DatasetFeatures = {
 
 export type DatasetMarkerResult = {
     term: string
-    label: string
+    label?: string
     kind: MarkerKind
 }
 

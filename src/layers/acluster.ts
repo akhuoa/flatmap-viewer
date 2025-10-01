@@ -151,19 +151,18 @@ export class ClusteredAnatomicalMarkerLayer
         const zoomLevel = Math.floor(this.#map.getZoom())
         const terms = [...(this.#datasetTermsByZoomTerm.get(term)[zoomLevel] || []).values()]
         return terms.map(term => {
-            let label: string = term
+            const result: DatasetMarkerResult = {
+                term,
+                kind: this.#kindByTerm.get(term) || 'dataset'
+            }
             const termFeatures = this.#flatmap.modelFeatureIds(term)
             if (termFeatures.length) {
                 const annotation = this.#flatmap.annotation(termFeatures[0])
                 if (annotation && 'label' in annotation) {
-                    label = annotation.label!
+                    result.label = annotation.label!
                 }
             }
-            return {
-                term,
-                label,
-                kind: this.#kindByTerm.get(term) || 'dataset'
-            }
+            return result
         })
     }
 
