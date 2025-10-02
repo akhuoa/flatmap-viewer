@@ -55,6 +55,7 @@ export type PathType = PathStyle & {
 
 const PATH_TYPES: PathTypeDefn[] = [
     { type: "cns", label: "CNS", colour: "#9B1FC1"},
+    { type: "enteric", label: "Enteric", colour: "#C0D040"},
     { type: "intracardiac", label: "Local circuit neuron", colour: "#F19E38"},
     { type: "para-pre", label: "Parasympathetic pre-ganglionic", colour: "#3F8F4A"},
     { type: "para-post", label: "Parasympathetic post-ganglionic", colour: "#3F8F4A", dashed: true},
