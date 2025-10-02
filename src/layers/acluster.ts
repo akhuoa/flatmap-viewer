@@ -219,7 +219,7 @@ export class ClusteredAnatomicalMarkerLayer
     addDatasetMarkers(datasets: DatasetTerms[]): DatasetTerms[]
     //=========================================================
     {
-        let mapDatasetMarkers: DatasetTerms[] = []
+        const mapDatasetMarkers: DatasetTerms[] = []
 
         for (const dataset of datasets) {
             if (dataset.terms.length) {
