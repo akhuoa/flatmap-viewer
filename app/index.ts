@@ -49,8 +49,8 @@ const MAP_ENDPOINTS = {
 const DEFAULT_OPTIONS = {
     debug: false,
     minimap: true,
-    showId: true,
-    showPosition: false,
+    showId: false,
+    showCoords: false,
     showLngLat: false,
     standalone: true,
     flightPaths: false,

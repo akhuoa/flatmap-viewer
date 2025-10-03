@@ -1177,11 +1177,16 @@ export class UserInteractions
             this.#infoControl!.reset()
         }
 
+        const eventLngLat = this.#map.unproject(eventPoint)
+
         // Get all the features at the current point
         const features = this.#renderedFeatures(eventPoint)
         if (features.length === 0) {
             this.#lastFeatureMouseEntered = null
             this.#lastFeatureModelsMouse = null
+            if (this.#flatmap.options.showCoords || this.#flatmap.options.showLngLat) {
+                this.#showToolTip('', eventLngLat, null)
+            }
             return
         }
 
@@ -1217,7 +1222,6 @@ export class UserInteractions
         let info = ''
         let tooltip = ''
         let tooltipFeature: MapPointFeature|null = null
-        const eventLngLat = this.#map.unproject(eventPoint)
         if (displayInfo) {
             if (!('tooltip' in features[0].properties)) {
                 this.activateFeature(feature as MapFeature)
@@ -1302,32 +1306,32 @@ export class UserInteractions
         this.#showToolTip(tooltip, eventLngLat, tooltipFeature)
     }
 
-    #showToolTip(html, lngLat, feature: MapPointFeature|null=null)
-    //============================================================
+    #showToolTip(html: string, lngLat: maplibregl.LngLat, feature: MapPointFeature|null=null)
+    //=======================================================================================
     {
         // Show a tooltip
         if (html !== ''
-        || this.#flatmap.options.showPosition
-        || this.#flatmap.options.showId && feature !== null) {
-            let header = ''
-            if (this.#flatmap.options.showPosition) {
+         || this.#flatmap.options.showCoords
+         || this.#flatmap.options.showLngLat
+         || this.#flatmap.options.showId && feature !== null) {
+            const header: string[] = []
+            if (this.#flatmap.options.showId && feature !== null) {
+                if ('id' in feature.properties) {
+                    header.push(`${feature.properties.id} (${feature.id})`)
+                } else {
+                    header.push(`GeoId: ${feature.id})`)
+                }
+            }
+            if (this.#flatmap.options.showCoords) {
                 const pt = turf.point(lngLat.toArray())
                 const gps = turfProjection.toMercator(pt)
-                const coords = JSON.stringify(gps.geometry.coordinates)
-                let geopos: string|null = null
-                if (this.#flatmap.options.showLngLat) {
-                    geopos = JSON.stringify(lngLat.toArray())
-                }
-                const position = (geopos === null) ? coords : `${geopos}<br/>${coords}`
-                header = (feature === null)
-                             ? position
-                             : `${position} (${feature.id})`
+                header.push(JSON.stringify(gps.geometry.coordinates))
             }
-            if (this.#flatmap.options.showId && feature !== null && 'id' in feature.properties) {
-                header = `${header} ${feature.properties.id}`
+            if (this.#flatmap.options.showLngLat) {
+                header.push(JSON.stringify(lngLat.toArray()))
             }
-            if (header !== '') {
-                html = `<span>${header}</span><br/>${html}`
+            if (header.length) {
+                html = `<span>${header.join('<br/>')}</span><br/>${html}`
             }
             if (html !== '') {
                 this.#tooltip = new maplibregl.Popup({
@@ -1812,7 +1816,7 @@ export class UserInteractions
                 }
                 // Show tooltip
                 const html = this.#tooltipHtml(annotation, true)
-                this.#showToolTip(html, markerPosition)
+                this.#showToolTip(html, new maplibregl.LngLat(...markerPosition))
 
                 // Send marker event message
                 this.#flatmap.markerEvent(event.type, markerId, annotation)

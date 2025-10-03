@@ -253,7 +253,7 @@ export interface FlatMapOptions
     pathsDisabled?: boolean
     showId?: boolean
     showLngLat?: boolean
-    showPosition?: boolean
+    showCoords?: boolean
     standalone?: boolean
     tooltipDelay?: number
     hideTooltips?: boolean
