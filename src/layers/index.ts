@@ -731,7 +731,7 @@ export class LayerManager
     }
 
     freeDeckGLResource()
-    //=======================================
+    //==================
     {
         if (this.#deckGlOverlay) {
             this.#deckGlOverlay.finalise()

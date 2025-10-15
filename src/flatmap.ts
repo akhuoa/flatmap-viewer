@@ -323,13 +323,13 @@ export class FlatMap
      *
      */
     forceContextLoss()
-    //=======================================
+    //================
     {
         this.#contextLostCallback()
     }
 
-    #contextLostCallback(event = undefined)
-    //=======================================
+    #contextLostCallback(event=undefined)
+    //===================================
     {
         // Clean up some of the resources after the GL context is lost
 
@@ -356,7 +356,7 @@ export class FlatMap
      *
      */
     forceContextRestore()
-    //=======================================
+    //===================
     {
         if (this.#contextLost) {
             this.#initialiseMap()
@@ -368,7 +368,7 @@ export class FlatMap
      *
      */
     #initialiseMap()
-    //=======================================
+    //==============
     {
         // Set options for the map
 
@@ -527,8 +527,8 @@ export class FlatMap
      *
      * @group Properties
      */
-    get has_flightpaths(): boolean
-    //===================
+    get hasFlightpaths(): boolean
+    //===========================
     {
         return 'version' in this.#details
             && this.#details.version >= MAP_MAKER_FLIGHTPATHS_VERSION
@@ -1125,7 +1125,7 @@ export class FlatMap
      * @group Properties
      */
     get contextLost(): Boolean
-    //===================================
+    //========================
     {
         return this.#contextLost
     }
@@ -1493,7 +1493,7 @@ export class FlatMap
      *
      */
     enableSystem(systemId: string, enable=true)
-    //================================= ========
+    //=========================================
     {
         if (this.#userInteractions !== null) {
             return this.#userInteractions.enableSystem(systemId, enable)

@@ -302,7 +302,7 @@ export class UserInteractions
                     this.#map.addControl(new TaxonsControl(flatmap))
                 }
 
-                if (flatmap.has_flightpaths) {
+                if (flatmap.hasFlightpaths) {
                     this.#map.addControl(new FlightPathControl(flatmap, !!flatmap.options.flightPaths))
                 }
 
@@ -565,7 +565,7 @@ export class UserInteractions
      *
      */
     freeLayersResource()
-    //=======================================
+    //==================
     {
         this.#layerManager.freeDeckGLResource()
     }
