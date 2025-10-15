@@ -31,7 +31,13 @@ import {FlatMap} from '../flatmap'
 
 export class DeckGlOverlay
 {
-    #overlay: MapboxOverlay = new MapboxOverlay({layers: []})
+    #overlay: MapboxOverlay = new MapboxOverlay(
+      {
+        interleaved: true,
+        layers: [],
+        getCursor: () => 'default'
+      }
+    )
     #layers: Map<string, Layer> = new Map()
 
     #map: MapLibreMap
@@ -50,12 +56,17 @@ export class DeckGlOverlay
         this.#setLayers()
     }
 
+    finalise()
+    //====================
+    {
+        this.#overlay.finalize()
+    }
+
     queryFeaturesAtPoint(point)
     //=========================
     {
         return this.#overlay
                    .pickMultipleObjects(point)
-        return []
     }
 
     removeLayer(layerId: string)

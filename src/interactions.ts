@@ -559,6 +559,17 @@ export class UserInteractions
         this.#layerManager.activate(layerId, enable)
     }
 
+    /**
+     * Free up gl context used in layermanager, only call this when
+     * the GL context is lost
+     *
+     */
+    freeLayersResource()
+    //=======================================
+    {
+      this.#layerManager.freeDeckGLResource()
+    }
+
     enableFlightPaths(enable=true)
     //============================
     {

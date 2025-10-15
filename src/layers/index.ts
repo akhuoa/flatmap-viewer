@@ -730,6 +730,14 @@ export class LayerManager
         }
     }
 
+    freeDeckGLResource()
+    //=======================================
+    {
+        if (this.#deckGlOverlay) {
+            this.#deckGlOverlay.finalise()
+        }
+    }
+
     enableSckanPaths(_sckanState, _enable=true)
     //=======================================
     {

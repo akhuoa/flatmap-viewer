@@ -216,6 +216,7 @@ export class FlatMap
     #bounds: maplibregl.LngLatBounds
     #callbacks: FlatMapCallback[] = []
     #container: string
+    #contextLost = false
     #created: string
     #datasetToFeatureIds: FeatureIdMap = new Map()
     #details: FlatMapIndex
@@ -230,6 +231,7 @@ export class FlatMap
     #mapServer: FlatMapServer
     #mapSourceToFeatureIds: FeatureIdMap = new Map()
     #mapTermGraph: MapTermGraph
+    #mapTermGraphLoaded = false
     #modelToFeatureIds: FeatureIdMap = new Map()
     #normalisedOrigin: [number, number]
     #normalised_size: [number, number]
@@ -237,6 +239,7 @@ export class FlatMap
     #pathways: FlatMapPathways
     #searchIndex: SearchIndex = new SearchIndex()
     #startupState = -1
+    #style: FlatMapStyleSpecification
     #taxon: string|null
     #taxonNames = new Map()
     #taxonToFeatureIds: FeatureIdMap = new Map()
@@ -259,6 +262,7 @@ export class FlatMap
         this.#layers = mapDescription.layers
         this.#options = mapDescription.options
         this.#pathways = mapDescription.pathways
+        this.#style = mapDescription.style
         this.#mapTermGraph = new MapTermGraph()
 
         const sckanProvenance = mapDescription.details.connectivity
@@ -310,19 +314,75 @@ export class FlatMap
             }
         }
 
+        this.#initialiseMap()
+    }
+
+
+    /**
+     * Force the maplibregl instance to lose it's GL conontext
+     *
+     */
+    forceContextLoss()
+    //=======================================
+    {
+        this.#contextLostCallback()
+    }
+
+    #contextLostCallback(event = undefined)
+    //=======================================
+    {
+        // Clean up some of the resources after the GL context is lost
+
+        if (!this.#contextLost) {
+            this.closeMinimap()
+            this.#userInteractions.freeLayersResource()
+            const canvas = this.#map.getCanvas()
+            canvas.removeEventListener('webglcontextlost', this.#contextLostCallback, false);
+            this.#map.remove()
+            this.#contextLost = true
+            this.#startupState = -1
+            this.callback('context-lost', undefined)
+
+            // Prevent the browser's default behavior
+
+            if (event) {
+              event.preventDefault()
+            }
+        }
+    }
+
+    /**
+     * Restore a maplibregl instance after the cotnext is lost
+     *
+     */
+    forceContextRestore()
+    //=======================================
+    {
+        if (this.#contextLost) {
+            this.#initialiseMap()
+        }
+    }
+
+    /**
+     * Initialise a maplibregl map instance
+     *
+     */
+    #initialiseMap()
+    //=======================================
+    {
         // Set options for the map
 
         const mapOptions: maplibregl.MapOptions = {
-            style: mapDescription.style,
-            container: container,
+            style: this.#style,
+            container: this.#container,
             attributionControl: false
         }
 
-        if ('maxZoom' in mapDescription.options) {
-            mapOptions.maxZoom = mapDescription.options.maxZoom! - 0.001
+        if ('maxZoom' in this.#options) {
+            mapOptions.maxZoom = this.#options.maxZoom! - 0.001
         }
-        if ('minZoom' in mapDescription.options) {
-            mapOptions.minZoom = mapDescription.options.minZoom
+        if ('minZoom' in this.#options) {
+            mapOptions.minZoom = this.#options.minZoom
         }
 
         // Only show location in address bar when debugging
@@ -331,17 +391,25 @@ export class FlatMap
 
         // Set bounds if it is set in the map's options
 
-        if ('bounds' in mapDescription.options) {
-            mapOptions.bounds = mapDescription.options.bounds
+        if ('bounds' in this.#options) {
+            mapOptions.bounds = this.#options.bounds
         }
 
         // Create the map
 
         this.#map = new maplibregl.Map(mapOptions)
 
+
+        // Get the map's canvas element
+        const canvas = this.#map.getCanvas()
+
+        // Listen for the 'contextlost' event
+        canvas.addEventListener('webglcontextlost', this.#contextLostCallback.bind(this), false);
+
+
         // Show extra information if debugging
 
-        if (mapDescription.options.debug === true) {
+        if (this.#options.debug === true) {
             this.#map.showTileBoundaries = true
             this.#map.showCollisionBoxes = true
         }
@@ -359,6 +427,7 @@ export class FlatMap
         // and map has rendered
 
         const idleSubscription = this.#map.on('idle', async() => {
+
             if (this.#startupState === -1) {
                 this.#startupState = 0
                 await this.#setupUserInteractions()
@@ -388,7 +457,16 @@ export class FlatMap
                 this.#map!.fitBounds(this.#bounds, {animate: false})
                 this.#startupState = 3
 
+
+                // Trigger a context-restored callback
+
+                if (this.#contextLost) {
+                  this.callback('context-restored', undefined)
+                  this.#contextLost = false
+                }
+
                 idleSubscription.unsubscribe()
+
             }
         })
     }
@@ -418,9 +496,13 @@ export class FlatMap
         // Load icons used for clustered markers
         await loadMarkerIcons(this.#map!)
 
-        // Load anatomical term hierarchy for the flatmap
-        const termGraph = (await this.#mapServer.mapTermGraph(this.#uuid))!
-        this.#mapTermGraph.load(termGraph)
+        // Load anatomical term hierarchy for the flatmap, this is not required
+        // again after it has been loaded once
+        if (!this.#mapTermGraphLoaded) {
+          const termGraph = (await this.#mapServer.mapTermGraph(this.#uuid))!
+          this.#mapTermGraph.load(termGraph)
+          this.#mapTermGraphLoaded = true
+        }
 
         // Layers have now loaded so finish setting up
         this.#userInteractions = new UserInteractions(this)
@@ -1034,6 +1116,18 @@ export class FlatMap
                 return this.#taxonNames.set(taxonId, result[0]['label'])
             }
         }
+    }
+
+    /**
+     * A flag indicating whether gl context is lost
+     * @type {Boolean}
+     *
+     * @group Properties
+     */
+    get contextLost(): Boolean
+    //===================================
+    {
+        return this.#contextLost
     }
 
     /**
