@@ -567,7 +567,7 @@ export class UserInteractions
     freeLayersResource()
     //=======================================
     {
-      this.#layerManager.freeDeckGLResource()
+        this.#layerManager.freeDeckGLResource()
     }
 
     enableFlightPaths(enable=true)

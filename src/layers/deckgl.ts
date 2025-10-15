@@ -32,11 +32,11 @@ import {FlatMap} from '../flatmap'
 export class DeckGlOverlay
 {
     #overlay: MapboxOverlay = new MapboxOverlay(
-      {
-        interleaved: true,
-        layers: [],
-        getCursor: () => 'default'
-      }
+        {
+            interleaved: true,
+            layers: [],
+            getCursor: () => 'default'
+        }
     )
     #layers: Map<string, Layer> = new Map()
 
