@@ -283,6 +283,8 @@ export class MinimapControl
         this.#miniMapCanvas = miniMap.getCanvasContainer()
         this.#miniMapCanvas.addEventListener('wheel', this.#preventDefault)
         this.#miniMapCanvas.addEventListener('mousewheel', this.#preventDefault)
+
+        this.#loaded = true
     }
 
     #mouseDown(e: maplibregl.MapMouseEvent)
