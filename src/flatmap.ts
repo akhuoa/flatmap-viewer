@@ -245,6 +245,7 @@ export class FlatMap
     #taxonToFeatureIds: FeatureIdMap = new Map()
     #userInteractions: UserInteractions|null = null
     #uuid: string
+    #nerveToFeatureIds: Map<GeoJSONId, GeoJSONId[]> = new Map()
 
     constructor(container: string, mapServer: FlatMapServer, mapDescription: MapDescription)
     {
@@ -923,6 +924,21 @@ export class FlatMap
     }
 
     /**
+     * Get feature GeoJSON ids given a nerve id.
+     *
+     * @param      {GeoJSONId}  nerveId  The nerve identifier
+     * @return     {GeoJSONId[]}          The feature GeoJSON ids
+     */
+    featureIdsByNerveId(nerveId: GeoJSONId): GeoJSONId[]
+    //=================================================
+    {
+        if (this.#nerveToFeatureIds.has(nerveId)) {
+            return this.#nerveToFeatureIds.get(nerveId) || []
+        }
+        return []
+    }
+
+    /**
      * Flag the feature as having external annotation.
      *
      * @param      {string}  featureId  The feature's external identifier
@@ -1000,6 +1016,15 @@ export class FlatMap
             }
         }
         this.#annIdToFeatureId.set(ann.id, featureId)
+
+        if ('nerveId' in ann && ann.nerveId && 'type' in ann && ann.type === 'nerve') {
+            const existingFeatureIds = this.#nerveToFeatureIds.get(ann.nerveId as GeoJSONId)
+            if (existingFeatureIds) {
+                existingFeatureIds.push(featureId)
+            } else {
+                this.#nerveToFeatureIds.set(ann.nerveId as GeoJSONId, [featureId])
+            }
+        }
 
         // Pre-compute LineStrings of centrelines in centreline maps
         if (this.options.style === FLATMAP_STYLE.CENTRELINE && ann.centreline) {
