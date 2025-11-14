@@ -816,6 +816,12 @@ export class UserInteractions
             if (!this.#activeFeatures.has(+feature.id!)) {
                 this.#activeFeatures.set(+feature.id!, feature)
             }
+            // If the feature is a nerve, activate its inner features too
+            for (const innerFeatureId of this.#flatmap.featureIdsByNerveId(+feature.id!)) {
+                if (+feature.id! !== innerFeatureId){
+                    this.activateFeature(this.mapFeature(+innerFeatureId))
+                }
+            }
         }
     }
 

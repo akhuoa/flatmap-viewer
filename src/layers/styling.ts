@@ -1110,30 +1110,34 @@ export class NervePolygonFill extends VectorStyleLayer
         const dimmed = options.dimmed || false
         const paintStyle: PaintSpecification = {
             'fill-color': [
-                'let', 'active', ['to-number', ['feature-state', 'active'], 0],
-                [ 'case',
-                    ['all',
-                        ['==', ['var', 'active'], 0],
-                        ['==', ['get', 'type'], 'arrow'],
-                        ['boolean', ['feature-state', 'selected'], false]
-                    ], COLOUR_SELECTED,
-                    ['==', ['get', 'kind'], 'bezier-end'], 'red',
-                    ['==', ['get', 'kind'], 'bezier-control'], 'green',
-                    // @ts-expect-error 2322
-                    ...PATH_STYLE_RULES, '#A5F160'
-                ]
+                'case',
+                ['boolean', ['feature-state', 'selected'], false], COLOUR_SELECTED,
+                ['all',
+                    ['==', ['case', ['has', 'shape-type'], ['get', 'shape-type'], 'component'], 'component'],
+                    ['boolean', ['feature-state', 'active'], false]
+                ], '#D88',
+                ['has', 'colour'], ['get', 'colour'],
+                ['==', ['get', 'kind'], 'bezier-end'], 'red',
+                ['==', ['get', 'kind'], 'bezier-control'], 'green',
+                // @ts-expect-error 2322
+                ...PATH_STYLE_RULES, '#00A0FF'
             ],
             'fill-opacity': [
                 'case',
                 ['boolean', ['feature-state', 'hidden'], false], 0.01,
-                ['boolean', ['feature-state', 'selected'], false], 0.8,
-                ['boolean', ['feature-state', 'active'], false], 0.9,
-                ['==', ['get', 'type'], 'bezier'], 0.9,
+                ['boolean', ['feature-state', 'selected'], false], 0.2,
+                ['has', 'opacity'], ['get', 'opacity'],
+                ['has', 'colour'], 1.0,
+                ['==', ['get', 'kind'], 'proxy'], 1.0,
+                ['all',
+                    ['==', ['case', ['has', 'shape-type'], ['get', 'shape-type'], 'component'], 'component'],
+                    ['boolean', ['feature-state', 'active'], false]
+                ], 0.7,
                 ['any',
                     ['==', ['get', 'type'], 'arrow'],
                     ['==', ['get', 'type'], 'junction']
                 ], dimmed ? 0.1 : 0.5,
-                1.0
+                0.5
             ]
         }
         return super.changedPaintStyle(paintStyle, changes)

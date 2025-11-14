@@ -23,6 +23,7 @@ export type FlatmapLegendEntry = {
     colour: string
     style: 'circle' | 'exoid' | 'hexagon' |'rounded-square' | 'square' | 'star'
     border?: string
+    borderStyle?: string
 }
 
 export const FLATMAP_LEGEND: FlatmapLegendEntry[] = [
@@ -51,6 +52,13 @@ export const FLATMAP_LEGEND: FlatmapLegendEntry[] = [
         colour: '#FFFF09',
         style: 'star',
         border: 'black'
+    },
+    {
+        prompt: 'Nerve',
+        colour: '#00A0FF80',
+        style: 'circle',
+        border: 'grey',
+        borderStyle: 'dashed'
     }
 ]
 
