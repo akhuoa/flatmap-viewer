@@ -70,7 +70,7 @@ export interface StylingOptions extends StyleLayerOptions
 
 const COLOUR_ACTIVE    = 'blue'
 const COLOUR_ANNOTATED = '#C8F'
-const COLOUR_SELECTED  = '#0F0'
+const COLOUR_SELECTED  = '#8EF35D'
 const COLOUR_HIDDEN    = '#D8D8D8'
 
 const CENTRELINE_ACTIVE = '#888'
@@ -356,7 +356,7 @@ export class FeatureFillLayer extends VectorStyleLayer
             'fill-opacity': [
                 'case',
                 ['boolean', ['feature-state', 'hidden'], false], 0.01,
-                ['boolean', ['feature-state', 'selected'], false], 0.2,
+                ['boolean', ['feature-state', 'selected'], false], 1.0,
                 ['has', 'opacity'], ['get', 'opacity'],
                 ['has', 'colour'], 1.0,
                 ['==', ['get', 'kind'], 'proxy'], 1.0,
@@ -1125,7 +1125,7 @@ export class NervePolygonFill extends VectorStyleLayer
             'fill-opacity': [
                 'case',
                 ['boolean', ['feature-state', 'hidden'], false], 0.01,
-                ['boolean', ['feature-state', 'selected'], false], 0.2,
+                ['boolean', ['feature-state', 'selected'], false], 1,
                 ['has', 'opacity'], ['get', 'opacity'],
                 ['has', 'colour'], 1.0,
                 ['==', ['get', 'kind'], 'proxy'], 1.0,
