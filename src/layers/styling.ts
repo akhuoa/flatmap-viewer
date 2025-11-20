@@ -78,8 +78,8 @@ const CENTRELINE_COLOUR = '#8FF'
 
 const FEATURE_SELECTED_BORDER = 'black'
 
-const NERVE_ACTIVE = '#222'
-const NERVE_SELECTED = 'red'
+const NERVE_ACTIVE = 'blue'
+const NERVE_SELECTED = 'black'
 
 //==============================================================================
 
