@@ -992,42 +992,42 @@ export class FeatureNerveLayer extends VectorStyleLayer
         ]
     }
 
+    paintStyle(options: StylingOptions, changes=false) {
+        const dimmed = options.dimmed || false
+        const paintStyle: PaintSpecification = {
+            'line-color': [
+                'case',
+                ['boolean', ['feature-state', 'hidden'], false], COLOUR_HIDDEN,
+                ['boolean', ['feature-state', 'active'], false], NERVE_ACTIVE,
+                ['boolean', ['feature-state', 'selected'], false], NERVE_SELECTED,
+                '#888'
+            ],
+            'line-opacity': [
+                'case',
+                ['boolean', ['feature-state', 'hidden'], false], 0.3,
+                ['boolean', ['get', 'invisible'], false], 0.001,
+                ['boolean', ['feature-state', 'active'], false], 0.9,
+                ['boolean', ['feature-state', 'selected'], false], 0.9,
+                dimmed ? 0.05 : 0.9
+            ],
+            'line-dasharray': [2, 2],
+            'line-width': [
+                'case',
+                ['boolean', ['feature-state', 'selected'], false], 1.5,
+                ['boolean', ['feature-state', 'active'], false], 1.5,
+                dimmed ? 0.2 : 1.5
+            ]
+        }
+        return super.changedPaintStyle(paintStyle, changes)
+    }
+
     style(layer: FlatMapLayer, options: StylingOptions): LineLayerSpecification
     {
         return {
             ...super.style(layer, options),
             'type': 'line',
             'filter': this.defaultFilter(),
-            'paint': {
-                'line-color': [
-                    'case',
-                    ['boolean', ['feature-state', 'hidden'], false], COLOUR_HIDDEN,
-                    ['boolean', ['feature-state', 'selected'], false], NERVE_SELECTED,
-                    ['boolean', ['feature-state', 'active'], false], NERVE_ACTIVE,
-                    '#888'
-                ],
-                'line-opacity': [
-                    'case',
-                    ['boolean', ['feature-state', 'hidden'], false], 0.3,
-                    ['boolean', ['get', 'invisible'], false], 0.001,
-                    ['boolean', ['feature-state', 'active'], false], 0.9,
-                    ['boolean', ['feature-state', 'selected'], false], 0.9,
-                    0.9
-                ],
-                'line-dasharray': [2, 1],
-                'line-width': [
-                    'let', 'width', ['case',
-                        ['boolean', ['feature-state', 'active'], false], 0.8,
-                        ['boolean', ['feature-state', 'selected'], false], 1.2,
-                        0.6],
-                    [ 'interpolate',
-                        ['exponential', 2],
-                        ['zoom'],
-                         2, ["*", ['var', 'width'], ["^", 2, -1]],
-                        10, ["*", ['var', 'width'], ["^", 2,  6]]
-                    ]
-                ]
-            }
+            'paint': this.paintStyle(options) as LinePaintSpecification
         }
     }
 }
@@ -1137,7 +1137,7 @@ export class NervePolygonFill extends VectorStyleLayer
                     ['==', ['get', 'type'], 'arrow'],
                     ['==', ['get', 'type'], 'junction']
                 ], dimmed ? 0.1 : 0.5,
-                0.5
+                dimmed ? 0.2 : 0.5
             ]
         }
         return super.changedPaintStyle(paintStyle, changes)
