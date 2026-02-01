@@ -126,7 +126,7 @@ const markerIconDefinitions: MarkerIconDefinition[] = [
 
 //==============================================================================
 
-export async function loadMarkerIcons(map: MapLibreMap)
+export async function loadMarkerIcons(map: any)
 //=====================================================
 {
     // See https://github.com/rbrundritt/maplibre-gl-svg/blob/main/docs/docs.md

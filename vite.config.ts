@@ -17,12 +17,24 @@ export default defineConfig({
       name: 'FlatmapViewer'
     },
     rollupOptions: {
+      external: [
+        /@deck\.gl\/.*/,
+        /@luma\.gl\/.*/
+      ],
       output: {
         // Put chunk files at <output>/chunks
         chunkFileNames: 'chunks/[name].[hash].js',
         // Put chunk styles at <output>/assets
         assetFileNames: 'assets/[name][extname]',
         entryFileNames: '[name].js',
+        // Externalize peer dependencies
+        globals: {
+          '@deck.gl/core': '@deck.gl/core',
+          '@deck.gl/layers': '@deck.gl/layers',
+          '@deck.gl/geo-layers': '@deck.gl/geo-layers',
+          '@deck.gl/mapbox': '@deck.gl/mapbox',
+          '@luma.gl/engine': '@luma.gl/engine'
+        }
       }
     }
   },
