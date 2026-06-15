@@ -144,7 +144,7 @@ class StandaloneViewer
     #defaultBackground: string = localStorage.getItem('flatmap-background-colour') || 'black'
     #drawControl: DrawControl|null = null
 
-    #mapEndpoints: object
+    #mapEndpoints: Record<string, string>
     #mapSelector: HTMLSelectElement
     #mapGeneration: HTMLSelectElement
     #mapOptions: FlatMapOptions
@@ -182,6 +182,9 @@ class StandaloneViewer
         if (this.#currentServer === null) {
             if (requestEndpoint.includes('localhost')) {
                 if ('local' in this.#mapEndpoints) {
+                    if (this.#requestUrl.pathname === '/viewer') {
+                        this.#mapEndpoints.local = this.#requestUrl.origin
+                    }
                     // localhost is a special case since viewer might be separate
                     this.#currentServer = 'local'
                 }
