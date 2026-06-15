@@ -419,15 +419,7 @@ class StandaloneViewer
 //                console.log('Stomach marker:', map.addMarker('UBERON:0000945'))  // stomach
 
 //                map.addDatasetMarkers([{id: '1', terms: ['UBERON:0000945']}])   // stomach
-//                map.addDatasetMarkers([{id: '2', terms: ['UBERON:0002113']}])   // kidney
-//                map.addDatasetMarkers([{id: '6', terms: ['UBERON:0000948']}])   // heart
-                //map.addDatasetMarkers(DATASETS)
 
-                for (const dataset of DATASETS) {
-                    if (dataset.terms.length) {
-                        map.addDatasetMarkers([dataset])
-                    }
-                }
 
 /****************
                 //map.addDatasetMarkers([{id: '1', terms: ['UBERON:0001759']}])   // vagus
