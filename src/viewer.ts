@@ -19,16 +19,18 @@ limitations under the License.
 ==============================================================================*/
 
 import {
-    FlatMap, FLATMAP_STYLE, MapDescriptionOptions,
-    FlatMapStyleSpecification
+    FLATMAP_STYLE,
+    FlatMap,
+    type FlatMapStyleSpecification,
+    type MapDescriptionOptions,
 } from './flatmap'
-import {
+import type {
     FlatMapCallback, FlatMapIndex, FlatMapLayer,
     FlatMapMetadata, FlatMapOptions, FlatMapServerIndex
 } from './flatmap-types'
+import * as $rdf from './knowledge/rdf'
 import {FlatMapServer} from './mapserver'
 import {noFlatMapPathways} from './pathways'
-import * as $rdf from './knowledge/rdf'
 import * as utils from './utils'
 
 //==============================================================================
@@ -127,7 +129,7 @@ export class MapViewer
             if (!this.#initialised) {
                 await this.#mapServer.initialise()
                 this.#mapList = []
-                let maps
+                let maps: FlatMapServerIndex[]
                 try {
                     maps = await this.#mapServer.flatMaps()
                 } catch {

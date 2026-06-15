@@ -76,6 +76,7 @@ export interface FlatMapServerIndex
     creator: string
     id: string
     name: string
+    separateLayers: boolean
     source: string
     uri: string
     version: number
