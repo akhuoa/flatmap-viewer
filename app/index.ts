@@ -60,6 +60,16 @@ const DEFAULT_OPTIONS = {
 }
 
 window.onload = () => {
+    const requestUrl = new URL(window.location.href)
+    const requestPathParts = requestUrl.pathname.split('/')
+    const requestEndpoint = requestUrl.origin + (requestPathParts.slice(0, (requestPathParts[requestPathParts.length - 1] === '') ? -2 : -1)
+                                                                 .concat([''])
+                                                                 .join('/'))
+    if (requestEndpoint.includes('localhost')
+     && requestUrl.pathname === '/viewer'
+     && 'local' in MAP_ENDPOINTS) {
+        MAP_ENDPOINTS.local = requestUrl.origin
+    }
     standaloneViewer(MAP_ENDPOINTS, {
         debug: DEBUG,
         minimap: MINIMAP
@@ -182,9 +192,6 @@ class StandaloneViewer
         if (this.#currentServer === null) {
             if (requestEndpoint.includes('localhost')) {
                 if ('local' in this.#mapEndpoints) {
-                    if (this.#requestUrl.pathname === '/viewer') {
-                        this.#mapEndpoints.local = this.#requestUrl.origin
-                    }
                     // localhost is a special case since viewer might be separate
                     this.#currentServer = 'local'
                 }
