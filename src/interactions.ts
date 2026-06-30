@@ -1518,7 +1518,8 @@ export class UserInteractions
             if (this.#flatmap.options.showCoords) {
                 const pt = turf.point(lngLat.toArray())
                 const gps = turfProjection.toMercator(pt)
-                header.push(JSON.stringify(gps.geometry.coordinates))
+                const coords = gps.geometry.coordinates.map(x => Math.round(x))
+                header.push(JSON.stringify(coords))
             }
             if (this.#flatmap.options.showLngLat) {
                 header.push(JSON.stringify(lngLat.toArray()))
