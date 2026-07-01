@@ -40,9 +40,8 @@ export const VECTOR_TILES_SOURCE = 'vector-tiles'
 //==============================================================================
 
 import {FLATMAP_STYLE} from '../flatmap'
+import type {FlatMapLayer, FlatMapLayerOptions} from '../flatmap-types'
 import {PATH_STYLE_RULES} from '../pathways'
-
-import {FlatMapLayer, FlatMapLayerOptions} from '../flatmap-types'
 
 //==============================================================================
 
