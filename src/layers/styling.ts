@@ -375,7 +375,7 @@ export class FeatureFillLayer extends VectorStyleLayer
             'fill-opacity': [
                 'case',
                 ['boolean', ['feature-state', 'hidden'], false], 0.01,
-                ['boolean', ['feature-state', 'selected'], false], functional ? 0.6 : 1.0,
+                ['boolean', ['feature-state', 'selected'], false], 0.6,
                 ['has', 'opacity'], ['get', 'opacity'],
                 ['has', 'colour'], 1.0,
                 ['==', ['get', 'kind'], 'proxy'], 1.0,
@@ -447,12 +447,11 @@ export class FeatureBorderLayer extends VectorStyleLayer
         if (options.hasImageLayers) {
             lineOpacity.push(['has', 'shape-type'], 0)
         }
-        if (activeRasterLayer) {
+        if (!functional && activeRasterLayer) {
             lineOpacity.push((outlined && !dimmed) ? 0.3 : 0.1)
         } else {
-            lineOpacity.push(0.5)
+            lineOpacity.push(functional ? 0.01 : 0.5)
         }
-
         const width: CaseSpecification = ['case']
         width.push(['boolean', ['get', 'invisible'], false], 0.2)
         width.push(['boolean', ['feature-state', 'selected'], false], 2)
