@@ -1381,21 +1381,22 @@ export class UserInteractions
             return
         }
 
+        // Simulate `mouseenter` events on features
+
         const feature = features[0]
-        const lineFeatures = features.filter(f => ('centreline' in f.properties
-                                                 || ('type' in f.properties
-                                                   && f.properties.type.startsWith('line'))))
-                                     .filter((f, index, self) => {
-                                         // Deduplicate: the same feature can appear multiple times
-                                         // when it spans across vector tile boundaries
-                                         const fId = isMarker(f) ? +f.id : +f.properties.featureId
-                                         return index === self.findIndex(g => {
-                                             const gId = isMarker(g) ? +g.id : +g.properties.featureId
-                                             return gId === fId
-                                         })
+        const lineFeatures = features.filter(feature => ('centreline' in feature.properties
+                                                 || ('type' in feature.properties
+                                                   && feature.properties.type.startsWith('line'))))
+                                     .filter((feature, index, self) => {
+                                        // Deduplicate: the same feature can appear multiple times
+                                        // when it spans across vector tile boundaries
+                                        const fId = isMarker(feature) ? +feature.id : +feature.properties.featureId
+                                        return index === self.findIndex(g => {
+                                            const gId = isMarker(g) ? +g.id : +g.properties.featureId
+                                            return gId === fId
+                                        })
                                      })
 
-        // Simulate `mouseenter` events on features
         // When multiple line (path) features overlap, emit all of them
         if (lineFeatures.length > 1) {
             const firstLineFeature = lineFeatures[0]
@@ -1407,8 +1408,8 @@ export class UserInteractions
             if (this.#lastFeatureMouseEntered !== firstFeatureId
              && (this.#lastFeatureModelsMouse === null
               || this.#lastFeatureModelsMouse !== firstFeatureModels)) {
-                const allFeatureProperties = lineFeatures.map(f =>
-                    Object.assign({}, f.properties, this.#locationOnLine(+f.properties.featureId, lngLat))
+                const allFeatureProperties = lineFeatures.map(feature =>
+                    Object.assign({}, feature.properties, this.#locationOnLine(+feature.properties.featureId, lngLat))
                 ) as FlatMapFeatureAnnotation[]
                 if (this.#multiFeatureEvent('mouseenter', allFeatureProperties)) {
                     this.#lastFeatureMouseEntered = firstFeatureId
