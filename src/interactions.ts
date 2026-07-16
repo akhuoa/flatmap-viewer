@@ -1381,7 +1381,6 @@ export class UserInteractions
             return
         }
 
-        // Determine the primary feature and any line features for tooltip
         const feature = features[0]
         const lineFeatures = features.filter(f => ('centreline' in f.properties
                                                  || ('type' in f.properties
@@ -1398,7 +1397,6 @@ export class UserInteractions
 
         // Simulate `mouseenter` events on features
         // When multiple line (path) features overlap, emit all of them
-        // so the callback can provide labels for each one.
         if (lineFeatures.length > 1) {
             const firstLineFeature = lineFeatures[0]
             const firstFeatureId = isMarker(firstLineFeature) ? +firstLineFeature.id
