@@ -37,7 +37,7 @@ jobs:
         run: npm install -g npm@latest
 
       - name: Install bun
-        run: npm install -g bun
+        run: npm install -g --allow-scripts=bun bun
 
       - name: Install packages
         run: bun install
