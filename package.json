@@ -1,10 +1,10 @@
 {
-  "name": "@abi-software/flatmap-viewer",
-  "version": "4.4.3",
+  "name": "@akhuoa/flatmap-viewer",
+  "version": "4.4.4-beta.1",
   "description": "Flatmap viewer using Maplibre GL",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AnatomicMaps/flatmap-viewer.git"
+    "url": "git+https://github.com/akhuoa/flatmap-viewer.git"
   },
   "type": "module",
   "files": [
